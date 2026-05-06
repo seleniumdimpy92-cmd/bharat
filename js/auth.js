@@ -2,6 +2,14 @@
 let currentUser = null;
 let token = localStorage.getItem('token');
 
+// ── Hardcoded admin account ──────────────────────────────────
+const ADMIN_USER = {
+  id: 'admin_deb',
+  username: 'deb',
+  email: 'deb@bharattours.com',
+  password: 'deb'
+};
+
 // Database simulation using localStorage
 const DB = {
   users: JSON.parse(localStorage.getItem('users') || '[]'),
@@ -33,14 +41,12 @@ function updateAuthUI() {
   const signUpLink = document.querySelector('a[onclick*="openRegister"]');
   
   if (currentUser) {
-    // Hide Sign Up when logged in
     if (signUpLink) {
       signUpLink.parentElement.style.display = 'none';
     }
     authLink.innerHTML = `<i class="fas fa-user"></i> ${currentUser.username}`;
     authLink.onclick = openProfile;
   } else {
-    // Show Sign Up when not logged in
     if (signUpLink) {
       signUpLink.parentElement.style.display = 'block';
     }
@@ -49,10 +55,27 @@ function updateAuthUI() {
   }
 }
 
-
-
 function login(email, password) {
   return new Promise((resolve, reject) => {
+
+    // ── Hardcoded admin login: username "deb" / password "deb" ──
+    const isAdminLogin =
+      (email === ADMIN_USER.username || email === ADMIN_USER.email) &&
+      password === ADMIN_USER.password;
+
+    if (isAdminLogin) {
+      token = 'token_' + Date.now();
+      currentUser = { id: ADMIN_USER.id, username: ADMIN_USER.username, email: ADMIN_USER.email };
+      localStorage.setItem('token', token);
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      updateAuthUI();
+      closeLogin();
+      alert('✅ Login successful! Welcome, deb.');
+      resolve({ token, user: currentUser });
+      return;
+    }
+
+    // ── Regular user login ───────────────────────────────────────
     const user = DB.users.find(u => u.email === email && u.password === password);
     
     if (!user) {
@@ -73,7 +96,12 @@ function login(email, password) {
 
 function register(username, email, password) {
   return new Promise((resolve, reject) => {
-    // Check if user already exists
+    // Prevent overwriting the hardcoded admin account
+    if (username.toLowerCase() === 'deb' || email === ADMIN_USER.email) {
+      reject(new Error('This username/email is reserved.'));
+      return;
+    }
+
     if (DB.users.find(u => u.email === email)) {
       reject(new Error('Email already registered'));
       return;
@@ -88,7 +116,7 @@ function register(username, email, password) {
       id: Date.now(),
       username,
       email,
-      password // Note: In production, hash passwords!
+      password
     };
     
     DB.users.push(newUser);
@@ -179,9 +207,7 @@ async function loadProfileContent() {
   }
 }
 
-
 function editBooking(id) {
-  // Simple edit: prompt for new price or something, or open form
   const newPrice = prompt('Enter new price:');
   if (newPrice) {
     updateBooking(id, { price: parseFloat(newPrice) }).then(() => loadProfileContent());
