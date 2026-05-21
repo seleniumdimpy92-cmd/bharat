@@ -259,14 +259,16 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Username</th>
+                                <th>Username / Name</th>
                                 <th>Email</th>
                                 <th>Bookings</th>
                                 <th>Total Spent</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="customersBody">
-                            <tr><td colspan="5" class="table-empty">No customers yet</td></tr>
+                            <tr><td colspan="7" class="table-empty">Loading customers…</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -354,9 +356,9 @@
         </div>
     </div>
 
-    <script src="js/firebase-config.js?v=7"></script>
-    <script src="js/dataStore.js?v=7"></script>
-    <script src="js/dashboard.js?v=7"></script>
+    <script src="js/firebase-config.js?v=8"></script>
+    <script src="js/dataStore.js?v=8"></script>
+    <script src="js/dashboard.js?v=8"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
         document.getElementById('iteDoneBtn').addEventListener('click', () => window._closeItineraryEditor());

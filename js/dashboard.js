@@ -51,6 +51,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (pageTitle) pageTitle.textContent = sectionTitles[section] || 'Dashboard';
 
+            // Refresh data on tab switch
+            if (section === 'customers') {
+                if (typeof refreshCustomers === 'function') refreshCustomers();
+            }
+
             // Close sidebar on mobile
             document.getElementById('sidebar').classList.remove('open');
         });
@@ -724,39 +729,132 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // ── Customers ───────────────────────────────────────────────
-    function renderCustomers(search) {
-        const tbody = document.getElementById('customersBody');
-        let users = [...DB.users];
+    // ── Customers (Firestore-backed) ────────────────────────────
+    let _allCustomers = [];                // last loaded from Firestore
+    let _customerSearchTerm = '';
 
-        if (search) {
-            const q = search.toLowerCase();
-            users = users.filter(u =>
-                u.username.toLowerCase().includes(q) ||
-                u.email.toLowerCase().includes(q)
-            );
+    async function fetchAllCustomers() {
+        if (!window.UsersStore || !window.UsersStore.listAllUsers) return [];
+        try {
+            return await window.UsersStore.listAllUsers();
+        } catch (err) {
+            console.warn('listAllUsers failed:', err);
+            return [];
         }
+    }
 
-        if (users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No customers found</td></tr>';
+    function renderCustomers(search) {
+        if (typeof search === 'string') _customerSearchTerm = search;
+        const tbody = document.getElementById('customersBody');
+        if (!tbody) return;
+
+        const q = (_customerSearchTerm || '').toLowerCase();
+        const list = !q ? _allCustomers : _allCustomers.filter(u =>
+            (u.username || '').toLowerCase().includes(q) ||
+            (u.email    || '').toLowerCase().includes(q) ||
+            (u.fullName || '').toLowerCase().includes(q)
+        );
+
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No customers found</td></tr>';
             return;
         }
 
-        tbody.innerHTML = users.map(u => {
-            const userBookings = DB.bookings.filter(b => b.userId === u.id && b.status !== 'cancelled');
+        const projectId = (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.projectId) || '';
+        tbody.innerHTML = list.map(u => {
+            const isDisabled = u.disabled === true;
+            const userBookings = DB.bookings.filter(b => (b.userId === u.uid || b.userId === u.id) && b.status !== 'cancelled');
             const totalSpent = userBookings.reduce((s, b) => s + (b.price || 0), 0);
+            const consoleUrl = projectId
+                ? `https://console.firebase.google.com/project/${projectId}/authentication/users`
+                : '';
+
+            const statusBadge = isDisabled
+                ? '<span class="badge badge-cancelled">DISABLED</span>'
+                : (u.role === 'admin'
+                    ? '<span class="badge badge-confirmed">ADMIN</span>'
+                    : '<span class="badge badge-confirmed">ACTIVE</span>');
+
+            const safeEmail = String(u.email || '').replace(/'/g, "\\'");
+            const safeUsername = String(u.username || '').replace(/'/g, "\\'");
 
             return `
                 <tr>
-                    <td>#${String(u.id).slice(-6)}</td>
-                    <td>${u.username}</td>
-                    <td>${u.email}</td>
+                    <td title="${u.uid}">#${String(u.uid || '').slice(-6)}</td>
+                    <td>${u.username || '-'}${u.fullName ? `<br><small style="color:#888;">${u.fullName}</small>` : ''}</td>
+                    <td>${u.email || '-'}</td>
                     <td>${userBookings.length}</td>
                     <td>${formatCurrency(totalSpent)}</td>
+                    <td>${statusBadge}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="action-btn" title="Send password reset email"
+                                onclick="window._adminResetPassword('${safeEmail}')">
+                            <i class="fas fa-key"></i> Reset
+                        </button>
+                        <button class="action-btn ${isDisabled ? 'action-btn-cancel' : ''}"
+                                title="${isDisabled ? 'Re-enable account' : 'Disable login for this account'}"
+                                onclick="window._adminToggleDisabled('${u.uid}', ${isDisabled})">
+                            <i class="fas ${isDisabled ? 'fa-unlock' : 'fa-ban'}"></i> ${isDisabled ? 'Enable' : 'Disable'}
+                        </button>
+                        <button class="action-btn action-btn-cancel"
+                                title="Delete this user's profile from Firestore"
+                                onclick="window._adminDeleteUser('${u.uid}', '${safeUsername}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        ${consoleUrl ? `
+                        <a class="action-btn" href="${consoleUrl}" target="_blank" rel="noopener"
+                           title="Open Firebase Console to fully delete the auth account">
+                            <i class="fas fa-external-link-alt"></i> Auth
+                        </a>` : ''}
+                    </td>
                 </tr>
             `;
         }).join('');
     }
+
+    async function refreshCustomers() {
+        _allCustomers = await fetchAllCustomers();
+        renderCustomers(_customerSearchTerm);
+    }
+
+    // Inline-onclick admin handlers
+    window._adminResetPassword = async function (email) {
+        if (!email) return;
+        if (!confirm('Send a password-reset email to ' + email + '?')) return;
+        try {
+            await window.UsersStore.adminSendPasswordReset(email);
+            alert('✅ Password reset email sent to ' + email);
+        } catch (err) {
+            alert('❌ ' + (err.message || 'Failed to send reset email.'));
+        }
+    };
+
+    window._adminToggleDisabled = async function (uid, currentlyDisabled) {
+        if (!uid) return;
+        const action = currentlyDisabled ? 're-enable' : 'disable';
+        if (!confirm(`Are you sure you want to ${action} this user's login?`)) return;
+        try {
+            await window.UsersStore.setUserDisabled(uid, !currentlyDisabled);
+            await refreshCustomers();
+        } catch (err) {
+            alert('❌ ' + (err.message || 'Failed to update user.'));
+        }
+    };
+
+    window._adminDeleteUser = async function (uid, username) {
+        if (!uid) return;
+        if (!confirm(
+            'Delete this user\'s Firestore profile?\n\n' +
+            '• Their profile + username will be removed.\n' +
+            '• Their Firebase Auth account is NOT deleted automatically — open the "Auth" link to delete it in the Firebase Console.'
+        )) return;
+        try {
+            await window.UsersStore.deleteUserProfile(uid, username);
+            await refreshCustomers();
+        } catch (err) {
+            alert('❌ ' + (err.message || 'Failed to delete user.'));
+        }
+    };
 
     const customerSearch = document.getElementById('customerSearch');
     if (customerSearch) {

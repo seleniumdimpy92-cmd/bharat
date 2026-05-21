@@ -42,8 +42,11 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.auth != null
         && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if request.auth != null
-        && resource.data.uid == request.auth.uid;
+      // Admin can also clean up usernames when deleting users
+      allow update, delete: if isAdmin() || (
+        request.auth != null
+        && resource.data.uid == request.auth.uid
+      );
     }
 
     // Bookings — each booking has a userId field
