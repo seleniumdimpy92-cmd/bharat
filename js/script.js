@@ -15,9 +15,8 @@ function getInclIcon(inc) {
     return INCL_ICONS[inc] || 'fa-check';
 }
 
-function loadAndRenderSitePackages() {
-    // Static-site mode (GitHub Pages): use localStorage if the admin has
-    // saved packages from the dashboard, otherwise fall back to defaults.
+async function loadAndRenderSitePackages() {
+    // 1. Try cached copy first for instant render (avoids blank state)
     const cached = localStorage.getItem('sitePackages');
     if (cached) {
         try {
@@ -25,19 +24,36 @@ function loadAndRenderSitePackages() {
             if (Array.isArray(parsed) && parsed.length) {
                 window._packages = parsed;
                 renderSitePackages();
-                return;
             }
-        } catch (_) { /* ignore parse errors, fall through */ }
+        } catch (_) { /* ignore parse errors */ }
     }
 
-    window._packages = [
-        { id:'budget',    name:'Budget Andaman Escape',    desc:'4N/5D | Port Blair + Havelock | Basic Hotels + Ferries', price:15999, rating:4.2, image:'images/beach1.jpg', inclusions:['Hotels','Ferries','Breakfast'], visible:true },
-        { id:'standard',  name:'Standard Andaman Bliss',   desc:'6N/7D | Port Blair + Havelock + Neil | Deluxe + Activities', price:21999, rating:4.6, image:'images/beach2.jpg', inclusions:['Deluxe Hotels','Premium Ferries','Snorkeling'], visible:true },
-        { id:'luxury',    name:'Luxury Andaman Retreat',   desc:'6N/7D | All Islands | 5* Resorts + Scuba + Private Transfers', price:28999, rating:4.8, image:'images/beach3.jpg', inclusions:['5* Resorts','VIP Ferries','Scuba Dive'], visible:true },
-        { id:'honeymoon', name:'Honeymoon Paradise',       desc:'5N/6D | Romantic Stays + Candlelight Dinner + Photos', price:24999, rating:4.9, image:'images/beach4.jpg', inclusions:['Romantic Setup','Photoshoot','Dinner'], visible:true },
-        { id:'test',      name:'🧪 Payment Test Package',  desc:'Test the live payment gateway for ₹1 only', price:1, rating:5.0, image:'images/beach1.jpg', inclusions:['Live Payment','Instant'], visible:true }
-    ];
-    renderSitePackages();
+    // 2. Then fetch the canonical JSON from the repo (committed by admin via
+    //    the GitHub API). Cache-bust so visitors always see the latest.
+    try {
+        const res = await fetch('data/packages.json?t=' + Date.now(), { cache: 'no-store' });
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length) {
+                window._packages = data;
+                localStorage.setItem('sitePackages', JSON.stringify(data));
+                renderSitePackages();
+                return;
+            }
+        }
+    } catch (_) { /* fall through to defaults */ }
+
+    // 3. Last-resort hard-coded defaults
+    if (!window._packages) {
+        window._packages = [
+            { id:'budget',    name:'Budget Andaman Escape',    desc:'4N/5D | Port Blair + Havelock | Basic Hotels + Ferries', price:15999, rating:4.2, image:'images/beach1.jpg', inclusions:['Hotels','Ferries','Breakfast'], visible:true },
+            { id:'standard',  name:'Standard Andaman Bliss',   desc:'6N/7D | Port Blair + Havelock + Neil | Deluxe + Activities', price:21999, rating:4.6, image:'images/beach2.jpg', inclusions:['Deluxe Hotels','Premium Ferries','Snorkeling'], visible:true },
+            { id:'luxury',    name:'Luxury Andaman Retreat',   desc:'6N/7D | All Islands | 5* Resorts + Scuba + Private Transfers', price:28999, rating:4.8, image:'images/beach3.jpg', inclusions:['5* Resorts','VIP Ferries','Scuba Dive'], visible:true },
+            { id:'honeymoon', name:'Honeymoon Paradise',       desc:'5N/6D | Romantic Stays + Candlelight Dinner + Photos', price:24999, rating:4.9, image:'images/beach4.jpg', inclusions:['Romantic Setup','Photoshoot','Dinner'], visible:true },
+            { id:'test',      name:'🧪 Payment Test Package',  desc:'Test the live payment gateway for ₹1 only', price:1, rating:5.0, image:'images/beach1.jpg', inclusions:['Live Payment','Instant'], visible:true }
+        ];
+        renderSitePackages();
+    }
 }
 
 function renderSitePackages() {
