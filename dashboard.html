@@ -8,12 +8,15 @@
     <link rel="stylesheet" href="css/dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/firebase-config.js?v=9"></script>
     <script>
-        // Access guard — only the admin (deb) may view this page.
-        // Checks the cached profile first; the real authority is Firebase
-        // Auth + Firestore rules, but this is a UX/quick block.
+        // Access guard — only admin users may view this page.
+        // Admin emails come from window.ADMIN_EMAILS (set in firebase-config.js).
+        // The real authority is Firebase Auth + Firestore rules; this is a UX block.
         (function() {
-            var ADMIN_EMAIL    = 'deb@andamanvoyages.in';
+            var ADMIN_EMAILS = (Array.isArray(window.ADMIN_EMAILS) && window.ADMIN_EMAILS.length)
+                ? window.ADMIN_EMAILS.map(function (e) { return String(e).toLowerCase(); })
+                : [String(window.ADMIN_EMAIL || 'deb@andamanvoyages.in').toLowerCase()];
             var ADMIN_USERNAME = 'deb';
             var token = localStorage.getItem('token');
             var raw   = localStorage.getItem('currentUser');
@@ -24,8 +27,9 @@
             }
             try {
                 var user = JSON.parse(raw);
+                var email = (user && user.email) ? String(user.email).toLowerCase() : '';
                 var isAdmin = user && (
-                    user.email === ADMIN_EMAIL ||
+                    ADMIN_EMAILS.indexOf(email) >= 0 ||
                     user.role === 'admin' ||
                     (user.username || '').toLowerCase() === ADMIN_USERNAME
                 );
@@ -356,9 +360,9 @@
         </div>
     </div>
 
-    <script src="js/firebase-config.js?v=8"></script>
-    <script src="js/dataStore.js?v=8"></script>
-    <script src="js/dashboard.js?v=8"></script>
+    <script src="js/firebase-config.js?v=9"></script>
+    <script src="js/dataStore.js?v=9"></script>
+    <script src="js/dashboard.js?v=9"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
         document.getElementById('iteDoneBtn').addEventListener('click', () => window._closeItineraryEditor());

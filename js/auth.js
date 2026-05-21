@@ -6,7 +6,13 @@
 
 let currentUser = null;
 const ADMIN_USERNAME = 'deb';
-const ADMIN_EMAIL    = window.ADMIN_EMAIL || 'deb@andamanvoyages.in';
+const ADMIN_EMAILS   = (Array.isArray(window.ADMIN_EMAILS) && window.ADMIN_EMAILS.length)
+  ? window.ADMIN_EMAILS.map(e => String(e).toLowerCase())
+  : [String(window.ADMIN_EMAIL || 'deb@andamanvoyages.in').toLowerCase()];
+const ADMIN_EMAIL    = ADMIN_EMAILS[0]; // legacy
+function isAdminEmail(email) {
+  return !!email && ADMIN_EMAILS.indexOf(String(email).toLowerCase()) >= 0;
+}
 
 const DB = {
   bookings: JSON.parse(localStorage.getItem('bookings') || '[]'),
@@ -37,7 +43,7 @@ function isValidEmail(email) {
 function isAdmin(user) {
   if (!user) user = currentUser;
   if (!user) return false;
-  return user.email === ADMIN_EMAIL || user.role === 'admin' || user.username === ADMIN_USERNAME;
+  return isAdminEmail(user.email) || user.role === 'admin' || user.username === ADMIN_USERNAME;
 }
 
 // ── UI: show/hide nav based on auth & role ──

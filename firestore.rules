@@ -18,7 +18,10 @@ service cloud.firestore {
     // Helpers
     function isAdmin() {
       return request.auth != null
-        && request.auth.token.email == "deb@andamanvoyages.in";
+        && request.auth.token.email in [
+          "deb@andamanvoyages.in",
+          "admin@admin.com"
+        ];
     }
     function isSelf(uid) {
       return request.auth != null && request.auth.uid == uid;

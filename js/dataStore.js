@@ -19,7 +19,13 @@
 // promise on `window.__firebaseReady` so callers can `await` it.
 
 (function () {
-    const ADMIN_EMAIL  = window.ADMIN_EMAIL || 'deb@andamanvoyages.in';
+    const ADMIN_EMAILS = (Array.isArray(window.ADMIN_EMAILS) && window.ADMIN_EMAILS.length)
+        ? window.ADMIN_EMAILS.map(e => String(e).toLowerCase())
+        : [String(window.ADMIN_EMAIL || 'deb@andamanvoyages.in').toLowerCase()];
+    const ADMIN_EMAIL  = ADMIN_EMAILS[0]; // legacy single
+    function isAdminEmail(email) {
+        return !!email && ADMIN_EMAILS.indexOf(String(email).toLowerCase()) >= 0;
+    }
     const SDK_VERSION  = '10.13.2';
     const APP_URL       = `https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-app.js`;
     const AUTH_URL      = `https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-auth.js`;
@@ -154,7 +160,7 @@
         const { db, auth, firestore } = await window.__firebaseReady;
         const user = auth.currentUser;
         if (!user) throw new Error('You must be signed in as the admin to publish.');
-        if (user.email !== ADMIN_EMAIL) throw new Error('Only the admin user can publish packages.');
+        if (!isAdminEmail(user.email)) throw new Error('Only an admin user can publish packages.');
 
         // Strategy: write/merge each provided package, delete packages in
         // Firestore that aren't in the new list. Single batch.
@@ -218,7 +224,7 @@
 
     function profileFromUser(authUser, extra) {
         if (!authUser) return null;
-        const isAdmin = authUser.email === ADMIN_EMAIL;
+        const isAdmin = isAdminEmail(authUser.email);
         return {
             id: authUser.uid,
             uid: authUser.uid,
@@ -272,7 +278,7 @@
             usernameLower: username.toLowerCase(),
             fullName: fullName || '',
             phone: phone || '',
-            role: email === ADMIN_EMAIL ? 'admin' : 'user',
+            role: isAdminEmail(email) ? 'admin' : 'user',
             createdAt: firestore.serverTimestamp()
         });
         batch.set(firestore.doc(db, 'usernames', username.toLowerCase()), {
@@ -284,7 +290,7 @@
 
         return profileFromUser(cred.user, {
             username, fullName: fullName || '', phone: phone || '',
-            role: email === ADMIN_EMAIL ? 'admin' : 'user'
+            role: isAdminEmail(email) ? 'admin' : 'user'
         });
     }
 
@@ -412,7 +418,7 @@
 
     function isAdmin() {
         const u = getCurrentUser();
-        return !!u && (u.email === ADMIN_EMAIL || u.role === 'admin' || u.username === 'deb');
+        return !!u && (isAdminEmail(u.email) || u.role === 'admin' || u.username === 'deb');
     }
 
     // ── Admin-only helpers (Firestore rules also enforce these) ──
