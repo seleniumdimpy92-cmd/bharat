@@ -13,7 +13,13 @@ window.FIREBASE_CONFIG = {
     measurementId: "G-B2EH7QRMGE"
 };
 
-// Email of the admin user. Anyone signed in with this email can write
-// the packages collection and access the dashboard. Must match the
-// `request.auth.token.email` check in firestore.rules.
-window.ADMIN_EMAIL = "deb@andamanvoyages.in";
+// List of admin emails. Anyone signed in with one of these emails can
+// write the packages collection and access the dashboard. Must match
+// the `request.auth.token.email in [...]` check in firestore.rules.
+window.ADMIN_EMAILS = [
+    "deb@andamanvoyages.in",
+    "admin@admin.com"
+];
+
+// Back-compat: keep a single ADMIN_EMAIL pointing at the first admin.
+window.ADMIN_EMAIL = window.ADMIN_EMAILS[0];
