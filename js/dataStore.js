@@ -326,6 +326,48 @@
         cacheProfile(null);
     }
 
+    // ── Forgot password / username helpers ──
+    async function sendPasswordReset(identifier) {
+        if (!identifier) throw new Error('Please enter your username or email.');
+        const { auth, firebaseAuth } = await window.__firebaseReady;
+        let email = identifier.trim();
+        if (email.indexOf('@') === -1) {
+            const map = await lookupUsername(email);
+            if (!map || !map.email) throw new Error('We could not find that username.');
+            email = map.email;
+        }
+        try {
+            await firebaseAuth.sendPasswordResetEmail(auth, email);
+            return email;
+        } catch (err) {
+            const code = err && err.code;
+            if (code === 'auth/user-not-found') throw new Error('No account found for that email.');
+            if (code === 'auth/invalid-email') throw new Error('That does not look like a valid email.');
+            throw new Error(err.message || 'Could not send reset email.');
+        }
+    }
+
+    // Find the username(s) tied to an email.
+    // Uses a Firestore query on usersnames.email (works because rules
+    // allow public read of the usernames collection).
+    async function lookupUsernamesByEmail(email) {
+        if (!email) throw new Error('Please enter your email.');
+        const { db, firestore } = await window.__firebaseReady;
+        const lower = email.trim().toLowerCase();
+        const q = firestore.query(
+            firestore.collection(db, 'usernames'),
+            firestore.where('email', '==', lower)
+        );
+        const snap = await firestore.getDocs(q);
+        const out = [];
+        snap.forEach(d => {
+            const data = d.data() || {};
+            if (data.username) out.push(data.username);
+            else out.push(d.id);
+        });
+        return out;
+    }
+
     async function updateProfile(updates) {
         const { db, auth, firestore } = await window.__firebaseReady;
         const user = auth.currentUser;
@@ -367,12 +409,14 @@
     }
 
     window.UsersStore = {
-        login:           loginUser,
-        register:        registerUser,
-        logout:          logoutUser,
-        onAuthChange:    onAuthChange,
-        getCurrentUser:  getCurrentUser,
-        isAdmin:         isAdmin,
-        updateProfile:   updateProfile
+        login:                  loginUser,
+        register:               registerUser,
+        logout:                 logoutUser,
+        onAuthChange:           onAuthChange,
+        getCurrentUser:         getCurrentUser,
+        isAdmin:                isAdmin,
+        updateProfile:          updateProfile,
+        sendPasswordReset:      sendPasswordReset,
+        lookupUsernamesByEmail: lookupUsernamesByEmail
     };
 })();
