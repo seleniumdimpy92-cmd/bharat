@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="js/dataStore.js"></script>
 </head>
 <body>
 
@@ -182,48 +183,30 @@ function getIcon(s) { return INCL_ICONS[s] || 'fa-check'; }
 let currentPkg = null;
 let currentBasePrice = 0;
 
-// ── Load package (data/packages.json + localStorage cache + fallback) ─
+// Hard-coded defaults — used if both jsonbin and the repo file fail
+const HARDCODED_PACKAGES = [
+    { id:'budget',    name:'Budget Andaman Escape',    desc:'4N/5D | Port Blair + Havelock | Basic Hotels + Ferries', price:15999, rating:4.2, image:'images/beach1.jpg', inclusions:['Hotels','Ferries','Breakfast'], visible:true },
+    { id:'standard',  name:'Standard Andaman Bliss',   desc:'6N/7D | Port Blair + Havelock + Neil | Deluxe + Activities', price:21999, rating:4.6, image:'images/beach2.jpg', inclusions:['Deluxe Hotels','Premium Ferries','Snorkeling'], visible:true },
+    { id:'luxury',    name:'Luxury Andaman Retreat',   desc:'6N/7D | All Islands | 5* Resorts + Scuba + Private Transfers', price:28999, rating:4.8, image:'images/beach3.jpg', inclusions:['5* Resorts','VIP Ferries','Scuba Dive'], visible:true },
+    { id:'honeymoon', name:'Honeymoon Paradise',       desc:'5N/6D | Romantic Stays + Candlelight Dinner + Photos', price:24999, rating:4.9, image:'images/beach4.jpg', inclusions:['Romantic Setup','Photoshoot','Dinner'], visible:true },
+    { id:'test',      name:'🧪 Payment Test Package',  desc:'Test the live payment gateway for ₹1 only', price:1, rating:5.0, image:'images/beach1.jpg', inclusions:['Live Payment','Instant'], visible:true }
+];
+
+// ── Load package via the shared PackagesStore (jsonbin → repo → defaults) ─
 async function loadPackage() {
     const params = new URLSearchParams(window.location.search);
     const pkgId = params.get('id') || 'budget';
 
-    // 1. Try cached copy first for instant render
-    try {
-        const cached = localStorage.getItem('sitePackages');
-        if (cached) {
-            const parsed = JSON.parse(cached);
-            if (Array.isArray(parsed) && parsed.length) {
-                window._packages = parsed;
-                currentPkg = parsed.find(p => p.id === pkgId);
-            }
-        }
-    } catch (_) { /* ignore parse errors */ }
-
-    // 2. Fetch the canonical JSON from the repo (always re-render with fresh data)
-    try {
-        const res = await fetch('data/packages.json?t=' + Date.now(), { cache: 'no-store' });
-        if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length) {
-                window._packages = data;
-                localStorage.setItem('sitePackages', JSON.stringify(data));
-                currentPkg = data.find(p => p.id === pkgId);
-            }
-        }
-    } catch (_) { /* fall through to defaults */ }
-
-    // Hardcoded fallback — same as script.js defaults
-    if (!currentPkg) {
-        const HARDCODED = [
-            { id:'budget',    name:'Budget Andaman Escape',    desc:'4N/5D | Port Blair + Havelock | Basic Hotels + Ferries', price:15999, rating:4.2, image:'images/beach1.jpg', inclusions:['Hotels','Ferries','Breakfast'], visible:true },
-            { id:'standard',  name:'Standard Andaman Bliss',   desc:'6N/7D | Port Blair + Havelock + Neil | Deluxe + Activities', price:21999, rating:4.6, image:'images/beach2.jpg', inclusions:['Deluxe Hotels','Premium Ferries','Snorkeling'], visible:true },
-            { id:'luxury',    name:'Luxury Andaman Retreat',   desc:'6N/7D | All Islands | 5* Resorts + Scuba + Private Transfers', price:28999, rating:4.8, image:'images/beach3.jpg', inclusions:['5* Resorts','VIP Ferries','Scuba Dive'], visible:true },
-            { id:'honeymoon', name:'Honeymoon Paradise',       desc:'5N/6D | Romantic Stays + Candlelight Dinner + Photos', price:24999, rating:4.9, image:'images/beach4.jpg', inclusions:['Romantic Setup','Photoshoot','Dinner'], visible:true },
-            { id:'test',      name:'🧪 Payment Test Package',  desc:'Test the live payment gateway for ₹1 only', price:1, rating:5.0, image:'images/beach1.jpg', inclusions:['Live Payment','Instant'], visible:true }
-        ];
-        currentPkg = HARDCODED.find(p => p.id === pkgId);
-        window._packages = HARDCODED;
+    let packages = null;
+    if (window.PackagesStore) {
+        const result = await window.PackagesStore.load();
+        packages = result.data;
     }
+    if (!Array.isArray(packages) || !packages.length) {
+        packages = HARDCODED_PACKAGES;
+    }
+    window._packages = packages;
+    currentPkg = packages.find(p => p.id === pkgId);
 
     if (!currentPkg) {
         document.getElementById('pageContent').innerHTML = `
