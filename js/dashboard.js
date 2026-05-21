@@ -266,9 +266,11 @@ document.addEventListener('DOMContentLoaded', function () {
         'images/ross2.jpg', 'images/ross3.jpg'
     ];
 
-    function loadAndRenderPackages() {
-        // Static-site mode: load from localStorage (saved by previous
-        // "Save & Publish") or fall back to hard-coded defaults.
+    async function loadAndRenderPackages() {
+        const container = document.getElementById('packageCards');
+        container.innerHTML = '<p style="padding:2rem;color:#888;text-align:center;"><i class="fas fa-spinner fa-spin"></i> Loading packages…</p>';
+
+        // 1. Try cached copy first for instant render
         try {
             const saved = localStorage.getItem('sitePackages');
             if (saved) {
@@ -276,16 +278,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (Array.isArray(parsed) && parsed.length) {
                     packagesData = parsed;
                     renderPackageEditorCards();
-                    return;
                 }
             }
         } catch (_) { /* ignore parse errors */ }
 
-        packagesData = Object.entries(PACKAGES).map(([id, p]) => ({
-            id, name: p.name, desc: '', price: p.price,
-            rating: 4.5, image: 'images/beach1.jpg', inclusions: [], visible: true
-        }));
-        renderPackageEditorCards();
+        // 2. Fetch the canonical JSON from the repo for fresh data
+        try {
+            const res = await fetch('data/packages.json?t=' + Date.now(), { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length) {
+                    packagesData = data;
+                    localStorage.setItem('sitePackages', JSON.stringify(data));
+                    renderPackageEditorCards();
+                    return;
+                }
+            }
+        } catch (_) { /* fall through */ }
+
+        // 3. Hard-coded defaults (only if nothing else worked)
+        if (!packagesData.length) {
+            packagesData = Object.entries(PACKAGES).map(([id, p]) => ({
+                id, name: p.name, desc: '', price: p.price,
+                rating: 4.5, image: 'images/beach1.jpg', inclusions: [], visible: true
+            }));
+            renderPackageEditorCards();
+        }
     }
 
     function renderPackages() {
@@ -666,34 +684,148 @@ document.addEventListener('DOMContentLoaded', function () {
     const publishBtnEl = document.getElementById('publishBtn');
     if (publishBtnEl) publishBtnEl.addEventListener('click', () => window.saveAndPublishPackages());
 
-    // Save packages to the browser's localStorage. The public site
-    // (index.html / package.html) reads from the same key, so changes
-    // appear instantly on this device. (Static-site mode — GitHub Pages.)
-    window.saveAndPublishPackages = function() {
+    // ── Save & Publish via GitHub API ───────────────────────────
+    // Commits the current packagesData to data/packages.json on the
+    // gh-pages branch using the admin's Personal Access Token. The
+    // token is asked once and stored in localStorage on this device.
+    const REPO_OWNER  = 'debzody';
+    const REPO_NAME   = 'bharat';
+    const REPO_BRANCH = 'gh-pages';
+    const REPO_FILE   = 'data/packages.json';
+
+    function utf8ToBase64(str) {
+        // Handles non-ASCII (e.g. ₹, emoji) safely.
+        return btoa(unescape(encodeURIComponent(str)));
+    }
+
+    function getGithubToken() {
+        let token = localStorage.getItem('ghToken') || '';
+        if (!token) {
+            token = prompt(
+                'To publish package changes globally, paste a GitHub Personal Access Token below.\n\n' +
+                'How to create one:\n' +
+                '  1. Go to: https://github.com/settings/tokens?type=beta (Fine-grained tokens)\n' +
+                '  2. Repository access → Only "' + REPO_OWNER + '/' + REPO_NAME + '"\n' +
+                '  3. Permissions → Repository → Contents = Read and write\n' +
+                '  4. Generate, copy the token (starts with "github_pat_…") and paste here.\n\n' +
+                'The token is stored only in this browser.'
+            );
+            if (token && token.trim()) {
+                localStorage.setItem('ghToken', token.trim());
+            }
+            return token ? token.trim() : '';
+        }
+        return token;
+    }
+
+    window.clearGithubToken = function() {
+        localStorage.removeItem('ghToken');
+        alert('GitHub token cleared. You will be asked again on the next publish.');
+    };
+
+    async function ghGetFileSha(token) {
+        // Returns the SHA of the existing file on the branch, or null if it doesn't exist.
+        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${REPO_FILE}?ref=${REPO_BRANCH}`;
+        const res = await fetch(url, {
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error('Could not read existing file (status ' + res.status + ')');
+        const json = await res.json();
+        return json.sha || null;
+    }
+
+    async function ghPutFile(token, content, sha) {
+        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${REPO_FILE}`;
+        const body = {
+            message: 'chore(packages): update packages.json from dashboard',
+            content: utf8ToBase64(content),
+            branch: REPO_BRANCH
+        };
+        if (sha) body.sha = sha;
+
+        const res = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+            let msg = 'GitHub API error ' + res.status;
+            try {
+                const j = await res.json();
+                if (j.message) msg += ': ' + j.message;
+            } catch (_) { /* ignore */ }
+            throw new Error(msg);
+        }
+        return res.json();
+    }
+
+    window.saveAndPublishPackages = async function() {
         const btn = document.getElementById('publishBtn');
         const status = document.getElementById('publishStatus');
 
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
         status.style.display = 'block';
         status.className = 'publish-status publish-info';
-        status.innerHTML = '⏳ Saving packages…';
+        status.innerHTML = '⏳ Saving locally…';
 
+        // 1. Save locally first (instant feedback on this device)
+        const json = JSON.stringify(packagesData, null, 2) + '\n';
         try {
             localStorage.setItem('sitePackages', JSON.stringify(packagesData));
+        } catch (_) { /* non-fatal */ }
+
+        // 2. Get GitHub token
+        const token = getGithubToken();
+        if (!token) {
+            status.className = 'publish-status publish-error';
+            status.innerHTML = '⚠️ No GitHub token provided. Saved locally only — other devices will not see the change.';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Save & Publish';
+            return;
+        }
+
+        // 3. Commit to gh-pages
+        try {
+            status.innerHTML = '⏳ Pushing to GitHub…';
+            const sha = await ghGetFileSha(token);
+            await ghPutFile(token, json, sha);
+
             status.className = 'publish-status publish-success';
-            status.innerHTML = '✅ Saved! Your package changes are live on this device.';
-            btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+            status.innerHTML =
+                '✅ Published! GitHub Pages will redeploy in ~30-60 seconds. ' +
+                'Refresh other devices after a minute to see your changes.';
+            btn.innerHTML = '<i class="fas fa-check"></i> Published!';
         } catch (err) {
             status.className = 'publish-status publish-error';
-            status.innerHTML = '❌ Save failed: ' + (err && err.message ? err.message : 'storage unavailable');
+            const msg = (err && err.message) ? err.message : 'unknown error';
+            const tokenIssue = /401|403|Bad credentials|permission/i.test(msg);
+            if (tokenIssue) {
+                localStorage.removeItem('ghToken');
+                status.innerHTML =
+                    '❌ GitHub rejected the token (' + msg + '). It has been cleared — ' +
+                    'click Save & Publish again to enter a new one. Make sure the token has ' +
+                    '<strong>Contents: Read and write</strong> for ' + REPO_OWNER + '/' + REPO_NAME + '.';
+            } else {
+                status.innerHTML = '⚠️ Publish to GitHub failed: ' + msg + '. Saved locally only.';
+            }
             btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Save & Publish';
         }
 
         setTimeout(() => {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Save & Publish';
-        }, 3000);
+        }, 4000);
     };
 
     // ── Customers ───────────────────────────────────────────────
