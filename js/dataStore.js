@@ -17,6 +17,11 @@
 window.PackagesStore = (function () {
     // ───── CONFIGURE THIS ─────
     const JSONBIN_BIN_ID = '6a0ed2ee6877513b27aab711';
+    // Master key for the admin user "deb". Embedded so the dashboard
+    // doesn't prompt every time. NOTE: anyone who views this file's source
+    // could read this key and write to the bin. If you ever rotate it,
+    // update this constant and re-deploy.
+    const JSONBIN_MASTER_KEY = '$2a$10$5g20BFUwHVdvdiSNZuIqN.G5Vf6Mfq0Fggm13j9fXzg1VW0G0CFNW';
     // ───────────────────────────
 
     const API_BASE  = 'https://api.jsonbin.io/v3/b/';
@@ -107,26 +112,42 @@ window.PackagesStore = (function () {
         return fresh;
     }
 
-    // Public: dashboard publish.
-    // Returns a promise that resolves on success, rejects with Error on failure.
+    // The Master Key is hard-coded above (JSONBIN_MASTER_KEY) so the admin
+    // doesn't have to enter it. We still allow an override via localStorage
+    // (key "jsonbinKey") for development / key rotation testing.
     function getKey() {
-        let key = localStorage.getItem(KEY_STORAGE) || '';
-        if (!key) {
-            key = prompt(
-                'To publish package changes globally, paste your jsonbin.io Master Key.\n\n' +
-                'Get it from: https://jsonbin.io/app/api-keys (starts with "$2a$10$…").\n\n' +
-                'The key is stored only in this browser (localStorage key "jsonbinKey").'
-            );
-            if (key && key.trim()) {
-                localStorage.setItem(KEY_STORAGE, key.trim());
-            }
-            return key ? key.trim() : '';
+        const override = localStorage.getItem(KEY_STORAGE);
+        if (override && override.trim()) return override.trim();
+        if (JSONBIN_MASTER_KEY && JSONBIN_MASTER_KEY.indexOf('REPLACE') === -1) {
+            return JSONBIN_MASTER_KEY;
         }
-        return key;
+        // Last resort — prompt the admin (shouldn't happen with a hard-coded key)
+        const k = prompt(
+            'jsonbin.io Master Key (starts with "$2a$10$…"). ' +
+            'Paste once; it will be cached on this browser.'
+        );
+        if (k && k.trim()) {
+            localStorage.setItem(KEY_STORAGE, k.trim());
+            return k.trim();
+        }
+        return '';
     }
 
     function clearKey() {
+        // Removes only the localStorage override; the hard-coded key remains.
         localStorage.removeItem(KEY_STORAGE);
+    }
+
+    // Only the admin user "deb" should be able to publish. The dashboard's
+    // access guard already restricts the page to deb, but we double-check
+    // here so an accidental call from another context fails fast.
+    function isAdmin() {
+        try {
+            const raw = localStorage.getItem('currentUser');
+            if (!raw) return false;
+            const u = JSON.parse(raw);
+            return u && (u.username === 'deb' || u.role === 'admin');
+        } catch (_) { return false; }
     }
 
     async function publish(packagesArray) {
