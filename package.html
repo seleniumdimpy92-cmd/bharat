@@ -179,24 +179,21 @@ function getIcon(s) { return INCL_ICONS[s] || 'fa-check'; }
 let currentPkg = null;
 let currentBasePrice = 0;
 
-// ── Load package from API ────────────────────────────────────────
-async function loadPackage() {
+// ── Load package from localStorage (static-site mode) ───────────
+function loadPackage() {
     const params = new URLSearchParams(window.location.search);
     const pkgId = params.get('id') || 'budget';
 
     try {
-        const res = await fetch('/.netlify/functions/packages', { cache: 'no-store' });
-        if (!res.ok) throw new Error('API unavailable: ' + res.status);
-        const packages = await res.json();
-        window._packages = packages;
-        currentPkg = packages.find(p => p.id === pkgId);
-    } catch(e) {
         const cached = localStorage.getItem('sitePackages');
         if (cached) {
-            window._packages = JSON.parse(cached);
-            currentPkg = window._packages.find(p => p.id === pkgId);
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length) {
+                window._packages = parsed;
+                currentPkg = parsed.find(p => p.id === pkgId);
+            }
         }
-    }
+    } catch (_) { /* ignore parse errors */ }
 
     // Hardcoded fallback — same as script.js defaults
     if (!currentPkg) {
