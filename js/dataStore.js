@@ -16,7 +16,7 @@
 
 window.PackagesStore = (function () {
     // ───── CONFIGURE THIS ─────
-    const JSONBIN_BIN_ID = 'REPLACE_WITH_YOUR_BIN_ID';
+    const JSONBIN_BIN_ID = '6a0ed2ee6877513b27aab711';
     // ───────────────────────────
 
     const API_BASE  = 'https://api.jsonbin.io/v3/b/';
