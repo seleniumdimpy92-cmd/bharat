@@ -101,9 +101,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const cancelled = bookings.filter(b => b.status === 'cancelled');
         const totalRevenue = confirmed.reduce((sum, b) => sum + (b.price || 0), 0);
 
+        // Customer count: prefer Firestore-loaded list (admin only), else localStorage fallback
+        const customerCount = (Array.isArray(_allCustomers) && _allCustomers.length)
+            ? _allCustomers.length
+            : DB.users.length;
+
         document.getElementById('totalBookings').textContent = bookings.length;
         document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
-        document.getElementById('totalCustomers').textContent = DB.users.length;
+        document.getElementById('totalCustomers').textContent = customerCount;
         document.getElementById('confirmedBookings').textContent = confirmed.length;
 
         // Donut chart
@@ -833,6 +838,8 @@ document.addEventListener('DOMContentLoaded', function () {
     async function refreshCustomers() {
         _allCustomers = await fetchAllCustomers();
         renderCustomers(_customerSearchTerm);
+        // Update Overview count too (uses _allCustomers when available)
+        try { renderOverview(); } catch (_) {}
     }
 
     // Inline-onclick admin handlers
