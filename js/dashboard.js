@@ -266,19 +266,25 @@ document.addEventListener('DOMContentLoaded', function () {
         'images/ross2.jpg', 'images/ross3.jpg'
     ];
 
-    async function loadAndRenderPackages() {
-        const container = document.getElementById('packageCards');
-        container.innerHTML = '<p style="padding:2rem;color:#888;text-align:center;"><i class="fas fa-spinner fa-spin"></i> Loading packages…</p>';
+    function loadAndRenderPackages() {
+        // Static-site mode: load from localStorage (saved by previous
+        // "Save & Publish") or fall back to hard-coded defaults.
         try {
-            const res = await fetch('/.netlify/functions/packages', { cache: 'no-store' });
-            packagesData = await res.json();
-        } catch (e) {
-            // Fallback to PACKAGES constant
-            packagesData = Object.entries(PACKAGES).map(([id, p]) => ({
-                id, name: p.name, desc: '', price: p.price,
-                rating: 4.5, image: 'images/beach1.jpg', inclusions: [], visible: true
-            }));
-        }
+            const saved = localStorage.getItem('sitePackages');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length) {
+                    packagesData = parsed;
+                    renderPackageEditorCards();
+                    return;
+                }
+            }
+        } catch (_) { /* ignore parse errors */ }
+
+        packagesData = Object.entries(PACKAGES).map(([id, p]) => ({
+            id, name: p.name, desc: '', price: p.price,
+            rating: 4.5, image: 'images/beach1.jpg', inclusions: [], visible: true
+        }));
         renderPackageEditorCards();
     }
 
@@ -660,39 +666,34 @@ document.addEventListener('DOMContentLoaded', function () {
     const publishBtnEl = document.getElementById('publishBtn');
     if (publishBtnEl) publishBtnEl.addEventListener('click', () => window.saveAndPublishPackages());
 
-    window.saveAndPublishPackages = async function() {
+    // Save packages to the browser's localStorage. The public site
+    // (index.html / package.html) reads from the same key, so changes
+    // appear instantly on this device. (Static-site mode — GitHub Pages.)
+    window.saveAndPublishPackages = function() {
         const btn = document.getElementById('publishBtn');
         const status = document.getElementById('publishStatus');
 
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
         status.style.display = 'block';
         status.className = 'publish-status publish-info';
-        status.innerHTML = '⏳ Saving packages to live site…';
+        status.innerHTML = '⏳ Saving packages…';
 
         try {
-            const res = await fetch('/.netlify/functions/packages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Admin-Token': 'deb2024' },
-                body: JSON.stringify(packagesData)
-            });
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.error || 'Server error ' + res.status);
-
             localStorage.setItem('sitePackages', JSON.stringify(packagesData));
             status.className = 'publish-status publish-success';
-            status.innerHTML = '✅ Published! All visitors will see the updated packages immediately.';
+            status.innerHTML = '✅ Saved! Your package changes are live on this device.';
             btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Save & Publish';
-            }, 3000);
         } catch (err) {
             status.className = 'publish-status publish-error';
-            status.innerHTML = '❌ Publish failed: ' + err.message;
-            btn.disabled = false;
+            status.innerHTML = '❌ Save failed: ' + (err && err.message ? err.message : 'storage unavailable');
             btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Save & Publish';
         }
+
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Save & Publish';
+        }, 3000);
     };
 
     // ── Customers ───────────────────────────────────────────────
