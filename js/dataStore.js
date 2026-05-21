@@ -1,334 +1,378 @@
-// ── Shared data store: jsonbin.io as a global packages database ──
-// All pages (index, package details, dashboard) read packages through
-// PackagesStore.load(). The dashboard uses PackagesStore.publish() to write.
+// ── Firebase-backed data store (Auth + Firestore) ────────────────
+// Replaces the previous jsonbin.io implementation. All public pages and
+// the admin dashboard go through this module.
 //
-// SETUP (one-time, takes ~3 minutes):
-//   1. Create a free account at https://jsonbin.io
-//   2. Click "Create Bin" → paste the contents of data/packages.json
-//      → set bin to "Public" → click Create
-//   3. Copy the Bin ID from the URL or the bin's settings page
-//   4. Replace JSONBIN_BIN_ID below with that ID and commit/push
-//   5. (Admin only) On first publish, the dashboard will prompt for the
-//      Master Key — copy it from https://jsonbin.io/app/api-keys
+// Public surface (set on `window`):
+//   PackagesStore.load()                 → load all packages (with cache)
+//   PackagesStore.loadWithStaleWhileRevalidate(cb)
+//   PackagesStore.publish(packagesArray) → admin-only; writes all packages
+//   UsersStore.login(identifier, pwd)    → identifier = email OR username
+//   UsersStore.register({username,email,password,fullName?,phone?})
+//   UsersStore.logout()
+//   UsersStore.onAuthChange(cb)          → cb(profile|null)
+//   UsersStore.getCurrentUser()          → cached profile or null
+//   UsersStore.isAdmin()                 → bool
+//   UsersStore.updateProfile({fullName?,phone?})
 //
-// If the Bin ID below is left as the placeholder, the site falls back
-// to data/packages.json bundled in the repo (still works fine).
+// Implementation note: the Firebase JS SDK is ES-modules-only on the
+// CDN. We dynamically import it once at startup and stash the resolved
+// promise on `window.__firebaseReady` so callers can `await` it.
 
-window.PackagesStore = (function () {
-    // ───── CONFIGURE THIS ─────
-    const JSONBIN_BIN_ID = '6a0ed2ee6877513b27aab711';
-    // X-Master-Key — used by the admin dashboard to PUT (publish) to the bin.
-    // ⚠️  Anyone who views this file's source can read this and write to the
-    // bin. The bin is small / non-critical so we accept the trade-off. If
-    // you rotate the key on jsonbin.io, update both constants here.
-    const JSONBIN_MASTER_KEY = '$2a$10$5g20BFUwHVdvdiSNZuIqN.G5Vf6Mfq0Fggm13j9fXzg1VW0G0CFNW';
-    // X-Access-Key — read-only. Not strictly needed because the bin is
-    // public, but kept here so future private-bin reads still work without
-    // exposing the master key.
-    const JSONBIN_ACCESS_KEY = '$2a$10$ZjJgcUxE0YAyd37zvavDM.Pz2Y24FlwR7ngR3OTjItRI8CxIcuyGS';
-    // ───────────────────────────
+(function () {
+    const ADMIN_EMAIL  = window.ADMIN_EMAIL || 'deb@andamanvoyages.in';
+    const SDK_VERSION  = '10.13.2';
+    const APP_URL       = `https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-app.js`;
+    const AUTH_URL      = `https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-auth.js`;
+    const FIRESTORE_URL = `https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-firestore.js`;
 
-    const API_BASE  = 'https://api.jsonbin.io/v3/b/';
-    const HAS_BIN   = JSONBIN_BIN_ID && JSONBIN_BIN_ID !== 'REPLACE_WITH_YOUR_BIN_ID';
-    const READ_URL  = API_BASE + JSONBIN_BIN_ID + '/latest';
-    const WRITE_URL = API_BASE + JSONBIN_BIN_ID;
+    const PACKAGES_CACHE_KEY = 'sitePackages';
+    const USER_CACHE_KEY     = 'currentUser';
 
-    const REPO_FALLBACK = 'data/packages.json';
-    const CACHE_KEY     = 'sitePackages';
-    const KEY_STORAGE   = 'jsonbinKey';
+    // ── Bootstrap Firebase once ────────────────────────────────
+    window.__firebaseReady = (async function init() {
+        if (!window.FIREBASE_CONFIG) {
+            throw new Error('Missing window.FIREBASE_CONFIG (load js/firebase-config.js first)');
+        }
+        const [
+            { initializeApp },
+            authMod,
+            firestoreMod
+        ] = await Promise.all([
+            import(APP_URL),
+            import(AUTH_URL),
+            import(FIRESTORE_URL)
+        ]);
 
-    function getCached() {
+        const app  = initializeApp(window.FIREBASE_CONFIG);
+        const auth = authMod.getAuth(app);
+        try { await authMod.setPersistence(auth, authMod.browserLocalPersistence); } catch (_) {}
+        const db   = firestoreMod.getFirestore(app);
+
+        // Wire auth-state listener so the cached profile stays in sync
+        authMod.onAuthStateChanged(auth, async (authUser) => {
+            if (!authUser) {
+                cacheProfile(null);
+                fireAuthListeners(null);
+                return;
+            }
+            let extra = null;
+            try { extra = await fetchUserDoc(authUser.uid); } catch (_) {}
+            const profile = profileFromUser(authUser, extra);
+            cacheProfile(profile);
+            fireAuthListeners(profile);
+        });
+
+        return { app, auth, db, firebaseAuth: authMod, firestore: firestoreMod };
+    })();
+
+    // Surface init errors so callers can fail fast
+    window.__firebaseReady.catch(err => console.error('Firebase init failed:', err));
+
+    // ── Local cache helpers ─────────────────────────────────────
+    function getCachedPackages() {
         try {
-            const raw = localStorage.getItem(CACHE_KEY);
+            const raw = localStorage.getItem(PACKAGES_CACHE_KEY);
             if (!raw) return null;
             const parsed = JSON.parse(raw);
             return Array.isArray(parsed) && parsed.length ? parsed : null;
         } catch (_) { return null; }
     }
-
-    function setCache(data) {
-        try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (_) {}
+    function setCachedPackages(data) {
+        try { localStorage.setItem(PACKAGES_CACHE_KEY, JSON.stringify(data)); } catch (_) {}
     }
 
-    async function loadFromBin() {
-        if (!HAS_BIN) return null;
-        const res = await fetch(READ_URL, { cache: 'no-store' });
-        if (!res.ok) throw new Error('jsonbin read failed: ' + res.status);
-        const json = await res.json();
-        // jsonbin v3 returns { record: <data>, metadata: ... }
-        const data = json.record !== undefined ? json.record : json;
-        return Array.isArray(data) && data.length ? data : null;
-    }
-
-    async function loadFromRepo() {
-        const res = await fetch(REPO_FALLBACK + '?t=' + Date.now(), { cache: 'no-store' });
-        if (!res.ok) throw new Error('repo file fetch failed: ' + res.status);
-        const data = await res.json();
-        return Array.isArray(data) && data.length ? data : null;
-    }
-
-    // Public: load packages, preferring jsonbin → repo file → cache → null.
-    // Returns { data, source } where source is one of: 'bin' | 'repo' | 'cache' | 'none'.
-    async function load() {
-        // First try the canonical online source
-        if (HAS_BIN) {
-            try {
-                const data = await loadFromBin();
-                if (data) {
-                    setCache(data);
-                    return { data, source: 'bin' };
-                }
-            } catch (e) {
-                console.warn('jsonbin read failed; falling back', e);
-            }
-        }
-
-        // Repo file (works on GitHub Pages, even before bin is configured)
+    async function loadFromRepoFile() {
         try {
-            const data = await loadFromRepo();
-            if (data) {
-                setCache(data);
-                return { data, source: 'repo' };
+            const res = await fetch('data/packages.json?t=' + Date.now(), { cache: 'no-store' });
+            if (!res.ok) return null;
+            const data = await res.json();
+            return Array.isArray(data) && data.length ? data : null;
+        } catch (_) { return null; }
+    }
+
+    // ───────────────────────────────────────────────────────────
+    // PackagesStore
+    // ───────────────────────────────────────────────────────────
+    async function loadFromFirestore() {
+        const { db, firestore } = await window.__firebaseReady;
+        const snap = await firestore.getDocs(firestore.collection(db, 'packages'));
+        if (snap.empty) return null;
+
+        const list = [];
+        snap.forEach(d => {
+            const data = d.data() || {};
+            list.push({ id: d.id, ...data });
+        });
+        list.sort((a, b) => {
+            const oa = (a.order != null) ? a.order : 999;
+            const ob = (b.order != null) ? b.order : 999;
+            return oa - ob;
+        });
+        return list;
+    }
+
+    async function loadPackages() {
+        // 1. Authoritative: Firestore
+        try {
+            const data = await loadFromFirestore();
+            if (data && data.length) {
+                setCachedPackages(data);
+                return { data, source: 'firestore' };
             }
         } catch (e) {
-            console.warn('repo file read failed; falling back', e);
+            console.warn('Firestore packages read failed; falling back', e);
         }
-
-        // Local cache (last successful load)
-        const cached = getCached();
+        // 2. Static fallback file in the repo
+        const repoData = await loadFromRepoFile();
+        if (repoData) {
+            setCachedPackages(repoData);
+            return { data: repoData, source: 'repo' };
+        }
+        // 3. Cached
+        const cached = getCachedPackages();
         if (cached) return { data: cached, source: 'cache' };
 
         return { data: null, source: 'none' };
     }
 
-    // Same as load() but tries cache FIRST for instant render, then refreshes
-    // from the bin/repo and calls onUpdate(data) if the fresh data differs.
-    async function loadWithStaleWhileRevalidate(onUpdate) {
-        const cached = getCached();
+    async function loadPackagesSWR(onUpdate) {
+        const cached = getCachedPackages();
         if (cached && typeof onUpdate === 'function') {
             try { onUpdate(cached, 'cache'); } catch (_) {}
         }
-        const fresh = await load();
+        const fresh = await loadPackages();
         if (fresh.data && typeof onUpdate === 'function') {
-            // Always call onUpdate after fresh load so caller can re-render
             try { onUpdate(fresh.data, fresh.source); } catch (_) {}
         }
         return fresh;
     }
 
-    // The Master Key is hard-coded above (JSONBIN_MASTER_KEY) so the admin
-    // doesn't have to enter it. We still allow an override via localStorage
-    // (key "jsonbinKey") for development / key rotation testing.
-    function getKey() {
-        const override = localStorage.getItem(KEY_STORAGE);
-        if (override && override.trim()) return override.trim();
-        if (JSONBIN_MASTER_KEY && JSONBIN_MASTER_KEY.indexOf('REPLACE') === -1) {
-            return JSONBIN_MASTER_KEY;
-        }
-        // Last resort — prompt the admin (shouldn't happen with a hard-coded key)
-        const k = prompt(
-            'jsonbin.io Master Key (starts with "$2a$10$…"). ' +
-            'Paste once; it will be cached on this browser.'
-        );
-        if (k && k.trim()) {
-            localStorage.setItem(KEY_STORAGE, k.trim());
-            return k.trim();
-        }
-        return '';
-    }
+    async function publishPackages(packages) {
+        if (!Array.isArray(packages)) throw new Error('packages must be an array');
+        setCachedPackages(packages);
 
-    function clearKey() {
-        // Removes only the localStorage override; the hard-coded key remains.
-        localStorage.removeItem(KEY_STORAGE);
-    }
+        const { db, auth, firestore } = await window.__firebaseReady;
+        const user = auth.currentUser;
+        if (!user) throw new Error('You must be signed in as the admin to publish.');
+        if (user.email !== ADMIN_EMAIL) throw new Error('Only the admin user can publish packages.');
 
-    // Only the admin user "deb" should be able to publish. The dashboard's
-    // access guard already restricts the page to deb, but we double-check
-    // here so an accidental call from another context fails fast.
-    function isAdmin() {
-        try {
-            const raw = localStorage.getItem('currentUser');
-            if (!raw) return false;
-            const u = JSON.parse(raw);
-            return u && (u.username === 'deb' || u.role === 'admin');
-        } catch (_) { return false; }
-    }
+        // Strategy: write/merge each provided package, delete packages in
+        // Firestore that aren't in the new list. Single batch.
+        const colRef = firestore.collection(db, 'packages');
+        const existingSnap = await firestore.getDocs(colRef);
+        const newIds = new Set(packages.map(p => String(p.id)));
+        const batch = firestore.writeBatch(db);
 
-    async function publish(packagesArray) {
-        if (!Array.isArray(packagesArray)) {
-            throw new Error('packages must be an array');
-        }
-
-        // Always update local cache so the admin sees the change instantly
-        setCache(packagesArray);
-
-        if (!HAS_BIN) {
-            throw new Error(
-                'No jsonbin Bin ID is configured. Set JSONBIN_BIN_ID in js/dataStore.js. ' +
-                'Until then, publish only saves locally on this device.'
-            );
-        }
-
-        const key = getKey();
-        if (!key) {
-            throw new Error('No jsonbin Master Key provided.');
-        }
-
-        const res = await fetch(WRITE_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': key,
-                'X-Bin-Versioning': 'false'  // overwrite latest, don't pile up versions
-            },
-            body: JSON.stringify(packagesArray)
+        packages.forEach((pkg, idx) => {
+            const id = String(pkg.id || ('pkg_' + Date.now() + '_' + idx));
+            const docRef = firestore.doc(db, 'packages', id);
+            const payload = {
+                ...pkg,
+                id,
+                order: idx,
+                updatedAt: firestore.serverTimestamp()
+            };
+            batch.set(docRef, payload, { merge: false });
         });
 
-        if (!res.ok) {
-            const text = await res.text().catch(() => '');
-            const tokenIssue = res.status === 401 || res.status === 403;
-            if (tokenIssue) clearKey();
-            const err = new Error(
-                'jsonbin publish failed: ' + res.status +
-                (text ? ' — ' + text.slice(0, 300) : '')
-            );
-            err.tokenIssue = tokenIssue;
-            throw err;
-        }
+        existingSnap.forEach(d => {
+            if (!newIds.has(d.id)) {
+                batch.delete(firestore.doc(db, 'packages', d.id));
+            }
+        });
 
-        return res.json();
+        await batch.commit();
+        return { count: packages.length };
     }
 
-    return {
-        load,
-        loadWithStaleWhileRevalidate,
-        publish,
-        clearKey,
-        get isConfigured() { return HAS_BIN; }
+    window.PackagesStore = {
+        load: loadPackages,
+        loadWithStaleWhileRevalidate: loadPackagesSWR,
+        publish: publishPackages,
+        clearKey: function () {},                 // no-op (Firebase Auth manages creds)
+        get isConfigured() { return true; }
     };
-})();
 
+    // ───────────────────────────────────────────────────────────
+    // UsersStore
+    // ───────────────────────────────────────────────────────────
+    let _currentProfile = null;
+    const _authListeners = [];
 
-// ── Shared user store (jsonbin private bin) ──────────────────────
-// Holds the user list { id, username, email, salt, passwordHash, role, createdAt }.
-// Reads use the X-Access-Key (read-only). Writes use the X-Master-Key.
-// Passwords are SHA-256 hashed in the browser with a per-user random salt.
-window.UsersStore = (function () {
-    const USERS_BIN_ID = '6a0f2402ee5a733b12f866b2';
-
-    // Reuse the keys defined inside PackagesStore. We pull them from the
-    // visible source above (dataStore.js) — this keeps a single source of
-    // truth even though both the keys are stored as constants.
-    const MASTER_KEY = '$2a$10$5g20BFUwHVdvdiSNZuIqN.G5Vf6Mfq0Fggm13j9fXzg1VW0G0CFNW';
-    const ACCESS_KEY = '$2a$10$ZjJgcUxE0YAyd37zvavDM.Pz2Y24FlwR7ngR3OTjItRI8CxIcuyGS';
-
-    const API_BASE  = 'https://api.jsonbin.io/v3/b/';
-    const READ_URL  = API_BASE + USERS_BIN_ID + '/latest';
-    const WRITE_URL = API_BASE + USERS_BIN_ID;
-
-    function bytesToHex(buf) {
-        const arr = Array.from(new Uint8Array(buf));
-        return arr.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    function randomSalt() {
-        const arr = new Uint8Array(8);
-        crypto.getRandomValues(arr);
-        return bytesToHex(arr.buffer);
-    }
-
-    async function hashPassword(password, salt) {
-        const data = new TextEncoder().encode(salt + password);
-        const buf = await crypto.subtle.digest('SHA-256', data);
-        return bytesToHex(buf);
-    }
-
-    async function listUsers() {
-        const res = await fetch(READ_URL, {
-            cache: 'no-store',
-            headers: { 'X-Access-Key': ACCESS_KEY }
+    function fireAuthListeners(profile) {
+        _authListeners.forEach(fn => {
+            try { fn(profile); } catch (_) {}
         });
-        if (!res.ok) throw new Error('users read failed: ' + res.status);
-        const json = await res.json();
-        const data = json.record !== undefined ? json.record : json;
-        return Array.isArray(data) ? data : [];
     }
 
-    async function saveUsers(users) {
-        const res = await fetch(WRITE_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': MASTER_KEY,
-                'X-Bin-Versioning': 'false'
-            },
-            body: JSON.stringify(users)
-        });
-        if (!res.ok) {
-            const text = await res.text().catch(() => '');
-            throw new Error('users write failed: ' + res.status + ' ' + text);
+    function cacheProfile(profile) {
+        _currentProfile = profile;
+        if (profile) {
+            try { localStorage.setItem(USER_CACHE_KEY, JSON.stringify(profile)); } catch (_) {}
+            try { localStorage.setItem('token', 'firebase'); } catch (_) {}
+        } else {
+            try { localStorage.removeItem(USER_CACHE_KEY); } catch (_) {}
+            try { localStorage.removeItem('token'); } catch (_) {}
         }
     }
 
-    // Find a user by username OR email (case-insensitive).
-    function matchIdentifier(user, identifier) {
-        const id = (identifier || '').trim().toLowerCase();
-        if (!id) return false;
-        return (
-            (user.username && user.username.toLowerCase() === id) ||
-            (user.email    && user.email.toLowerCase()    === id)
-        );
-    }
-
-    async function findByIdentifier(identifier) {
-        const users = await listUsers();
-        return users.find(u => matchIdentifier(u, identifier));
-    }
-
-    async function login(identifier, password) {
-        const user = await findByIdentifier(identifier);
-        if (!user) throw new Error('Invalid username/email or password');
-        const hash = await hashPassword(password, user.salt || '');
-        if (hash !== user.passwordHash) throw new Error('Invalid username/email or password');
-        // Return a sanitised copy (no salt/hash) for client use.
+    function profileFromUser(authUser, extra) {
+        if (!authUser) return null;
+        const isAdmin = authUser.email === ADMIN_EMAIL;
         return {
-            id: user.id, username: user.username, email: user.email,
-            role: user.role || 'user', createdAt: user.createdAt
+            id: authUser.uid,
+            uid: authUser.uid,
+            email: authUser.email || '',
+            username: (extra && extra.username) || authUser.displayName || (authUser.email || '').split('@')[0],
+            fullName: (extra && extra.fullName) || authUser.displayName || '',
+            phone:    (extra && extra.phone) || '',
+            role:     isAdmin ? 'admin' : ((extra && extra.role) || 'user')
         };
     }
 
-    async function register({ username, email, password }) {
+    async function fetchUserDoc(uid) {
+        const { db, firestore } = await window.__firebaseReady;
+        try {
+            const snap = await firestore.getDoc(firestore.doc(db, 'users', uid));
+            return snap.exists() ? snap.data() : null;
+        } catch (_) { return null; }
+    }
+
+    async function lookupUsername(username) {
+        const { db, firestore } = await window.__firebaseReady;
+        try {
+            const snap = await firestore.getDoc(firestore.doc(db, 'usernames', username.toLowerCase()));
+            return snap.exists() ? snap.data() : null;
+        } catch (_) { return null; }
+    }
+
+    async function registerUser({ username, email, password, fullName, phone }) {
         username = (username || '').trim();
         email    = (email || '').trim().toLowerCase();
-        if (!username || !email || !password) throw new Error('All fields are required');
+        if (!username || !email || !password) throw new Error('All fields are required.');
+        if (username.length < 3) throw new Error('Username must be at least 3 characters long.');
         if (username.toLowerCase() === 'deb') throw new Error('This username is reserved.');
 
-        const users = await listUsers();
-        if (users.some(u => u.username && u.username.toLowerCase() === username.toLowerCase())) {
-            throw new Error('Username already taken.');
-        }
-        if (users.some(u => u.email && u.email.toLowerCase() === email)) {
-            throw new Error('Email already registered.');
-        }
+        const { db, auth, firebaseAuth, firestore } = await window.__firebaseReady;
 
-        const salt = randomSalt();
-        const passwordHash = await hashPassword(password, salt);
-        const newUser = {
-            id: 'u_' + Date.now(),
-            username,
+        // Best-effort uniqueness check (rules enforce too)
+        const existing = await lookupUsername(username);
+        if (existing) throw new Error('Username already taken.');
+
+        const cred = await firebaseAuth.createUserWithEmailAndPassword(auth, email, password);
+        const uid = cred.user.uid;
+
+        try { await firebaseAuth.updateProfile(cred.user, { displayName: username }); } catch (_) {}
+
+        const batch = firestore.writeBatch(db);
+        batch.set(firestore.doc(db, 'users', uid), {
+            uid,
             email,
-            salt,
-            passwordHash,
-            role: 'user',
-            createdAt: new Date().toISOString()
-        };
-        users.push(newUser);
-        await saveUsers(users);
-        return {
-            id: newUser.id, username: newUser.username, email: newUser.email,
-            role: newUser.role, createdAt: newUser.createdAt
+            username,
+            usernameLower: username.toLowerCase(),
+            fullName: fullName || '',
+            phone: phone || '',
+            role: email === ADMIN_EMAIL ? 'admin' : 'user',
+            createdAt: firestore.serverTimestamp()
+        });
+        batch.set(firestore.doc(db, 'usernames', username.toLowerCase()), {
+            uid,
+            email,
+            username
+        });
+        await batch.commit();
+
+        return profileFromUser(cred.user, {
+            username, fullName: fullName || '', phone: phone || '',
+            role: email === ADMIN_EMAIL ? 'admin' : 'user'
+        });
+    }
+
+    // identifier may be a username OR an email
+    async function loginUser(identifier, password) {
+        if (!identifier || !password) throw new Error('Please enter your username/email and password.');
+        const { auth, firebaseAuth } = await window.__firebaseReady;
+
+        let email = identifier.trim();
+        if (email.indexOf('@') === -1) {
+            // Treat as username — look up the email
+            const map = await lookupUsername(email);
+            if (!map || !map.email) throw new Error('Invalid username/email or password.');
+            email = map.email;
+        }
+        try {
+            const cred = await firebaseAuth.signInWithEmailAndPassword(auth, email, password);
+            // onAuthStateChanged will run cacheProfile; but also return a profile now
+            const extra = await fetchUserDoc(cred.user.uid).catch(() => null);
+            const profile = profileFromUser(cred.user, extra);
+            cacheProfile(profile);
+            return profile;
+        } catch (err) {
+            // Map common Firebase errors to friendly text
+            const code = err && err.code;
+            if (code === 'auth/wrong-password' || code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+                throw new Error('Invalid username/email or password.');
+            }
+            if (code === 'auth/too-many-requests') {
+                throw new Error('Too many failed attempts. Please try again in a few minutes.');
+            }
+            throw new Error(err.message || 'Login failed.');
+        }
+    }
+
+    async function logoutUser() {
+        const { auth, firebaseAuth } = await window.__firebaseReady;
+        await firebaseAuth.signOut(auth);
+        cacheProfile(null);
+    }
+
+    async function updateProfile(updates) {
+        const { db, auth, firestore } = await window.__firebaseReady;
+        const user = auth.currentUser;
+        if (!user) throw new Error('Not signed in.');
+        const allowed = {};
+        if (typeof updates.fullName === 'string') allowed.fullName = updates.fullName;
+        if (typeof updates.phone    === 'string') allowed.phone    = updates.phone;
+        if (!Object.keys(allowed).length) return _currentProfile;
+        await firestore.setDoc(firestore.doc(db, 'users', user.uid), allowed, { merge: true });
+        if (_currentProfile) {
+            Object.assign(_currentProfile, allowed);
+            cacheProfile(_currentProfile);
+        }
+        return _currentProfile;
+    }
+
+    function onAuthChange(cb) {
+        if (typeof cb !== 'function') return () => {};
+        _authListeners.push(cb);
+        // Fire immediately with the current cached profile (may be null)
+        try { cb(_currentProfile); } catch (_) {}
+        return function unsubscribe() {
+            const i = _authListeners.indexOf(cb);
+            if (i >= 0) _authListeners.splice(i, 1);
         };
     }
 
-    return { listUsers, login, register, hashPassword };
+    function getCurrentUser() {
+        if (_currentProfile) return _currentProfile;
+        try {
+            const raw = localStorage.getItem(USER_CACHE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (_) { return null; }
+    }
+
+    function isAdmin() {
+        const u = getCurrentUser();
+        return !!u && (u.email === ADMIN_EMAIL || u.role === 'admin' || u.username === 'deb');
+    }
+
+    window.UsersStore = {
+        login:           loginUser,
+        register:        registerUser,
+        logout:          logoutUser,
+        onAuthChange:    onAuthChange,
+        getCurrentUser:  getCurrentUser,
+        isAdmin:         isAdmin,
+        updateProfile:   updateProfile
+    };
 })();

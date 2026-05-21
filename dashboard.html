@@ -9,10 +9,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-        // Access guard — only user "deb" may view this page
+        // Access guard — only the admin (deb) may view this page.
+        // Checks the cached profile first; the real authority is Firebase
+        // Auth + Firestore rules, but this is a UX/quick block.
         (function() {
+            var ADMIN_EMAIL    = 'deb@andamanvoyages.in';
+            var ADMIN_USERNAME = 'deb';
             var token = localStorage.getItem('token');
-            var raw = localStorage.getItem('currentUser');
+            var raw   = localStorage.getItem('currentUser');
             if (!token || !raw) {
                 alert('⛔ Access denied. Please login first.');
                 window.location.replace('index.html');
@@ -20,7 +24,12 @@
             }
             try {
                 var user = JSON.parse(raw);
-                if (!user || user.username.toLowerCase() !== 'deb') {
+                var isAdmin = user && (
+                    user.email === ADMIN_EMAIL ||
+                    user.role === 'admin' ||
+                    (user.username || '').toLowerCase() === ADMIN_USERNAME
+                );
+                if (!isAdmin) {
                     alert('⛔ Access denied. This dashboard is restricted.');
                     window.location.replace('index.html');
                 }
@@ -345,8 +354,9 @@
         </div>
     </div>
 
-    <script src="js/dataStore.js?v=4"></script>
-    <script src="js/dashboard.js?v=4"></script>
+    <script src="js/firebase-config.js?v=6"></script>
+    <script src="js/dataStore.js?v=6"></script>
+    <script src="js/dashboard.js?v=6"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
         document.getElementById('iteDoneBtn').addEventListener('click', () => window._closeItineraryEditor());

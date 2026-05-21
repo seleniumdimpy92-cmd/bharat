@@ -1,13 +1,12 @@
-// ── Auth (jsonbin-backed) and bookings (localStorage) ──────────────
-//
-// Users are stored in a private jsonbin bin via window.UsersStore (see
-// js/dataStore.js). Passwords are SHA-256 hashed with a per-user salt.
-// Bookings remain client-side only for now (per-browser localStorage).
+// ── Auth shim layer ─────────────────────────────────────────────
+// Thin wrappers around window.UsersStore (defined in js/dataStore.js).
+// Exists to keep the old global API (login/register/logout/etc.) used
+// by index.html / package.html / dashboard.html unchanged while the
+// real work happens against Firebase Auth + Firestore.
 
 let currentUser = null;
-let token = localStorage.getItem('token');
-
 const ADMIN_USERNAME = 'deb';
+const ADMIN_EMAIL    = window.ADMIN_EMAIL || 'deb@andamanvoyages.in';
 
 const DB = {
   bookings: JSON.parse(localStorage.getItem('bookings') || '[]'),
@@ -16,20 +15,13 @@ const DB = {
   }
 };
 
-// ── Bootstrap on load ──
-(function init() {
-  if (!token) { updateAuthUI(); return; }
-  const storedUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-  if (storedUser) {
-    currentUser = storedUser;
-  } else {
-    localStorage.removeItem('token');
-    token = null;
-  }
-  updateAuthUI();
-})();
+// Pull any cached profile so the UI renders correctly during the
+// brief async Firebase boot.
+try {
+  currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+} catch (_) { currentUser = null; }
 
-// ── Validation helpers ──
+// ── Validation ──
 function validatePassword(password) {
   if (!password || password.length < 5) {
     return 'Password must be at least 5 characters long.';
@@ -39,23 +31,29 @@ function validatePassword(password) {
   }
   return null;
 }
-
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
-
 function isAdmin(user) {
   if (!user) user = currentUser;
-  return !!user && (user.username === ADMIN_USERNAME || user.role === 'admin');
+  if (!user) return false;
+  return user.email === ADMIN_EMAIL || user.role === 'admin' || user.username === ADMIN_USERNAME;
 }
 
-// ── UI: show/hide nav items based on auth & role ──
+// ── UI: show/hide nav based on auth & role ──
+function findDashboardNavItem() {
+  const links = document.querySelectorAll('a[href$="dashboard.html"]');
+  for (const a of links) {
+    return a.closest('li') || a;
+  }
+  return null;
+}
+
 function updateAuthUI() {
   const authLink = document.getElementById('authLink');
   const signUpNavLink = document.getElementById('signUpNavLink');
   const dashboardNavItem = findDashboardNavItem();
 
-  // Login / username pill
   if (authLink) {
     if (currentUser) {
       authLink.innerHTML = '<i class="fas fa-user"></i> ' + currentUser.username;
@@ -66,49 +64,46 @@ function updateAuthUI() {
     }
   }
 
-  // Hide Sign Up while logged in
   if (signUpNavLink) {
     const li = signUpNavLink.closest('li') || signUpNavLink;
     li.style.display = currentUser ? 'none' : '';
   }
 
-  // Dashboard tab — admin (deb) only
   if (dashboardNavItem) {
     dashboardNavItem.style.display = isAdmin() ? '' : 'none';
   }
 }
 
-function findDashboardNavItem() {
-  // Find the <li> containing the Dashboard link in the navbar.
-  const links = document.querySelectorAll('a[href$="dashboard.html"]');
-  for (const a of links) {
-    const li = a.closest('li');
-    if (li) return li;
-    return a; // fallback to the link itself
+// Subscribe to Firebase auth-state changes once UsersStore is available.
+(function subscribeAuth() {
+  if (window.UsersStore && typeof window.UsersStore.onAuthChange === 'function') {
+    window.UsersStore.onAuthChange(profile => {
+      currentUser = profile || null;
+      updateAuthUI();
+    });
+  } else {
+    // dataStore.js may load just after this file — retry shortly.
+    setTimeout(subscribeAuth, 100);
   }
-  return null;
-}
+})();
 
-// ── Login ──
+// Render whatever we have right away (instant cached pill before Firebase boots)
+updateAuthUI();
+
+// ── Login (identifier may be username OR email) ──
 async function login(identifier, password) {
   if (!identifier || !password) {
     throw new Error('Please enter your username/email and password.');
   }
   if (!window.UsersStore) {
-    throw new Error('Auth store not loaded — please refresh the page.');
+    throw new Error('Auth system not loaded — please refresh the page.');
   }
-  const user = await window.UsersStore.login(identifier.trim(), password);
-  token = 'token_' + Date.now();
-  currentUser = {
-    id: user.id, username: user.username, email: user.email,
-    role: user.role || 'user'
-  };
-  localStorage.setItem('token', token);
-  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  const profile = await window.UsersStore.login(identifier.trim(), password);
+  currentUser = profile;
   updateAuthUI();
   closeLogin();
-  alert('✅ Login successful! Welcome, ' + currentUser.username + '.');
-  return { token, user: currentUser };
+  alert('✅ Login successful! Welcome, ' + profile.username + '.');
+  return { user: profile };
 }
 
 // ── Register ──
@@ -116,52 +111,44 @@ async function register(username, email, password) {
   username = (username || '').trim();
   email    = (email || '').trim();
 
-  if (!username || !email || !password) {
-    throw new Error('All fields are required.');
-  }
-  if (username.length < 3) {
-    throw new Error('Username must be at least 3 characters long.');
-  }
-  if (!isValidEmail(email)) {
-    throw new Error('Please enter a valid email address.');
-  }
+  if (!username || !email || !password) throw new Error('All fields are required.');
+  if (username.length < 3) throw new Error('Username must be at least 3 characters long.');
+  if (!isValidEmail(email)) throw new Error('Please enter a valid email address.');
   const pwErr = validatePassword(password);
   if (pwErr) throw new Error(pwErr);
 
-  if (!window.UsersStore) {
-    throw new Error('Auth store not loaded — please refresh the page.');
-  }
+  if (!window.UsersStore) throw new Error('Auth system not loaded — please refresh the page.');
 
   await window.UsersStore.register({ username, email, password });
   alert('✅ Registration successful! Please login with your new account.');
   closeRegister();
   openLogin();
-  // Pre-fill the login email with whatever they registered with
+
   const loginEmailEl = document.getElementById('loginEmail');
   if (loginEmailEl) loginEmailEl.value = email;
 }
 
 // ── Logout ──
-function logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('currentUser');
-  token = null;
+async function logout() {
+  try {
+    if (window.UsersStore) await window.UsersStore.logout();
+  } catch (_) {}
   currentUser = null;
   updateAuthUI();
   closeProfile();
 }
 
-// ── Bookings (localStorage only — per-browser) ──
+// ── Bookings (still localStorage; per-browser) ──
 async function loadBookings() {
   if (!currentUser) return [];
-  return DB.bookings.filter(b => b.userId === currentUser.id);
+  return DB.bookings.filter(b => b.userId === currentUser.id || b.userId === currentUser.uid);
 }
 
 async function createBooking(bookingData) {
   if (!currentUser) throw new Error('Login required');
   const booking = {
     id: Date.now(),
-    userId: currentUser.id,
+    userId: currentUser.id || currentUser.uid,
     ...bookingData,
     createdAt: new Date().toISOString()
   };
@@ -171,7 +158,7 @@ async function createBooking(bookingData) {
 }
 
 async function updateBooking(id, updates) {
-  const booking = DB.bookings.find(b => b.id === id && b.userId === currentUser.id);
+  const booking = DB.bookings.find(b => b.id === id);
   if (!booking) throw new Error('Booking not found');
   Object.assign(booking, updates);
   DB.saveBookings();
@@ -179,7 +166,7 @@ async function updateBooking(id, updates) {
 }
 
 async function cancelBooking(id) {
-  const booking = DB.bookings.find(b => b.id === id && b.userId === currentUser.id);
+  const booking = DB.bookings.find(b => b.id === id);
   if (!booking) throw new Error('Booking not found');
   booking.status = 'cancelled';
   DB.saveBookings();
@@ -221,7 +208,7 @@ async function loadProfileContent() {
   }
 }
 
-// ── Expose globals (used by inline handlers / other scripts) ──
+// ── Globals (used by inline handlers and other scripts) ──
 window.login = login;
 window.register = register;
 window.logout = logout;
