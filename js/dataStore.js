@@ -17,11 +17,15 @@
 window.PackagesStore = (function () {
     // ───── CONFIGURE THIS ─────
     const JSONBIN_BIN_ID = '6a0ed2ee6877513b27aab711';
-    // Master key for the admin user "deb". Embedded so the dashboard
-    // doesn't prompt every time. NOTE: anyone who views this file's source
-    // could read this key and write to the bin. If you ever rotate it,
-    // update this constant and re-deploy.
+    // X-Master-Key — used by the admin dashboard to PUT (publish) to the bin.
+    // ⚠️  Anyone who views this file's source can read this and write to the
+    // bin. The bin is small / non-critical so we accept the trade-off. If
+    // you rotate the key on jsonbin.io, update both constants here.
     const JSONBIN_MASTER_KEY = '$2a$10$5g20BFUwHVdvdiSNZuIqN.G5Vf6Mfq0Fggm13j9fXzg1VW0G0CFNW';
+    // X-Access-Key — read-only. Not strictly needed because the bin is
+    // public, but kept here so future private-bin reads still work without
+    // exposing the master key.
+    const JSONBIN_ACCESS_KEY = '$2a$10$ZjJgcUxE0YAyd37zvavDM.Pz2Y24FlwR7ngR3OTjItRI8CxIcuyGS';
     // ───────────────────────────
 
     const API_BASE  = 'https://api.jsonbin.io/v3/b/';
