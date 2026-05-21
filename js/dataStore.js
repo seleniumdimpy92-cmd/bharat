@@ -207,3 +207,128 @@ window.PackagesStore = (function () {
         get isConfigured() { return HAS_BIN; }
     };
 })();
+
+
+// ── Shared user store (jsonbin private bin) ──────────────────────
+// Holds the user list { id, username, email, salt, passwordHash, role, createdAt }.
+// Reads use the X-Access-Key (read-only). Writes use the X-Master-Key.
+// Passwords are SHA-256 hashed in the browser with a per-user random salt.
+window.UsersStore = (function () {
+    const USERS_BIN_ID = '6a0f2402ee5a733b12f866b2';
+
+    // Reuse the keys defined inside PackagesStore. We pull them from the
+    // visible source above (dataStore.js) — this keeps a single source of
+    // truth even though both the keys are stored as constants.
+    const MASTER_KEY = '$2a$10$5g20BFUwHVdvdiSNZuIqN.G5Vf6Mfq0Fggm13j9fXzg1VW0G0CFNW';
+    const ACCESS_KEY = '$2a$10$ZjJgcUxE0YAyd37zvavDM.Pz2Y24FlwR7ngR3OTjItRI8CxIcuyGS';
+
+    const API_BASE  = 'https://api.jsonbin.io/v3/b/';
+    const READ_URL  = API_BASE + USERS_BIN_ID + '/latest';
+    const WRITE_URL = API_BASE + USERS_BIN_ID;
+
+    function bytesToHex(buf) {
+        const arr = Array.from(new Uint8Array(buf));
+        return arr.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function randomSalt() {
+        const arr = new Uint8Array(8);
+        crypto.getRandomValues(arr);
+        return bytesToHex(arr.buffer);
+    }
+
+    async function hashPassword(password, salt) {
+        const data = new TextEncoder().encode(salt + password);
+        const buf = await crypto.subtle.digest('SHA-256', data);
+        return bytesToHex(buf);
+    }
+
+    async function listUsers() {
+        const res = await fetch(READ_URL, {
+            cache: 'no-store',
+            headers: { 'X-Access-Key': ACCESS_KEY }
+        });
+        if (!res.ok) throw new Error('users read failed: ' + res.status);
+        const json = await res.json();
+        const data = json.record !== undefined ? json.record : json;
+        return Array.isArray(data) ? data : [];
+    }
+
+    async function saveUsers(users) {
+        const res = await fetch(WRITE_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': MASTER_KEY,
+                'X-Bin-Versioning': 'false'
+            },
+            body: JSON.stringify(users)
+        });
+        if (!res.ok) {
+            const text = await res.text().catch(() => '');
+            throw new Error('users write failed: ' + res.status + ' ' + text);
+        }
+    }
+
+    // Find a user by username OR email (case-insensitive).
+    function matchIdentifier(user, identifier) {
+        const id = (identifier || '').trim().toLowerCase();
+        if (!id) return false;
+        return (
+            (user.username && user.username.toLowerCase() === id) ||
+            (user.email    && user.email.toLowerCase()    === id)
+        );
+    }
+
+    async function findByIdentifier(identifier) {
+        const users = await listUsers();
+        return users.find(u => matchIdentifier(u, identifier));
+    }
+
+    async function login(identifier, password) {
+        const user = await findByIdentifier(identifier);
+        if (!user) throw new Error('Invalid username/email or password');
+        const hash = await hashPassword(password, user.salt || '');
+        if (hash !== user.passwordHash) throw new Error('Invalid username/email or password');
+        // Return a sanitised copy (no salt/hash) for client use.
+        return {
+            id: user.id, username: user.username, email: user.email,
+            role: user.role || 'user', createdAt: user.createdAt
+        };
+    }
+
+    async function register({ username, email, password }) {
+        username = (username || '').trim();
+        email    = (email || '').trim().toLowerCase();
+        if (!username || !email || !password) throw new Error('All fields are required');
+        if (username.toLowerCase() === 'deb') throw new Error('This username is reserved.');
+
+        const users = await listUsers();
+        if (users.some(u => u.username && u.username.toLowerCase() === username.toLowerCase())) {
+            throw new Error('Username already taken.');
+        }
+        if (users.some(u => u.email && u.email.toLowerCase() === email)) {
+            throw new Error('Email already registered.');
+        }
+
+        const salt = randomSalt();
+        const passwordHash = await hashPassword(password, salt);
+        const newUser = {
+            id: 'u_' + Date.now(),
+            username,
+            email,
+            salt,
+            passwordHash,
+            role: 'user',
+            createdAt: new Date().toISOString()
+        };
+        users.push(newUser);
+        await saveUsers(users);
+        return {
+            id: newUser.id, username: newUser.username, email: newUser.email,
+            role: newUser.role, createdAt: newUser.createdAt
+        };
+    }
+
+    return { listUsers, login, register, hashPassword };
+})();
