@@ -460,10 +460,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            const fullName = (document.getElementById('regFullName') || {}).value || '';
             const username = document.getElementById('regUsername').value;
-            const email = document.getElementById('regEmail').value;
+            const email    = document.getElementById('regEmail').value;
+            const phone    = (document.getElementById('regPhone') || {}).value || '';
             const password = document.getElementById('regPassword').value;
-            window.register(username, email, password).catch(err => alert(err.message || 'Registration failed'));
+            window.register({ username, email, password, fullName, phone })
+                .catch(err => alert(err.message || 'Registration failed'));
         });
     }
 

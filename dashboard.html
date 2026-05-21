@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="js/firebase-config.js?v=11"></script>
+    <script src="js/firebase-config.js?v=12"></script>
     <script>
         // Access guard — only admin users may view this page.
         // Admin emails come from window.ADMIN_EMAILS (set in firebase-config.js).
@@ -265,6 +265,7 @@
                                 <th>ID</th>
                                 <th>Username / Name</th>
                                 <th>Email</th>
+                                <th>Phone</th>
                                 <th>Bookings</th>
                                 <th>Total Spent</th>
                                 <th>Status</th>
@@ -272,7 +273,7 @@
                             </tr>
                         </thead>
                         <tbody id="customersBody">
-                            <tr><td colspan="7" class="table-empty">Loading customers…</td></tr>
+                            <tr><td colspan="8" class="table-empty">Loading customers…</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -360,9 +361,9 @@
         </div>
     </div>
 
-    <script src="js/firebase-config.js?v=11"></script>
-    <script src="js/dataStore.js?v=11"></script>
-    <script src="js/dashboard.js?v=11"></script>
+    <script src="js/firebase-config.js?v=12"></script>
+    <script src="js/dataStore.js?v=12"></script>
+    <script src="js/dashboard.js?v=12"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
         document.getElementById('iteDoneBtn').addEventListener('click', () => window._closeItineraryEditor());

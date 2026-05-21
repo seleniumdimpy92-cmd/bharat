@@ -113,19 +113,42 @@ async function login(identifier, password) {
 }
 
 // ── Register ──
-async function register(username, email, password) {
+// Accepts either positional args (legacy) or a single object payload.
+async function register(...args) {
+  let username, email, password, fullName, phone;
+  if (args.length === 1 && typeof args[0] === 'object' && args[0]) {
+    ({ username, email, password, fullName, phone } = args[0]);
+  } else {
+    [username, email, password, fullName = '', phone = ''] = args;
+  }
+
   username = (username || '').trim();
   email    = (email || '').trim();
+  fullName = (fullName || '').trim();
+  phone    = (phone || '').trim();
 
-  if (!username || !email || !password) throw new Error('All fields are required.');
+  // Required fields
+  if (!fullName) throw new Error('Full name is required.');
+  if (fullName.length < 2) throw new Error('Full name must be at least 2 characters long.');
+  if (!username) throw new Error('Username is required.');
   if (username.length < 3) throw new Error('Username must be at least 3 characters long.');
+  if (!email) throw new Error('Email is required.');
   if (!isValidEmail(email)) throw new Error('Please enter a valid email address.');
+  if (!phone) throw new Error('Phone number is required.');
+  if (!/^[0-9+()\- ]{8,20}$/.test(phone)) {
+    throw new Error('Phone must be 8–20 digits (digits, spaces, dashes, parentheses, and a leading + are allowed).');
+  }
+  // Require at least 8 actual digits to avoid "+()-"-only inputs
+  if ((phone.match(/\d/g) || []).length < 8) {
+    throw new Error('Phone number must contain at least 8 digits.');
+  }
+  if (!password) throw new Error('Password is required.');
   const pwErr = validatePassword(password);
   if (pwErr) throw new Error(pwErr);
 
   if (!window.UsersStore) throw new Error('Auth system not loaded — please refresh the page.');
 
-  await window.UsersStore.register({ username, email, password });
+  await window.UsersStore.register({ username, email, password, fullName, phone });
   alert('✅ Registration successful! Please login with your new account.');
   closeRegister();
   openLogin();
