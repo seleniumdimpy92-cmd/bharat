@@ -227,3 +227,89 @@ window.cancelBooking = async (id) => {
   }
 };
 window.isAdmin = isAdmin;
+
+// ── Forgot username / password modal ────────────────────────────
+function openForgot() {
+  document.getElementById('forgotModal').style.display = 'block';
+  const r = document.getElementById('forgotResult');
+  if (r) r.innerHTML = '';
+  const e = document.getElementById('forgotEmail');
+  if (e) { e.value = ''; e.focus(); }
+}
+function closeForgot() {
+  document.getElementById('forgotModal').style.display = 'none';
+}
+window.openForgot = openForgot;
+window.closeForgot = closeForgot;
+
+document.addEventListener('DOMContentLoaded', () => {
+  // "Forgot username or password?" link inside the login modal
+  const goToForgot = document.getElementById('goToForgot');
+  if (goToForgot) {
+    goToForgot.addEventListener('click', e => {
+      e.preventDefault();
+      closeLogin();
+      openForgot();
+    });
+  }
+
+  // "Back to login" link from the forgot modal
+  const goToLoginFromForgot = document.getElementById('goToLoginFromForgot');
+  if (goToLoginFromForgot) {
+    goToLoginFromForgot.addEventListener('click', e => {
+      e.preventDefault();
+      closeForgot();
+      openLogin();
+    });
+  }
+
+  // Forgot form: look up username(s) AND send a password-reset email
+  const forgotForm = document.getElementById('forgotForm');
+  if (forgotForm) {
+    forgotForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const emailInput = document.getElementById('forgotEmail');
+      const submitBtn  = document.getElementById('forgotSubmitBtn');
+      const result     = document.getElementById('forgotResult');
+      const email = (emailInput.value || '').trim();
+      if (!email) return;
+
+      result.innerHTML = '';
+      submitBtn.disabled = true;
+      const oldHTML = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Working…';
+
+      let usernameMsg = '';
+      try {
+        const usernames = await window.UsersStore.lookupUsernamesByEmail(email);
+        if (usernames && usernames.length) {
+          usernameMsg = `<div style="background:#e8f8f5;border-left:3px solid #1abc9c;padding:0.6rem 0.85rem;border-radius:4px;margin-bottom:0.6rem;color:#0e6655;">
+              <strong>Your username:</strong> ${usernames.map(u => `<code>${u}</code>`).join(', ')}
+          </div>`;
+        } else {
+          usernameMsg = `<div style="background:#fef9e7;border-left:3px solid #f1c40f;padding:0.6rem 0.85rem;border-radius:4px;margin-bottom:0.6rem;color:#7d6608;">
+              No account found with that email. (We will still attempt the password reset; if the email isn't registered, no email is sent.)
+          </div>`;
+        }
+      } catch (err) {
+        usernameMsg = `<div style="color:#a04000;margin-bottom:0.6rem;">Couldn't look up username: ${err.message || err}</div>`;
+      }
+
+      let resetMsg;
+      try {
+        await window.UsersStore.sendPasswordReset(email);
+        resetMsg = `<div style="background:#eaf2f8;border-left:3px solid #3498db;padding:0.6rem 0.85rem;border-radius:4px;color:#1a5276;">
+            ✅ A password-reset link has been sent to <strong>${email}</strong>. Check your inbox (and spam folder).
+        </div>`;
+      } catch (err) {
+        resetMsg = `<div style="background:#fdedec;border-left:3px solid #e74c3c;padding:0.6rem 0.85rem;border-radius:4px;color:#922b21;">
+            ❌ ${err.message || 'Could not send reset link.'}
+        </div>`;
+      }
+
+      result.innerHTML = usernameMsg + resetMsg;
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = oldHTML;
+    });
+  }
+});
