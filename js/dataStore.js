@@ -302,8 +302,15 @@
         }
         try {
             const cred = await firebaseAuth.signInWithEmailAndPassword(auth, email, password);
-            // onAuthStateChanged will run cacheProfile; but also return a profile now
             const extra = await fetchUserDoc(cred.user.uid).catch(() => null);
+
+            // Soft-disable: if the admin marked this profile disabled, refuse login.
+            if (extra && extra.disabled === true) {
+                try { await firebaseAuth.signOut(auth); } catch (_) {}
+                throw new Error('This account has been disabled. Please contact support.');
+            }
+
+            // onAuthStateChanged will run cacheProfile; but also return a profile now
             const profile = profileFromUser(cred.user, extra);
             cacheProfile(profile);
             return profile;
@@ -408,6 +415,61 @@
         return !!u && (u.email === ADMIN_EMAIL || u.role === 'admin' || u.username === 'deb');
     }
 
+    // ── Admin-only helpers (Firestore rules also enforce these) ──
+    function ensureAdmin() {
+        if (!isAdmin()) throw new Error('Admin access required.');
+    }
+
+    async function listAllUsers() {
+        ensureAdmin();
+        const { db, firestore } = await window.__firebaseReady;
+        const snap = await firestore.getDocs(firestore.collection(db, 'users'));
+        const list = [];
+        snap.forEach(d => list.push({ uid: d.id, ...(d.data() || {}) }));
+        // newest first
+        list.sort((a, b) => {
+            const ta = (a.createdAt && a.createdAt.toMillis) ? a.createdAt.toMillis() : 0;
+            const tb = (b.createdAt && b.createdAt.toMillis) ? b.createdAt.toMillis() : 0;
+            return tb - ta;
+        });
+        return list;
+    }
+
+    // Soft-disable: flips a `disabled` boolean on the user's profile doc.
+    // The login flow checks this and refuses entry.
+    async function setUserDisabled(uid, disabled) {
+        ensureAdmin();
+        const { db, firestore } = await window.__firebaseReady;
+        await firestore.setDoc(
+            firestore.doc(db, 'users', uid),
+            { disabled: !!disabled, disabledAt: disabled ? firestore.serverTimestamp() : null },
+            { merge: true }
+        );
+    }
+
+    // Removes the user's Firestore profile + username mapping.
+    // ⚠️ Does NOT delete the Firebase Auth account itself — that requires
+    // server-side Admin SDK. We provide a Console deep-link instead.
+    async function deleteUserProfile(uid, username) {
+        ensureAdmin();
+        const { db, firestore } = await window.__firebaseReady;
+        const batch = firestore.writeBatch(db);
+        batch.delete(firestore.doc(db, 'users', uid));
+        if (username) {
+            batch.delete(firestore.doc(db, 'usernames', username.toLowerCase()));
+        }
+        await batch.commit();
+    }
+
+    // Direct password-reset for an arbitrary email (admin convenience).
+    async function adminSendPasswordReset(email) {
+        ensureAdmin();
+        if (!email) throw new Error('No email provided.');
+        const { auth, firebaseAuth } = await window.__firebaseReady;
+        await firebaseAuth.sendPasswordResetEmail(auth, email);
+        return email;
+    }
+
     window.UsersStore = {
         login:                  loginUser,
         register:               registerUser,
@@ -417,6 +479,11 @@
         isAdmin:                isAdmin,
         updateProfile:          updateProfile,
         sendPasswordReset:      sendPasswordReset,
-        lookupUsernamesByEmail: lookupUsernamesByEmail
+        lookupUsernamesByEmail: lookupUsernamesByEmail,
+        // admin-only:
+        listAllUsers:           listAllUsers,
+        setUserDisabled:        setUserDisabled,
+        deleteUserProfile:      deleteUserProfile,
+        adminSendPasswordReset: adminSendPasswordReset
     };
 })();
