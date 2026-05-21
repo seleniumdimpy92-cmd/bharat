@@ -768,7 +768,7 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
         if (_customerError) {
-            tbody.innerHTML = `<tr><td colspan="7" class="table-empty" style="color:#a04000;">
+            tbody.innerHTML = `<tr><td colspan="8" class="table-empty" style="color:#a04000;">
                 ⚠️ ${escHtml(_customerError)}<br>
                 <small style="color:#888;">
                     Most likely fix: open <a href="https://console.firebase.google.com/project/andaman-b886d/firestore/rules" target="_blank">Firestore Rules</a>
@@ -779,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (list.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No customers found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="table-empty">No customers found</td></tr>';
             return;
         }
 
@@ -806,6 +806,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td title="${u.uid}">#${String(u.uid || '').slice(-6)}</td>
                     <td>${u.username || '-'}${u.fullName ? `<br><small style="color:#888;">${u.fullName}</small>` : ''}</td>
                     <td>${u.email || '-'}</td>
+                    <td>${u.phone ? `<a href="tel:${u.phone}" style="color:#1abc9c;text-decoration:none;">${u.phone}</a>` : '<span style="color:#bbb;">—</span>'}</td>
                     <td>${userBookings.length}</td>
                     <td>${formatCurrency(totalSpent)}</td>
                     <td>${statusBadge}</td>
