@@ -733,12 +733,19 @@ document.addEventListener('DOMContentLoaded', function () {
     let _allCustomers = [];                // last loaded from Firestore
     let _customerSearchTerm = '';
 
+    let _customerError = null;
+
     async function fetchAllCustomers() {
-        if (!window.UsersStore || !window.UsersStore.listAllUsers) return [];
+        _customerError = null;
+        if (!window.UsersStore || !window.UsersStore.listAllUsers) {
+            _customerError = 'UsersStore not loaded — refresh the page.';
+            return [];
+        }
         try {
             return await window.UsersStore.listAllUsers();
         } catch (err) {
             console.warn('listAllUsers failed:', err);
+            _customerError = err && err.message ? err.message : String(err);
             return [];
         }
     }
@@ -754,6 +761,17 @@ document.addEventListener('DOMContentLoaded', function () {
             (u.email    || '').toLowerCase().includes(q) ||
             (u.fullName || '').toLowerCase().includes(q)
         );
+
+        if (_customerError) {
+            tbody.innerHTML = `<tr><td colspan="7" class="table-empty" style="color:#a04000;">
+                ⚠️ ${escHtml(_customerError)}<br>
+                <small style="color:#888;">
+                    Most likely fix: open <a href="https://console.firebase.google.com/project/andaman-b886d/firestore/rules" target="_blank">Firestore Rules</a>
+                    and publish the latest <code>firestore.rules</code> from the repo.
+                </small>
+            </td></tr>`;
+            return;
+        }
 
         if (list.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No customers found</td></tr>';
@@ -971,6 +989,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initial render
     refreshAll();
+    // Also fetch customers from Firestore once on load (so the count and
+    // table are ready by the time the user clicks the Customers tab).
+    if (typeof refreshCustomers === 'function') {
+        refreshCustomers();
+    }
 
     // Auto-refresh when localStorage changes (e.g. from another tab)
     window.addEventListener('storage', refreshAll);
