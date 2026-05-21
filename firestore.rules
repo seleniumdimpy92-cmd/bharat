@@ -1,0 +1,64 @@
+// ── Firestore Security Rules ────────────────────────────────────
+// Paste these into Firebase Console → Firestore Database → Rules tab,
+// then click "Publish".
+//
+// What they enforce:
+//   • Anyone (signed in or not) can READ packages.
+//   • Only the admin (signed in with ADMIN_EMAIL) can WRITE packages.
+//   • Each user can read & write only their own profile (users/{uid}).
+//   • Each user can read & write only their own bookings (bookings/{id} where userId == uid).
+//   • The "usernames" map (for username → email lookup at login) is
+//     readable by anyone, but each entry can only be written by the
+//     user who owns the matching uid.
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helpers
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == "deb@andamanvoyages.in";
+    }
+    function isSelf(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Public packages collection
+    match /packages/{pkgId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // User profiles — each user owns their doc (doc id = auth uid)
+    match /users/{uid} {
+      allow read: if isSelf(uid) || isAdmin();
+      allow create: if isSelf(uid);
+      allow update, delete: if isSelf(uid) || isAdmin();
+    }
+
+    // Username → uid/email lookup (used for "login by username" flow)
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+    }
+
+    // Bookings — each booking has a userId field
+    match /bookings/{bookingId} {
+      allow read: if request.auth != null
+        && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null
+        && (isAdmin() || resource.data.userId == request.auth.uid);
+    }
+
+    // Default deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
