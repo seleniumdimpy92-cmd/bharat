@@ -690,7 +690,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // token is asked once and stored in localStorage on this device.
     const REPO_OWNER  = 'debzody';
     const REPO_NAME   = 'bharat';
-    const REPO_BRANCH = 'gh-pages';
+    // Push to main — a GitHub Actions workflow auto-deploys main → gh-pages.
+    // (Pushing directly to gh-pages would be wiped on the next workflow run.)
+    const REPO_BRANCH = 'main';
     const REPO_FILE   = 'data/packages.json';
 
     function utf8ToBase64(str) {
