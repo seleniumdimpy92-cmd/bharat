@@ -597,10 +597,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Search button (top navy bar) — currently just scrolls + flashes
+    // Search button (top navy bar) — captures search criteria
     const mmtSearchBtn = document.getElementById('mmtSearchBtn');
     if (mmtSearchBtn) {
         mmtSearchBtn.addEventListener('click', () => {
+            const fromEl = document.getElementById('mmtFrom');
+            const dateEl = document.getElementById('mmtDate');
+            const adultsEl = document.getElementById('mmtAdults');
+            const childrenEl = document.getElementById('mmtChildren');
+
+            const from = fromEl ? fromEl.value.trim() : '';
+            const date = dateEl ? dateEl.value : '';
+            const adults = adultsEl ? parseInt(adultsEl.value, 10) : 2;
+            const children = childrenEl ? parseInt(childrenEl.value, 10) : 0;
+
+            if (!from) {
+                alert('Please enter your travelling-from city.');
+                if (fromEl) fromEl.focus();
+                return;
+            }
+            if (!date) {
+                alert('Please select a travel date.');
+                if (dateEl) dateEl.focus();
+                return;
+            }
+
+            // Persist search context for downstream use (booking/customize flow)
+            window.searchContext = {
+                from, to: 'Andaman', date, adults, children,
+                totalPersons: adults + children
+            };
+            try { sessionStorage.setItem('searchContext', JSON.stringify(window.searchContext)); } catch (e) {}
+
             // Reset to ALL and refresh, then scroll into view
             mmtState.cat = 'all';
             document.querySelectorAll('#mmtTabs .mmt-tab').forEach(t => {
@@ -665,10 +693,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Customization form
     const checkboxes = document.querySelectorAll('#customForm input[type="checkbox"]');
     checkboxes.forEach(cb => cb.addEventListener('change', updateTotal));
-
-    // Find Packages button
-    const findPkgsBtn = document.getElementById('findPkgsBtn');
-    if (findPkgsBtn) findPkgsBtn.addEventListener('click', window.quickSearch);
 
     // Proceed to Payment button (in customize modal)
     const proceedPaymentBtn = document.getElementById('proceedPaymentBtn');

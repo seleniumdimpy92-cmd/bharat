@@ -50,6 +50,24 @@
 }
 .mmt-field-value::placeholder { color: rgba(255,255,255,0.55); }
 .mmt-field input[type="date"] { color-scheme: dark; }
+/* Native <select> inside the dark searchbar */
+select.mmt-field-value {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  padding-right: 1.1rem;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='%23ffffff'><path d='M6 8L0 0h12z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  background-size: 8px 6px;
+}
+select.mmt-field-value option {
+  color: #0a1f44;
+  background: #fff;
+}
 .mmt-search-btn {
   background: linear-gradient(90deg, #2196f3 0%, #00b9ff 100%);
   color: #fff;
