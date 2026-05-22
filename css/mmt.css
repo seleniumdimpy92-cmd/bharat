@@ -91,7 +91,7 @@ select.mmt-field-value option {
 /* ── Top variant of the search bar (sits at top of main-content) ── */
 .mmt-searchbar-top {
   position: sticky;
-  top: var(--tb-h, 56px);
+  top: calc(var(--tb-h, 56px) + var(--nav-h, 74px));
   z-index: 30;
   padding: 0.85rem 1.25rem;
 }
