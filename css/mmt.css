@@ -102,26 +102,67 @@ select.mmt-field-value option {
 }
 
 /* ── HERO-CENTERED variant: large search bar in the middle of the hero,
-      same width as the package listing container below it (1280px max) ── */
+      same width as the package listing container below it (1280px max).
+      All 5 fields + SEARCH button stay on a single row on desktop. ── */
 .mmt-searchbar.mmt-searchbar-hero {
   width: min(calc(100% - 3rem), 1280px);
   margin: 1.25rem auto;
-  padding: 1.6rem 1.75rem;
+  padding: 1rem 1.1rem;
   border-radius: 22px;
   position: relative;
   z-index: 5;
+  flex-wrap: nowrap;            /* keep fields + button in one row */
+  align-items: stretch;         /* button matches field height */
+  gap: 0.6rem;
 }
-.mmt-searchbar.mmt-searchbar-hero .mmt-search-fields { gap: 1rem; }
+.mmt-searchbar.mmt-searchbar-hero .mmt-search-fields {
+  gap: 0.5rem;
+  flex-wrap: nowrap;            /* fields stay on one row too */
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: stretch;
+}
 .mmt-searchbar.mmt-searchbar-hero .mmt-field {
-  padding: 0.75rem 1.1rem;
-  min-width: 180px;
-  flex: 1 1 180px;
+  padding: 0.55rem 0.75rem;
+  min-width: 0;                 /* allow shrinking instead of overflow */
+  flex: 1 1 0;                  /* equal share of available space */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
-.mmt-searchbar.mmt-searchbar-hero .mmt-field-label { font-size: 0.72rem; }
-.mmt-searchbar.mmt-searchbar-hero .mmt-field-value { font-size: 1.05rem; }
+.mmt-searchbar.mmt-searchbar-hero .mmt-field-label { font-size: 0.65rem; }
+.mmt-searchbar.mmt-searchbar-hero .mmt-field-value {
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .mmt-searchbar.mmt-searchbar-hero .mmt-search-btn {
-  padding: 1.1rem 3rem;
-  font-size: 1rem;
+  padding: 0 1.6rem;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: stretch;          /* match height of fields */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Tablet: drop to 2 rows of 3+SEARCH below */
+@media (max-width: 980px) {
+  .mmt-searchbar.mmt-searchbar-hero { flex-wrap: wrap; }
+  .mmt-searchbar.mmt-searchbar-hero .mmt-search-fields {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .mmt-searchbar.mmt-searchbar-hero .mmt-field {
+    flex: 1 1 calc(50% - 0.3rem);
+    min-width: 0;
+  }
+  .mmt-searchbar.mmt-searchbar-hero .mmt-search-btn {
+    width: 100%;
+    margin-top: 0.4rem;
+  }
 }
 @media (max-width: 600px) {
   .mmt-searchbar.mmt-searchbar-hero {
@@ -129,6 +170,9 @@ select.mmt-field-value option {
     padding: 1rem 1rem;
     border-radius: 14px;
     margin: 0.75rem auto;
+  }
+  .mmt-searchbar.mmt-searchbar-hero .mmt-field {
+    flex: 1 1 100%;
   }
 }
 
