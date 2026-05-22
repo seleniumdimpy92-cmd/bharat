@@ -358,7 +358,18 @@
         rzp.on('payment.failed', function (r) {
             if (payBtn) { payBtn.disabled = false; payBtn.innerHTML = '<i class="fas fa-lock"></i> Pay ' + R + fmt(total) + ' Securely'; }
             window.Toast.error('Payment failed: ' + ((r && r.error && r.error.description) || 'Unknown error'), { duration: 8000 });
+            try { window.Analytics && window.Analytics.track('payment_failed', { value: total, currency: 'INR' }); } catch (e) {}
         });
+
+        // GA4 — checkout funnel step
+        try {
+            window.Analytics && window.Analytics.beginCheckout({
+                id:    state.cart.pkgId,
+                name:  state.cart.name,
+                price: total,
+                category: 'package'
+            }, total);
+        } catch (e) {}
 
         rzp.open();
     }
@@ -392,6 +403,16 @@
             var u = JSON.parse(localStorage.getItem('currentUser') || 'null');
             list.push(Object.assign({}, booking, { id: Date.now(), userId: u ? (u.uid || u.id) : 'guest', createdAt: new Date().toISOString() }));
             localStorage.setItem('bookings', JSON.stringify(list));
+        } catch (e) {}
+
+        // GA4 — purchase complete (revenue event)
+        try {
+            window.Analytics && window.Analytics.purchase(
+                ref,
+                { id: state.cart.pkgId, name: state.cart.name, price: state.cart.price, category: 'package' },
+                total,
+                'INR'
+            );
         } catch (e) {}
 
         // Clear cart
