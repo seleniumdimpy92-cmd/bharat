@@ -309,7 +309,7 @@ window.confirmBooking = async function() {
         prefill: {
             name: currentUser ? JSON.parse(currentUser).username : 'Guest User',
             email: currentUser ? JSON.parse(currentUser).email : 'guest@example.com',
-            contact: '9876543210'
+            contact: '8880195191'
         },
         notes: {
             package: window.currentPackage,
