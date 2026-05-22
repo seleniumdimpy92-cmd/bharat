@@ -35,6 +35,6 @@ window.ADMIN_EMAIL = window.ADMIN_EMAILS[0];
 // upload, not delete or read other assets. Real protection: in your
 // preset, restrict allowed formats and set a folder.
 window.CLOUDINARY_CONFIG = {
-    cloudName:    "REPLACE_WITH_YOUR_CLOUD_NAME",
+    cloudName:    "dwy7k3uhv",
     uploadPreset: "andaman_gallery"
 };
