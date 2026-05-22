@@ -56,22 +56,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (typeof refreshCustomers === 'function') refreshCustomers();
             }
 
-            // Close sidebar on mobile
-            document.getElementById('sidebar').classList.remove('open');
+            // Close mobile nav drawer (if open) when a section is selected
+            document.body.classList.remove('nav-open');
         });
     });
 
-    // Mobile sidebar toggle
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarClose = document.getElementById('sidebarClose');
-
-    if (menuToggle) {
-        menuToggle.addEventListener('click', () => sidebar.classList.add('open'));
+    // Mobile hamburger: toggle topnav drawer (matches main site behaviour)
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', () => {
+            document.body.classList.toggle('nav-open');
+        });
     }
-    if (sidebarClose) {
-        sidebarClose.addEventListener('click', () => sidebar.classList.remove('open'));
-    }
+    document.addEventListener('click', (e) => {
+        if (!document.body.classList.contains('nav-open')) return;
+        const topnav = document.getElementById('topnav');
+        if (topnav && topnav.contains(e.target)) {
+            if (e.target.closest('.topnav-item')) document.body.classList.remove('nav-open');
+            return;
+        }
+        if (hamburgerBtn && !hamburgerBtn.contains(e.target)) {
+            document.body.classList.remove('nav-open');
+        }
+    });
 
     // ── Helpers ─────────────────────────────────────────────────
     function formatCurrency(amount) {
