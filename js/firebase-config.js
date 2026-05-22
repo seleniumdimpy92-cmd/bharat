@@ -23,3 +23,18 @@ window.ADMIN_EMAILS = [
 
 // Back-compat: keep a single ADMIN_EMAIL pointing at the first admin.
 window.ADMIN_EMAIL = window.ADMIN_EMAILS[0];
+
+// ── Cloudinary configuration (for the photo gallery uploads) ──
+// Sign up free at https://cloudinary.com (no credit card needed) and
+// create an Unsigned upload preset. Then fill in these two values:
+//   1. cloudName    — top-left of your Cloudinary dashboard
+//   2. uploadPreset — Settings → Upload → Add upload preset
+//                     with Signing Mode = "Unsigned"
+//
+// This config is safe to ship to browsers: an unsigned preset can only
+// upload, not delete or read other assets. Real protection: in your
+// preset, restrict allowed formats and set a folder.
+window.CLOUDINARY_CONFIG = {
+    cloudName:    "REPLACE_WITH_YOUR_CLOUD_NAME",
+    uploadPreset: "andaman_gallery"
+};

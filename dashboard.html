@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="css/gallery.css?v=1">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="js/firebase-config.js?v=12"></script>
+    <script src="js/firebase-config.js?v=14"></script>
     <script>
         // Access guard — only admin users may view this page.
         // Admin emails come from window.ADMIN_EMAILS (set in firebase-config.js).
@@ -270,8 +270,10 @@
             <div class="section-header">
                 <h2><i class="fas fa-images"></i> Photo Gallery</h2>
                 <p style="color:#666;font-size:0.92rem;margin-top:.4rem;">
-                    Upload images to Firebase Storage. They'll appear instantly on the public
+                    Images upload to <strong>Cloudinary</strong> (free 25 GB, auto-CDN, auto WebP) and metadata
+                    is stored in Firestore. They'll appear instantly on the public
                     <a href="/gallery.html" target="_blank" rel="noopener">Gallery page</a>.
+                    First-time setup: see <code>gallery_setup.md</code> in the repo.
                 </p>
             </div>
 
@@ -282,7 +284,7 @@
                 <label class="admin-gallery-dropzone" id="galDropzone">
                     <i class="fas fa-image"></i>
                     <strong>Click to choose</strong> or drag &amp; drop one or more images here
-                    <div style="font-size:.78rem;margin-top:.25rem;color:#9aa7b1;">JPG / PNG / WEBP — up to ~10 MB each</div>
+                    <div style="font-size:.78rem;margin-top:.25rem;color:#9aa7b1;">JPG / PNG / WEBP / GIF — up to ~10 MB each</div>
                     <input type="file" id="galFileInput" accept="image/*" multiple>
                 </label>
 
@@ -494,11 +496,11 @@
         </div>
     </div>
 
-    <script src="js/firebase-config.js?v=12"></script>
+    <script src="js/firebase-config.js?v=14"></script>
     <script src="js/dataStore.js?v=14"></script>
     <script src="js/toast.js?v=1"></script>
     <script src="js/dashboard.js?v=17"></script>
-    <script src="js/gallery.js?v=1"></script>
+    <script src="js/gallery.js?v=2"></script>
     <script src="js/security.js?v=2"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
