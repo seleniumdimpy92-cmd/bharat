@@ -101,25 +101,34 @@ select.mmt-field-value option {
   filter: brightness(1.05);
 }
 
-/* ── HERO-OVERLAID variant: floats over the carousel ── */
+/* ── HERO-CENTERED variant: large search bar in the middle of the hero,
+      same width as the package listing container below it (1280px max) ── */
 .mmt-searchbar.mmt-searchbar-hero {
-  position: absolute;
-  left: 50%;
-  bottom: -45px;
-  transform: translateX(-50%);
-  z-index: 30;
-  width: min(calc(100% - 3rem), 1100px);
-  margin: 0;
+  width: min(calc(100% - 3rem), 1280px);
+  margin: 1.25rem auto;
+  padding: 1.6rem 1.75rem;
+  border-radius: 22px;
+  position: relative;
+  z-index: 5;
+}
+.mmt-searchbar.mmt-searchbar-hero .mmt-search-fields { gap: 1rem; }
+.mmt-searchbar.mmt-searchbar-hero .mmt-field {
+  padding: 0.75rem 1.1rem;
+  min-width: 180px;
+  flex: 1 1 180px;
+}
+.mmt-searchbar.mmt-searchbar-hero .mmt-field-label { font-size: 0.72rem; }
+.mmt-searchbar.mmt-searchbar-hero .mmt-field-value { font-size: 1.05rem; }
+.mmt-searchbar.mmt-searchbar-hero .mmt-search-btn {
+  padding: 1.1rem 3rem;
+  font-size: 1rem;
 }
 @media (max-width: 600px) {
   .mmt-searchbar.mmt-searchbar-hero {
-    bottom: auto;
-    top: auto;
-    position: relative;
-    transform: none;
-    left: auto;
     width: calc(100% - 1.5rem);
-    margin: 0.75rem auto -0.5rem;
+    padding: 1rem 1rem;
+    border-radius: 14px;
+    margin: 0.75rem auto;
   }
 }
 
