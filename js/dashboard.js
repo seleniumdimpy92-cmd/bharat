@@ -681,6 +681,63 @@ document.addEventListener('DOMContentLoaded', function () {
     const publishBtnEl = document.getElementById('publishBtn');
     if (publishBtnEl) publishBtnEl.addEventListener('click', () => window.saveAndPublishPackages());
 
+    // ── Seed Sample Packages (10 curated Andaman trips) ────────
+    // Adds these to whatever's already in Firestore; skips IDs that already exist.
+    const SAMPLE_SEED_PACKAGES = [
+        { id:'weekend',           name:'Weekend Andaman Quickie',      desc:"2N/3D | Port Blair only | Cellular Jail + Corbyn's Cove",                        price:9999,  rating:4.1, image:'images/neil1.jpg',  inclusions:['Hotel','Sightseeing','Breakfast'],                          visible:true },
+        { id:'scuba',             name:'Scuba Diving Special',         desc:'5N/6D | Havelock + Neil | 4 Dives + PADI Certification',                          price:26999, rating:4.8, image:'images/neil2.jpg',  inclusions:['PADI Course','4 Boat Dives','Hotels','Ferries'],            visible:true },
+        { id:'family',            name:'Family Andaman Joy',           desc:'6N/7D | Port Blair + Havelock + Neil | Family Rooms + Activities',               price:23999, rating:4.7, image:'images/beach2.jpg', inclusions:['Family Rooms','All Meals','Glass-bottom Boat','Sightseeing'],visible:true },
+        { id:'adventure',         name:'Adventure Andaman Pro',        desc:'7N/8D | All Islands | Scuba + Sea-walk + Trekking + Kayaking',                    price:32999, rating:4.7, image:'images/neil4.jpg',  inclusions:['Scuba Dive','Sea Walk','Sea Kayaking','Premium Hotels'],    visible:true },
+        { id:'ross-northbay',     name:'Ross & North Bay Day Tour',    desc:'1 Day | Port Blair Day Trip | Ross Island + North Bay Snorkeling',               price:2499,  rating:4.4, image:'images/ross2.jpg',  inclusions:['Boat Transfers','Snorkeling','Glass-bottom Boat'],          visible:true },
+        { id:'baratang',          name:'Baratang Limestone Adventure', desc:'1 Day | Limestone Caves + Mud Volcano + Mangrove Creek',                          price:3499,  rating:4.3, image:'images/beach1.jpg', inclusions:['AC Transport','Boat Ride','Forest Permit','Lunch'],         visible:true },
+        { id:'diglipur',          name:'Diglipur Explorer',            desc:'8N/9D | Port Blair + Havelock + Diglipur (North Andaman) | Saddle Peak',          price:36999, rating:4.6, image:'images/neil6.jpg',  inclusions:['Hotels','Ferries','Saddle Peak Trek','Turtle Beach Visit'], visible:true },
+        { id:'premium-honeymoon', name:'Premium Honeymoon Voyage',     desc:'7N/8D | Havelock 5★ Beach Villa + Neil + Private Yacht Sunset',                    price:44999, rating:4.9, image:'images/beach3.jpg', inclusions:['5★ Beach Villa','Private Yacht','Couple Spa','Photoshoot','All Meals'], visible:true },
+        { id:'solo',              name:'Solo Traveller Backpack',      desc:'5N/6D | Hostels + Group Tours + Flexible Itinerary',                              price:13999, rating:4.4, image:'images/neil3.jpg',  inclusions:['Hostel Beds','Ferries','Group Sightseeing'],                visible:true },
+        { id:'senior',            name:'Senior-Friendly Andaman',      desc:'5N/6D | Slower Pace | Ground-floor Rooms + Private Cars + Doctor on Call',        price:27999, rating:4.7, image:'images/ross3.jpg',  inclusions:['Ground-floor Rooms','Private AC Cars','Soft Diet','Medical Backup'], visible:true }
+    ];
+
+    const seedPackagesBtn = document.getElementById('seedPackagesBtn');
+    if (seedPackagesBtn) {
+        seedPackagesBtn.addEventListener('click', async () => {
+            const status = document.getElementById('publishStatus');
+            const existingIds = new Set((packagesData || []).map(p => p.id));
+            const toAdd = SAMPLE_SEED_PACKAGES.filter(p => !existingIds.has(p.id));
+
+            if (!toAdd.length) {
+                if (status) {
+                    status.style.display = 'block';
+                    status.className = 'publish-status publish-info';
+                    status.innerHTML = 'ℹ️ All 10 sample packages are already in your catalogue. Nothing to add.';
+                }
+                return;
+            }
+
+            const ok = confirm(
+                `This will add ${toAdd.length} sample Andaman package${toAdd.length === 1 ? '' : 's'} ` +
+                `to your Firestore catalogue and publish immediately.\n\n` +
+                toAdd.map(p => `• ${p.name} — ₹${p.price.toLocaleString()}`).join('\n') +
+                '\n\nProceed?'
+            );
+            if (!ok) return;
+
+            // Append to in-memory array, re-render, and reuse the existing publish flow
+            packagesData = (packagesData || []).concat(toAdd);
+            renderPackageEditorCards();
+
+            if (status) {
+                status.style.display = 'block';
+                status.className = 'publish-status publish-info';
+                status.innerHTML = `⏳ Adding ${toAdd.length} package${toAdd.length === 1 ? '' : 's'} and publishing to Firestore…`;
+            }
+
+            try {
+                await window.saveAndPublishPackages();
+            } catch (err) {
+                console.error('Seed publish failed:', err);
+            }
+        });
+    }
+
     // ── Save & Publish via PackagesStore (jsonbin.io) ───────────
     // Pushes the current packagesData to the global jsonbin store. The
     // master key is asked once and saved in localStorage on this device.
