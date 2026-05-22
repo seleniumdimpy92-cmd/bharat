@@ -88,27 +88,18 @@ select.mmt-field-value option {
   box-shadow: 0 6px 20px rgba(0,140,255,0.5);
 }
 
-/* ── Hero variant of the search bar (floats over the carousel) ── */
-.hero { padding-bottom: 5rem; }
-.mmt-searchbar-hero {
-  position: relative;
-  z-index: 6;
-  max-width: 1200px;
-  width: calc(100% - 3rem);
-  margin: 1.5rem auto -3.5rem;
-  border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(10,31,68,0.35);
-  background: linear-gradient(180deg, rgba(10,31,68,0.92) 0%, rgba(15,42,86,0.92) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.12);
+/* ── Top variant of the search bar (sits at top of main-content) ── */
+.mmt-searchbar-top {
+  position: sticky;
+  top: var(--tb-h, 56px);
+  z-index: 30;
+  padding: 0.85rem 1.25rem;
 }
+.mmt-searchbar-top .mmt-search-fields { gap: 0.5rem; }
+.mmt-searchbar-top .mmt-field { min-width: 150px; flex: 1 1 150px; padding: 0.5rem 0.75rem; }
+.mmt-searchbar-top .mmt-search-btn { padding: 0.7rem 2rem; }
 @media (max-width: 600px) {
-  .mmt-searchbar-hero {
-    width: calc(100% - 1.5rem);
-    margin: 1rem auto -2rem;
-    border-radius: 10px;
-  }
+  .mmt-searchbar-top { padding: 0.65rem 0.9rem; }
 }
 
 /* Hero band */
