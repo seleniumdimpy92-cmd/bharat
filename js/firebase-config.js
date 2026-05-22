@@ -51,6 +51,11 @@ window.CLOUDINARY_CONFIG = {
 // and the dashboard tab shows a setup-needed banner. Both values
 // are safe to ship to browsers — that's how GA4 works.
 window.GA4_CONFIG = {
-    measurementId: "REPLACE_WITH_YOUR_GA4_MEASUREMENT_ID",  // e.g. G-XXXXXXXXXX
-    streamId:      ""                                       // e.g. 1234567890
+    // Same Measurement ID as window.FIREBASE_CONFIG.measurementId — your
+    // Firebase project's auto-linked GA4 property. Open
+    // https://analytics.google.com to manage the property.
+    measurementId: "G-B2EH7QRMGE",
+    // Optional: paste your Web Stream ID from GA4 → Admin → Data streams
+    // to enable the realtime iframe widget in the admin dashboard.
+    streamId:      ""
 };
