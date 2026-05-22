@@ -1138,6 +1138,67 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // ── Developer Console Lock toggle (Firestore-backed) ─────────
+    const consoleLockToggle = document.getElementById('consoleLockToggle');
+    const saveConsoleLockBtn = document.getElementById('saveConsoleLockBtn');
+    const consoleLockInfo = document.getElementById('consoleLockInfo');
+
+    async function loadConsoleLockSetting() {
+        if (!window.SettingsStore) return;
+        try {
+            const s = await window.SettingsStore.load();
+            const on = s.consoleLockEnabled !== false; // default true
+            if (consoleLockToggle) consoleLockToggle.checked = on;
+            if (consoleLockInfo) {
+                consoleLockInfo.textContent = on
+                    ? '🔒 Console lock is ON for non-admin visitors. Admins are always exempt.'
+                    : '🔓 Console lock is OFF — anyone can use DevTools right now.';
+                consoleLockInfo.style.color = on ? '#16a085' : '#c0392b';
+            }
+        } catch (e) {
+            console.warn('Could not load console-lock setting:', e);
+        }
+    }
+    loadConsoleLockSetting();
+
+    if (saveConsoleLockBtn) {
+        saveConsoleLockBtn.addEventListener('click', async () => {
+            if (!window.SettingsStore) {
+                if (window.Toast) window.Toast.error('Settings store not loaded. Refresh the page.');
+                else alert('Settings store not loaded. Refresh the page.');
+                return;
+            }
+            saveConsoleLockBtn.disabled = true;
+            saveConsoleLockBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+            try {
+                const on = !!(consoleLockToggle && consoleLockToggle.checked);
+                await window.SettingsStore.save({ consoleLockEnabled: on });
+                if (consoleLockInfo) {
+                    consoleLockInfo.textContent = on
+                        ? '🔒 Console lock is ON for non-admin visitors. Admins are always exempt.'
+                        : '🔓 Console lock is OFF — anyone can use DevTools right now.';
+                    consoleLockInfo.style.color = on ? '#16a085' : '#c0392b';
+                }
+                if (window.Toast) {
+                    window.Toast.success(on
+                        ? 'Console lock enabled for visitors.'
+                        : 'Console lock disabled for everyone.');
+                }
+                // Apply immediately on this page (admin → no-op since admins are exempt,
+                // but the cache is updated for any other open tab)
+                if (typeof window.__securityCheck === 'function') window.__securityCheck();
+            } catch (err) {
+                if (window.Toast) window.Toast.error(err.message || 'Failed to save.');
+                else alert('❌ ' + (err.message || 'Failed to save.'));
+            } finally {
+                setTimeout(() => {
+                    saveConsoleLockBtn.disabled = false;
+                    saveConsoleLockBtn.innerHTML = '<i class="fas fa-save"></i> Save Console Lock';
+                }, 1500);
+            }
+        });
+    }
+
     // Auto-refresh when localStorage changes (e.g. from another tab)
     window.addEventListener('storage', refreshAll);
 });

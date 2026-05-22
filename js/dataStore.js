@@ -205,7 +205,13 @@
     //   Public read, admin-only write (enforced in firestore.rules).
     // ───────────────────────────────────────────────────────────
     const SETTINGS_CACHE_KEY = 'siteSettings';
-    const SETTINGS_DEFAULT   = { paymentsEnabled: true, paymentsDisabledMessage: '' };
+    const SETTINGS_DEFAULT   = {
+        paymentsEnabled: true,
+        paymentsDisabledMessage: '',
+        // When true, security.js blocks DevTools shortcuts/right-click for normal
+        // visitors. Admins are always allowed to use DevTools regardless.
+        consoleLockEnabled: true
+    };
 
     function getCachedSettings() {
         try {
