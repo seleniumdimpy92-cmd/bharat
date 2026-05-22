@@ -61,8 +61,8 @@
         "sameAs": []
     }
     </script>
-    <link rel="stylesheet" href="css/style.css?v=25">
-    <link rel="stylesheet" href="css/mmt.css?v=25">
+    <link rel="stylesheet" href="css/style.css?v=26">
+    <link rel="stylesheet" href="css/mmt.css?v=26">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Razorpay Payment Gateway -->
@@ -160,53 +160,60 @@
         </div>
 
         <div class="hero-content">
-            <h1>Best Andaman Holiday Packages <br><small>From ₹15,999 PP</small></h1>
-            <p>Discover pristine beaches, crystal waters & adventure in Andaman Islands. Customizable packages with flights, hotels, ferries & activities.</p>
-            <div class="trust-badges">
-                <span><i class="fas fa-award"></i> 50K+ Happy Travelers</span>
-                <span><i class="fas fa-shield-alt"></i> Secure Payments</span>
-                <span><i class="fas fa-clock"></i> Instant Confirmation</span>
+            <!-- Heading at the top of the hero -->
+            <div class="hero-heading">
+                <h1>Best Andaman Holiday Packages <br><small>From ₹15,999 PP</small></h1>
             </div>
-        </div>
 
-        <!-- ── Hero-overlapping Search Bar ─────────────────────── -->
-        <div class="mmt-searchbar mmt-searchbar-hero">
-            <div class="mmt-search-fields">
-                <div class="mmt-field">
-                    <span class="mmt-field-label">Travelling From</span>
-                    <select class="mmt-field-value" id="mmtFrom" data-cities data-default="Bangalore (Bengaluru)"></select>
+            <!-- Search bar in the MIDDLE of the hero image -->
+            <div class="mmt-searchbar mmt-searchbar-hero">
+                <div class="mmt-search-fields">
+                    <div class="mmt-field">
+                        <span class="mmt-field-label">Travelling From</span>
+                        <select class="mmt-field-value" id="mmtFrom" data-cities data-default="Bangalore (Bengaluru)"></select>
+                    </div>
+                    <div class="mmt-field">
+                        <span class="mmt-field-label">Going To</span>
+                        <input class="mmt-field-value" id="mmtTo" type="text" value="Andaman" readonly>
+                    </div>
+                    <div class="mmt-field">
+                        <span class="mmt-field-label">Travel Date</span>
+                        <input class="mmt-field-value" id="mmtDate" type="date">
+                    </div>
+                    <div class="mmt-field">
+                        <span class="mmt-field-label">Adults</span>
+                        <select class="mmt-field-value" id="mmtAdults">
+                            <option value="1">1 Adult</option>
+                            <option value="2" selected>2 Adults</option>
+                            <option value="3">3 Adults</option>
+                            <option value="4">4 Adults</option>
+                            <option value="5">5 Adults</option>
+                            <option value="6">6 Adults</option>
+                        </select>
+                    </div>
+                    <div class="mmt-field">
+                        <span class="mmt-field-label">Children (Under 5)</span>
+                        <select class="mmt-field-value" id="mmtChildren">
+                            <option value="0" selected>0 Children</option>
+                            <option value="1">1 Child</option>
+                            <option value="2">2 Children</option>
+                            <option value="3">3 Children</option>
+                            <option value="4">4 Children</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="mmt-field">
-                    <span class="mmt-field-label">Going To</span>
-                    <input class="mmt-field-value" id="mmtTo" type="text" value="Andaman" readonly>
-                </div>
-                <div class="mmt-field">
-                    <span class="mmt-field-label">Travel Date</span>
-                    <input class="mmt-field-value" id="mmtDate" type="date">
-                </div>
-                <div class="mmt-field">
-                    <span class="mmt-field-label">Adults</span>
-                    <select class="mmt-field-value" id="mmtAdults">
-                        <option value="1">1 Adult</option>
-                        <option value="2" selected>2 Adults</option>
-                        <option value="3">3 Adults</option>
-                        <option value="4">4 Adults</option>
-                        <option value="5">5 Adults</option>
-                        <option value="6">6 Adults</option>
-                    </select>
-                </div>
-                <div class="mmt-field">
-                    <span class="mmt-field-label">Children (Under 5)</span>
-                    <select class="mmt-field-value" id="mmtChildren">
-                        <option value="0" selected>0 Children</option>
-                        <option value="1">1 Child</option>
-                        <option value="2">2 Children</option>
-                        <option value="3">3 Children</option>
-                        <option value="4">4 Children</option>
-                    </select>
+                <button class="mmt-search-btn" id="mmtSearchBtn">SEARCH</button>
+            </div>
+
+            <!-- Description and trust badges BELOW the search bar -->
+            <div class="hero-subtext">
+                <p>Discover pristine beaches, crystal waters &amp; adventure in Andaman Islands. Customizable packages with flights, hotels, ferries &amp; activities.</p>
+                <div class="trust-badges">
+                    <span><i class="fas fa-award"></i> 50K+ Happy Travelers</span>
+                    <span><i class="fas fa-shield-alt"></i> Secure Payments</span>
+                    <span><i class="fas fa-clock"></i> Instant Confirmation</span>
                 </div>
             </div>
-            <button class="mmt-search-btn" id="mmtSearchBtn">SEARCH</button>
         </div>
 
     </section>
