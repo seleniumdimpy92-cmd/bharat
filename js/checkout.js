@@ -4,6 +4,7 @@
 
     var RAZORPAY_KEY = 'rzp_live_SLfG8nnKN3tXPC';
     var GST_RATE = 0.05;
+    var ADVANCE_RATE = 0.05;   // 5% advance to confirm booking; balance due after travel
     var COUPONS = {
         'WELCOME500':  { type: 'flat',    value: 500,  label: 'Rs.500 off',  min: 5000  },
         'ANDAMAN10':   { type: 'percent', value: 10,   label: '10% off',     min: 10000, cap: 3000 },
@@ -126,6 +127,8 @@
         var s = calcSubtotal(), d = calcDiscount(s), t = s - d;
         return t + calcGst(t);
     }
+    function calcAdvance() { return Math.max(1, Math.round(calcTotal() * ADVANCE_RATE)); }
+    function calcBalance() { return calcTotal() - calcAdvance(); }
 
     // ── HTML builder ──
     function esc(s) {
@@ -205,6 +208,8 @@
 
     function summaryCard() {
         var s = calcSubtotal(), d = calcDiscount(s), taxable = s - d, gst = calcGst(taxable), total = taxable + gst;
+        var advance = Math.max(1, Math.round(total * ADVANCE_RATE));
+        var balance = total - advance;
         var c = state.cart;
         var people = (Number(c.adults) || 0) + (Number(c.children) || 0);
         var couponHtml = state.coupon
@@ -218,9 +223,28 @@
             '<div class="row"><span>Base price (' + people + ' traveler' + (people !== 1 ? 's' : '') + ')</span><span>' + R + fmt(s) + '</span></div>' +
             (d > 0 ? '<div class="row" style="color:#0a5a68;"><span>Coupon discount</span><span>- ' + R + fmt(d) + '</span></div>' : '') +
             '<div class="row"><span>GST (5%)</span><span>' + R + fmt(gst) + '</span></div>' +
-            '<div class="row total"><span>Total Payable</span><span class="val">' + R + fmt(total) + '</span></div>' +
-            '<button class="btn-pay" id="payBtn"><i class="fas fa-lock"></i> Pay ' + R + fmt(total) + ' Securely</button>' +
+            '<div class="row total"><span>Total Trip Cost</span><span class="val">' + R + fmt(total) + '</span></div>' +
+
+            // Advance / balance split — the headline of this booking model
+            '<div class="advance-split">' +
+                '<div class="row"><span><i class="fas fa-credit-card"></i> Pay now <small>(5% advance)</small></span><span class="adv-amt">' + R + fmt(advance) + '</span></div>' +
+                '<div class="row" style="color:#5a6877;font-size:.9rem;"><span><i class="fas fa-handshake"></i> Balance after travel</span><span>' + R + fmt(balance) + '</span></div>' +
+            '</div>' +
+
+            '<button class="btn-pay" id="payBtn"><i class="fas fa-lock"></i> Pay ' + R + fmt(advance) + ' Advance &amp; Confirm</button>' +
             '<a href="index.html#packages" style="text-decoration:none;"><button class="btn-secondary" type="button"><i class="fas fa-arrow-left"></i> Continue Browsing</button></a>' +
+
+            // Cancellation policy summary
+            '<div class="cxl-policy">' +
+                '<strong><i class="fas fa-info-circle"></i> Cancellation Policy</strong>' +
+                '<ul>' +
+                    '<li><strong>60+ days</strong> before travel: 95% refund <em>(5% fee on advance)</em></li>' +
+                    '<li><strong>30–60 days</strong> before travel: 90% refund <em>(10% fee on advance)</em></li>' +
+                    '<li><strong>Within 30 days</strong> of travel: 50% refund <em>(50% fee on advance)</em></li>' +
+                '</ul>' +
+                '<small>Balance of ' + R + fmt(balance) + ' is paid directly at the end of your trip — UPI / bank transfer / cash.</small>' +
+            '</div>' +
+
             '<div class="payment-trust"><i class="fas fa-shield-alt"></i> Secured by Razorpay &middot; PCI-DSS compliant<br><i class="fas fa-headset"></i> 24/7 support: <a href="tel:+918880195191" style="color:#0a5a68;font-weight:600;">+91 88801 95191</a></div>' +
             '</div>';
     }
@@ -316,7 +340,9 @@
         if (errs.length) { window.Toast.warning(errs.join('\n')); return; }
         if (typeof Razorpay === 'undefined') { window.Toast.error('Payment gateway not loaded. Please refresh.'); return; }
 
-        var total = calcTotal();
+        var total   = calcTotal();
+        var advance = calcAdvance();
+        var balance = total - advance;
         var ref = 'BTT' + Date.now().toString().slice(-8) + Math.random().toString(36).slice(2, 4).toUpperCase();
         var name = document.getElementById('travelerName').value.trim();
         var email = document.getElementById('travelerEmail').value.trim();
@@ -325,14 +351,15 @@
         var notes = (document.getElementById('travelerNotes') || {}).value || '';
 
         var payBtn = document.getElementById('payBtn');
+        var payBtnLabel = '<i class="fas fa-lock"></i> Pay ' + R + fmt(advance) + ' Advance &amp; Confirm';
         if (payBtn) { payBtn.disabled = true; payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening payment...'; }
 
         var rzp = new Razorpay({
             key: RAZORPAY_KEY,
-            amount: total * 100,
+            amount: advance * 100,            // ← charge only the 5% advance
             currency: 'INR',
             name: 'Bharat Tours & Travels',
-            description: state.cart.name + ' (Ref ' + ref + ')',
+            description: '5% advance for ' + state.cart.name + ' (Ref ' + ref + ')',
             image: 'https://andamanvoyages.in/images/logo.png',
             prefill: { name: name, email: email, contact: phone },
             notes: {
@@ -343,25 +370,29 @@
                 travel_date: date,
                 addons: (state.cart.addons || []).map(function (a) { return a.name; }).join(', '),
                 coupon: state.coupon ? state.coupon.code : '',
-                special_requests: notes
+                special_requests: notes,
+                total_trip_cost: String(total),
+                advance_paid:    String(advance),
+                balance_due:     String(balance),
+                payment_type:    'advance_5pct'
             },
             theme: { color: '#0d7a8a' },
-            handler: function (response) { onPaymentSuccess(response, ref, total, name, email, phone, date, notes); },
+            handler: function (response) { onPaymentSuccess(response, ref, total, advance, balance, name, email, phone, date, notes); },
             modal: {
                 ondismiss: function () {
-                    if (payBtn) { payBtn.disabled = false; payBtn.innerHTML = '<i class="fas fa-lock"></i> Pay ' + R + fmt(total) + ' Securely'; }
+                    if (payBtn) { payBtn.disabled = false; payBtn.innerHTML = payBtnLabel; }
                     window.Toast.info('Payment cancelled.');
                 }
             }
         });
 
         rzp.on('payment.failed', function (r) {
-            if (payBtn) { payBtn.disabled = false; payBtn.innerHTML = '<i class="fas fa-lock"></i> Pay ' + R + fmt(total) + ' Securely'; }
+            if (payBtn) { payBtn.disabled = false; payBtn.innerHTML = payBtnLabel; }
             window.Toast.error('Payment failed: ' + ((r && r.error && r.error.description) || 'Unknown error'), { duration: 8000 });
-            try { window.Analytics && window.Analytics.track('payment_failed', { value: total, currency: 'INR' }); } catch (e) {}
+            try { window.Analytics && window.Analytics.track('payment_failed', { value: advance, currency: 'INR' }); } catch (e) {}
         });
 
-        // GA4 — checkout funnel step
+        // GA4 — checkout funnel step (track full trip value as the conversion goal)
         try {
             window.Analytics && window.Analytics.beginCheckout({
                 id:    state.cart.pkgId,
@@ -374,12 +405,16 @@
         rzp.open();
     }
 
-    function onPaymentSuccess(response, ref, total, name, email, phone, date, notes) {
+    function onPaymentSuccess(response, ref, total, advance, balance, name, email, phone, date, notes) {
         var booking = {
             booking_ref: ref,
             package_name: state.cart.pkgId,
             package_label: state.cart.name,
-            price: total,
+            price: total,                     // total trip cost (kept for back-compat)
+            total_trip_cost: total,
+            advance_paid: advance,            // amount actually charged via Razorpay
+            balance_due:  balance,            // amount owed at end of trip
+            payment_status: 'partial_advance',
             adults: state.cart.adults,
             children: state.cart.children,
             travel_date: date,
@@ -405,7 +440,7 @@
             localStorage.setItem('bookings', JSON.stringify(list));
         } catch (e) {}
 
-        // GA4 — purchase complete (revenue event)
+        // GA4 — purchase complete. Track full trip value as the conversion (not just advance).
         try {
             window.Analytics && window.Analytics.purchase(
                 ref,
@@ -420,11 +455,11 @@
         state.cart = null; state.coupon = null;
 
         saved.then(function () {
-            renderSuccess(ref, response.razorpay_payment_id, total, email);
+            renderSuccess(ref, response.razorpay_payment_id, total, advance, balance, email);
         });
     }
 
-    function renderSuccess(ref, paymentId, total, email) {
+    function renderSuccess(ref, paymentId, total, advance, balance, email) {
         var wrap = document.getElementById('checkoutWrap');
         if (!wrap) return;
         // Update step bar to "Confirmation"
@@ -436,12 +471,20 @@
             '<div class="co-card" style="grid-column:1/-1;text-align:center;padding:3rem 1.5rem;">' +
                 '<div style="width:80px;height:80px;border-radius:50%;background:#e8f8f5;color:#0a5a68;display:inline-flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:1rem;"><i class="fas fa-check-circle"></i></div>' +
                 '<h2 style="color:#0a5a68;margin:0 0 .5rem;font-size:1.6rem;">Booking Confirmed!</h2>' +
-                '<p style="color:#5a6877;margin:0 0 1.5rem;font-size:1rem;">Your Andaman adventure is booked. We\'ve emailed your confirmation to <strong>' + esc(email) + '</strong>.</p>' +
-                '<div style="display:inline-block;background:#f8fafb;padding:1rem 1.5rem;border-radius:8px;text-align:left;font-size:.92rem;color:#2c3e50;border:1px dashed #cfd9df;">' +
-                    '<div style="margin-bottom:.5rem;"><span style="color:#7f8c8d;">Booking Ref:</span> <strong>' + esc(ref) + '</strong></div>' +
-                    '<div style="margin-bottom:.5rem;"><span style="color:#7f8c8d;">Payment ID:</span> <strong>' + esc(paymentId) + '</strong></div>' +
-                    '<div><span style="color:#7f8c8d;">Amount Paid:</span> <strong>' + R + fmt(total) + '</strong></div>' +
+                '<p style="color:#5a6877;margin:0 0 1.5rem;font-size:1rem;">Your 5% advance payment was successful and your seat is reserved. We\'ve emailed your confirmation to <strong>' + esc(email) + '</strong>.</p>' +
+                '<div style="display:inline-block;background:#f8fafb;padding:1.1rem 1.5rem;border-radius:10px;text-align:left;font-size:.92rem;color:#2c3e50;border:1px dashed #cfd9df;">' +
+                    '<div style="margin-bottom:.45rem;"><span style="color:#7f8c8d;">Booking Ref:</span> <strong>' + esc(ref) + '</strong></div>' +
+                    '<div style="margin-bottom:.45rem;"><span style="color:#7f8c8d;">Payment ID:</span> <strong>' + esc(paymentId) + '</strong></div>' +
+                    '<hr style="border:none;border-top:1px dashed #cfd9df;margin:.6rem 0;">' +
+                    '<div style="margin-bottom:.4rem;"><span style="color:#7f8c8d;">Total Trip Cost:</span> <strong>' + R + fmt(total) + '</strong></div>' +
+                    '<div style="margin-bottom:.4rem;color:#0a5a68;"><span>Advance Paid (5%):</span> <strong>' + R + fmt(advance) + '</strong></div>' +
+                    '<div style="color:#a04000;"><span>Balance Due After Travel:</span> <strong>' + R + fmt(balance) + '</strong></div>' +
                 '</div>' +
+
+                '<div style="background:#fff8e7;color:#8a6d3b;border-left:3px solid #f39c12;padding:.75rem 1rem;border-radius:6px;margin:1.25rem auto 0;max-width:520px;text-align:left;font-size:.9rem;line-height:1.55;">' +
+                    '<i class="fas fa-info-circle"></i> <strong>Balance payment:</strong> ' + R + fmt(balance) + ' will be collected on the last day of your trip via UPI / bank transfer / cash. We will not charge this amount until your travel ends.' +
+                '</div>' +
+
                 '<div style="margin-top:2rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">' +
                     '<a href="bookings.html" style="background:#0d7a8a;color:#fff;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;"><i class="fas fa-suitcase-rolling"></i> View My Bookings</a>' +
                     '<a href="index.html" style="background:#ecf0f1;color:#2c3e50;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;"><i class="fas fa-home"></i> Back to Home</a>' +
@@ -449,7 +492,7 @@
                 '<p style="color:#7f8c8d;font-size:.85rem;margin-top:1.5rem;">Need help? Call <a href="tel:+918880195191" style="color:#0d7a8a;font-weight:600;">+91 88801 95191</a> &middot; Quote ref <strong>' + esc(ref) + '</strong></p>' +
             '</div>';
 
-        window.Toast.success('Booking confirmed! Ref: ' + ref, { duration: 8000 });
+        window.Toast.success('Booking confirmed! Advance ' + R + fmt(advance) + ' paid. Ref: ' + ref, { duration: 8000 });
     }
 
     // ── Init ──
