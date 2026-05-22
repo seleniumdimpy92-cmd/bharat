@@ -452,16 +452,51 @@ document.addEventListener('DOMContentLoaded', function() {
         startAuto();
     })();
 
-    // Sidebar toggle (mobile)
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-    const closeSidebar = () => document.body.classList.remove('sidebar-open');
-    const openSidebar  = () => document.body.classList.add('sidebar-open');
-    if (hamburgerBtn) hamburgerBtn.addEventListener('click', () => {
-        document.body.classList.toggle('sidebar-open');
+    // Top nav active-state highlight on click
+    document.querySelectorAll('.topnav-item').forEach(a => {
+        a.addEventListener('click', function () {
+            // Don't toggle for CTAs (Login/Sign Up) or non-hash links
+            if (this.classList.contains('topnav-cta')) return;
+            const href = this.getAttribute('href');
+            if (!href || !href.startsWith('#')) return;
+            document.querySelectorAll('.topnav-item').forEach(x => x.classList.remove('active'));
+            this.classList.add('active');
+        });
     });
-    if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
-    document.querySelectorAll('.sidebar-nav a').forEach(a => a.addEventListener('click', closeSidebar));
+
+    // Bookings section: wire Login + Register buttons
+    const bookingsLoginBtn = document.getElementById('bookingsLoginBtn');
+    if (bookingsLoginBtn) bookingsLoginBtn.addEventListener('click', () => window.openLogin && window.openLogin());
+    const bookingsRegisterBtn = document.getElementById('bookingsRegisterBtn');
+    if (bookingsRegisterBtn) bookingsRegisterBtn.addEventListener('click', () => window.openRegister && window.openRegister());
+
+    // Bookings tabs (All / Upcoming / Completed / Cancelled)
+    document.querySelectorAll('.bk-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.bk-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            // Render filtered bookings if the data is available
+            if (window.renderBookings) {
+                window.renderBookings(tab.dataset.bkFilter || 'all');
+            }
+        });
+    });
+
+    // Toggle logged-out vs logged-in state in the Bookings section
+    function refreshBookingsSection() {
+        const loggedOut = document.getElementById('bookingsLoggedOut');
+        const loggedIn  = document.getElementById('bookingsLoggedIn');
+        const isLoggedIn = !!localStorage.getItem('token') || !!window.currentUser;
+        if (loggedOut) loggedOut.style.display = isLoggedIn ? 'none' : '';
+        if (loggedIn)  loggedIn.style.display  = isLoggedIn ? '' : 'none';
+        if (isLoggedIn && window.loadAndRenderUserBookings) {
+            window.loadAndRenderUserBookings();
+        }
+    }
+    refreshBookingsSection();
+    // Re-run when login/logout occurs
+    window.addEventListener('storage', refreshBookingsSection);
+    document.addEventListener('auth:changed', refreshBookingsSection);
 
     // Sign Up nav link
     const signUpNavLink = document.getElementById('signUpNavLink');
