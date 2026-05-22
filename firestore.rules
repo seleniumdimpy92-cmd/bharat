@@ -33,6 +33,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Site-wide settings (e.g. payments toggle, maintenance mode).
+    // Public read so all visitors get the live value; admin-only write.
+    match /settings/{key} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // User profiles — each user owns their doc (doc id = auth uid)
     match /users/{uid} {
       allow read: if isSelf(uid) || isAdmin();

@@ -17,7 +17,7 @@
     <link rel="apple-touch-icon" href="images/logo.png">
 
     <link rel="stylesheet" href="css/style.css?v=18">
-    <link rel="stylesheet" href="css/dashboard.css?v=2">
+    <link rel="stylesheet" href="css/dashboard.css?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="js/firebase-config.js?v=12"></script>
@@ -77,6 +77,9 @@
             </a>
             <a href="#" class="topnav-item sidebar-link" data-section="revenue">
                 <i class="fas fa-chart-line"></i><span>Revenue</span>
+            </a>
+            <a href="#" class="topnav-item sidebar-link" data-section="settings">
+                <i class="fas fa-cog"></i><span>Settings</span>
             </a>
             <a href="/" class="topnav-item">
                 <i class="fas fa-arrow-left"></i><span>Back to Site</span>
@@ -348,6 +351,45 @@
                 </div>
             </div>
         </section>
+
+        <!-- Settings Section -->
+        <section class="dashboard-section" id="section-settings">
+            <div class="section-header">
+                <h2><i class="fas fa-cog"></i> Site Settings</h2>
+                <p style="color:#666;font-size:0.92rem;margin-top:.4rem;">Changes here are saved to Firebase Firestore and apply to every visitor immediately.</p>
+            </div>
+
+            <div id="settingsStatus" class="publish-status" style="display:none;"></div>
+
+            <!-- Payments toggle -->
+            <div class="settings-card">
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <h3><i class="fas fa-credit-card"></i> Online Payments (Razorpay)</h3>
+                        <p>When <strong>off</strong>, the "Pay Now" button on every package and the booking flow is replaced with a "Call to Book" CTA. Existing bookings are unaffected.</p>
+                    </div>
+                    <label class="toggle-switch" title="Enable / disable online payments">
+                        <input type="checkbox" id="paymentsEnabledToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row" style="margin-top:1rem;flex-direction:column;align-items:stretch;gap:.5rem;">
+                    <label for="paymentsDisabledMessage" style="font-weight:600;color:#333;">
+                        Message shown to visitors when payments are disabled
+                    </label>
+                    <textarea id="paymentsDisabledMessage" rows="2" placeholder='e.g. "Online payments are temporarily unavailable. Please call +91 88801 95191 to book."' style="width:100%;padding:.65rem .85rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:.92rem;resize:vertical;"></textarea>
+                    <small style="color:#888;">Leave blank to use the default message.</small>
+                </div>
+
+                <div class="settings-actions" style="margin-top:1.2rem;display:flex;gap:.6rem;align-items:center;">
+                    <button class="btn-save-packages" id="saveSettingsBtn">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                    <span id="settingsCurrentInfo" style="color:#666;font-size:.9rem;"></span>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- ── Full-Page Itinerary Editor Overlay ─────────────────── -->
@@ -370,8 +412,8 @@
     </div>
 
     <script src="js/firebase-config.js?v=12"></script>
-    <script src="js/dataStore.js?v=12"></script>
-    <script src="js/dashboard.js?v=14"></script>
+    <script src="js/dataStore.js?v=14"></script>
+    <script src="js/dashboard.js?v=15"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
         document.getElementById('iteDoneBtn').addEventListener('click', () => window._closeItineraryEditor());

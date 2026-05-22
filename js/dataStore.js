@@ -200,6 +200,68 @@
     };
 
     // ───────────────────────────────────────────────────────────
+    // SettingsStore — site-wide flags (e.g. payments enabled)
+    //   Firestore doc: /settings/site
+    //   Public read, admin-only write (enforced in firestore.rules).
+    // ───────────────────────────────────────────────────────────
+    const SETTINGS_CACHE_KEY = 'siteSettings';
+    const SETTINGS_DEFAULT   = { paymentsEnabled: true, paymentsDisabledMessage: '' };
+
+    function getCachedSettings() {
+        try {
+            const raw = localStorage.getItem(SETTINGS_CACHE_KEY);
+            if (!raw) return null;
+            const obj = JSON.parse(raw);
+            return Object.assign({}, SETTINGS_DEFAULT, obj || {});
+        } catch (_) {
+            return null;
+        }
+    }
+    function setCachedSettings(s) {
+        try { localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(s)); } catch (_) {}
+    }
+
+    async function loadSettings() {
+        try {
+            const { db, firestore } = await window.__firebaseReady;
+            const ref  = firestore.doc(db, 'settings', 'site');
+            const snap = await firestore.getDoc(ref);
+            if (snap.exists()) {
+                const data = Object.assign({}, SETTINGS_DEFAULT, snap.data() || {});
+                setCachedSettings(data);
+                return data;
+            }
+        } catch (e) {
+            console.warn('Settings read failed; using cache/defaults', e);
+        }
+        const cached = getCachedSettings();
+        return cached || Object.assign({}, SETTINGS_DEFAULT);
+    }
+
+    async function saveSettings(patch) {
+        const { db, auth, firestore } = await window.__firebaseReady;
+        const user = auth.currentUser;
+        if (!user) throw new Error('You must be signed in as the admin to change settings.');
+        if (!isAdminEmail(user.email)) throw new Error('Only an admin user can change settings.');
+
+        const ref = firestore.doc(db, 'settings', 'site');
+        const payload = Object.assign({}, patch || {}, { updatedAt: firestore.serverTimestamp() });
+        await firestore.setDoc(ref, payload, { merge: true });
+
+        // Update local cache so subsequent reads on this device are instant.
+        const merged = Object.assign({}, getCachedSettings() || SETTINGS_DEFAULT, patch || {});
+        setCachedSettings(merged);
+        return merged;
+    }
+
+    window.SettingsStore = {
+        load:  loadSettings,
+        save:  saveSettings,
+        cached: getCachedSettings,
+        DEFAULTS: Object.freeze(Object.assign({}, SETTINGS_DEFAULT))
+    };
+
+    // ───────────────────────────────────────────────────────────
     // UsersStore
     // ───────────────────────────────────────────────────────────
     let _currentProfile = null;
