@@ -452,6 +452,24 @@ document.addEventListener('DOMContentLoaded', function() {
         startAuto();
     })();
 
+    // Mobile hamburger: slide-down topnav
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    if (hamburgerBtn) hamburgerBtn.addEventListener('click', () => {
+        document.body.classList.toggle('nav-open');
+    });
+    document.addEventListener('click', (e) => {
+        if (!document.body.classList.contains('nav-open')) return;
+        const topnav = document.getElementById('topnav');
+        if (topnav && topnav.contains(e.target)) {
+            // Clicked a nav link → close menu
+            if (e.target.closest('.topnav-item')) document.body.classList.remove('nav-open');
+            return;
+        }
+        if (hamburgerBtn && !hamburgerBtn.contains(e.target)) {
+            document.body.classList.remove('nav-open');
+        }
+    });
+
     // Top nav active-state highlight on click
     document.querySelectorAll('.topnav-item').forEach(a => {
         a.addEventListener('click', function () {
