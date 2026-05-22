@@ -55,7 +55,7 @@
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #1abc9c, #0e8c72);
+        background: linear-gradient(135deg, #1976d2, #0e8c72);
         border: none;
         cursor: pointer;
         display: flex;
@@ -105,7 +105,7 @@
 
     /* Header */
     .cp-header {
-        background: linear-gradient(135deg, #1abc9c, #0e8c72);
+        background: linear-gradient(135deg, #1976d2, #0e8c72);
         padding: 1.1rem 1.4rem;
         display: flex;
         align-items: center;
@@ -168,7 +168,7 @@
         align-self: flex-start;
     }
     .cp-bubble.user {
-        background: linear-gradient(135deg, #1abc9c, #0e8c72);
+        background: linear-gradient(135deg, #1976d2, #0e8c72);
         color: #fff;
         border-radius: 16px 16px 4px 16px;
         align-self: flex-end;
@@ -205,7 +205,7 @@
     }
     .cp-quick-btn {
         padding: 0.42rem 0.95rem;
-        border: 1.5px solid #1abc9c;
+        border: 1.5px solid #1976d2;
         background: #fff;
         color: #0e8c72;
         border-radius: 22px;
@@ -215,7 +215,7 @@
         transition: all 0.18s;
         font-family: inherit;
     }
-    .cp-quick-btn:hover { background: #1abc9c; color: #fff; border-color: #1abc9c; }
+    .cp-quick-btn:hover { background: #1976d2; color: #fff; border-color: #1976d2; }
 
     /* Input bar */
     .cp-input-bar {
@@ -239,11 +239,11 @@
         background: #f7fafc;
         transition: border-color 0.2s, background 0.2s;
     }
-    .cp-input:focus { border-color: #1abc9c; background: #fff; }
+    .cp-input:focus { border-color: #1976d2; background: #fff; }
     .cp-send {
         width: 46px; height: 46px;
         border-radius: 50%;
-        background: #1abc9c;
+        background: #1976d2;
         border: none;
         color: #fff;
         cursor: pointer;

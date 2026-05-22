@@ -10,7 +10,7 @@
     <meta name="keywords" content="Andaman tour package, Andaman itinerary, Port Blair package, Havelock Island tour, Neil Island package, Andaman honeymoon package, scuba diving Andaman, book Andaman trip">
     <meta name="author" content="Bharat Tours and Travels">
     <meta name="robots" content="index, follow, max-image-preview:large">
-    <meta name="theme-color" content="#1abc9c">
+    <meta name="theme-color" content="#1976d2">
     <meta name="google-adsense-account" content="ca-pub-8154901590978667">
     <link rel="canonical" href="https://andamanvoyages.in/package.html">
 
@@ -82,7 +82,7 @@
             </a>
             <div style="display:flex;gap:1rem;align-items:center;">
                 <a href="index.html#packages" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;"><i class="fas fa-suitcase"></i> All Packages</a>
-                <a href="index.html" id="navAuthLink" style="color:#fff;background:#1abc9c;padding:0.4rem 1rem;border-radius:6px;text-decoration:none;font-size:0.88rem;font-weight:600;">Login</a>
+                <a href="index.html" id="navAuthLink" style="color:#fff;background:#1976d2;padding:0.4rem 1rem;border-radius:6px;text-decoration:none;font-size:0.88rem;font-weight:600;">Login</a>
             </div>
         </nav>
     </header>
@@ -102,7 +102,7 @@
             <h2><i class="fas fa-credit-card"></i> Secure Payment</h2>
             <p><strong>Final Amount:</strong> <span id="finalAmount">₹0</span></p>
             <p id="bookingDetails"></p>
-            <div style="background:#e8f8f5;padding:1rem;border-radius:5px;margin:1rem 0;color:#16a085;">
+            <div style="background:#e8f8f5;padding:1rem;border-radius:5px;margin:1rem 0;color:#1565c0;">
                 <i class="fas fa-lock"></i> Secured by Razorpay | 100% Safe & Secure
             </div>
             <button class="btn-primary" id="confirmBookingBtn">Pay Now with Razorpay</button>
@@ -147,7 +147,7 @@
                     <label><input type="checkbox" value="3000"> Candlelight Dinner (₹3,000)</label><br>
                     <label><input type="checkbox" value="1000"> Photoshoot (₹1,000)</label>
                 </div>
-                <div id="totalPrice" style="font-size:1.2rem;font-weight:700;color:#1abc9c;margin:1rem 0;"></div>
+                <div id="totalPrice" style="font-size:1.2rem;font-weight:700;color:#1976d2;margin:1rem 0;"></div>
                 <button type="button" class="btn-primary" id="proceedPaymentBtn">Proceed to Payment</button>
             </form>
         </div>
@@ -434,7 +434,7 @@ function renderPage(pkg) {
                     <h2><i class="fas fa-list-check"></i> What's Included / Excluded</h2>
                     <div class="incl-grid">
                         <div>
-                            <p class="incl-subtitle" style="color:#1abc9c;">✅ Included</p>
+                            <p class="incl-subtitle" style="color:#1976d2;">✅ Included</p>
                             <ul class="incl-list inclusions">
                                 ${(pkg.inclusions || []).map(i => `<li><i class="fas fa-check-circle"></i> ${i}</li>`).join('')}
                             </ul>
@@ -520,9 +520,9 @@ function renderPage(pkg) {
 
         <!-- Footer -->
         <footer style="background:#1a1a1a;color:rgba(255,255,255,0.6);text-align:center;padding:1.5rem;margin-top:2rem;font-size:0.88rem;">
-            © 2026 Bharat Tours and Travels · <a href="index.html" style="color:#1abc9c;">Home</a> · 
-            <a href="index.html#packages" style="color:#1abc9c;">All Packages</a> · 
-            <a href="index.html#contact" style="color:#1abc9c;">Contact</a>
+            © 2026 Bharat Tours and Travels · <a href="index.html" style="color:#1976d2;">Home</a> · 
+            <a href="index.html#packages" style="color:#1976d2;">All Packages</a> · 
+            <a href="index.html#contact" style="color:#1976d2;">Contact</a>
         </footer>
 
         <!-- Lightbox -->
@@ -727,7 +727,7 @@ window.confirmBooking = async function() {
             email: currentUser ? JSON.parse(currentUser).email : '',
             contact: '8880195191'
         },
-        theme: { color: '#1abc9c' }
+        theme: { color: '#1976d2' }
     };
     if (typeof Razorpay === 'undefined') { alert('Payment system not loaded. Please refresh.'); return; }
     const rzp = new Razorpay(options);

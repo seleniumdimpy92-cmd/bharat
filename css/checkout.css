@@ -1,5 +1,5 @@
 /* Checkout / Cart Page Styles */
-:root { --teal:#1abc9c; --teal-d:#16a085; --ink:#2c3e50; --muted:#7f8c8d; --line:#e0e6ed; }
+:root { --teal:#1976d2; --teal-d:#1565c0; --ink:#2c3e50; --muted:#7f8c8d; --line:#e0e6ed; }
 
 body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; background:#f5f7fa; color:var(--ink); }
 * { box-sizing:border-box; }
@@ -127,7 +127,7 @@ body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; bac
 
 .payment-trust {
     background:#e8f8f5; padding:.8rem 1rem; border-radius:6px;
-    color:#16a085; font-size:.85rem; margin-top:.85rem; line-height:1.5;
+    color:#1565c0; font-size:.85rem; margin-top:.85rem; line-height:1.5;
 }
 
 .co-footer { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:.85rem; background:#1a1a1a; color:rgba(255,255,255,.6); }
@@ -140,7 +140,7 @@ body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; bac
     border-radius:6px; cursor:pointer; font-weight:600; font:inherit; font-size:.88rem;
 }
 .coupon-row button:hover { background:#34495e; }
-.coupon-applied { background:#e8f8f5; color:#16a085; padding:.5rem .8rem; border-radius:6px; font-size:.85rem; margin-top:.5rem; }
+.coupon-applied { background:#e8f8f5; color:#1565c0; padding:.5rem .8rem; border-radius:6px; font-size:.85rem; margin-top:.5rem; }
 
 /* Required asterisk */
 .req { color:#e74c3c; }
