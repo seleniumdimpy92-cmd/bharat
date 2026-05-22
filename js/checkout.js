@@ -140,7 +140,7 @@
             '<i class="fas fa-shopping-cart"></i>' +
             '<h2 style="margin:.5rem 0;">Your cart is empty</h2>' +
             '<p>Browse our handpicked Andaman packages and start planning your dream trip.</p>' +
-            '<p style="margin-top:1.2rem;"><a href="index.html#packages" style="display:inline-block;padding:.8rem 1.5rem;background:#1abc9c;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;">Browse Packages</a></p>' +
+            '<p style="margin-top:1.2rem;"><a href="index.html#packages" style="display:inline-block;padding:.8rem 1.5rem;background:#1976d2;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;">Browse Packages</a></p>' +
             '</div>';
     }
 
@@ -208,7 +208,7 @@
         var c = state.cart;
         var people = (Number(c.adults) || 0) + (Number(c.children) || 0);
         var couponHtml = state.coupon
-            ? '<div class="coupon-applied"><i class="fas fa-check-circle"></i> ' + esc(state.coupon.code) + ' applied — ' + esc(state.coupon.label) + ' <a href="#" id="removeCouponLink" style="float:right;color:#16a085;">Remove</a></div>'
+            ? '<div class="coupon-applied"><i class="fas fa-check-circle"></i> ' + esc(state.coupon.code) + ' applied — ' + esc(state.coupon.label) + ' <a href="#" id="removeCouponLink" style="float:right;color:#1565c0;">Remove</a></div>'
             : '';
         return '<div class="co-card summary"><h2><i class="fas fa-receipt"></i> Price Summary</h2>' +
             '<div class="co-form-row full"><div class="co-field"><label>Coupon Code</label>' +
@@ -216,12 +216,12 @@
                 couponHtml +
             '</div></div>' +
             '<div class="row"><span>Base price (' + people + ' traveler' + (people !== 1 ? 's' : '') + ')</span><span>' + R + fmt(s) + '</span></div>' +
-            (d > 0 ? '<div class="row" style="color:#16a085;"><span>Coupon discount</span><span>- ' + R + fmt(d) + '</span></div>' : '') +
+            (d > 0 ? '<div class="row" style="color:#1565c0;"><span>Coupon discount</span><span>- ' + R + fmt(d) + '</span></div>' : '') +
             '<div class="row"><span>GST (5%)</span><span>' + R + fmt(gst) + '</span></div>' +
             '<div class="row total"><span>Total Payable</span><span class="val">' + R + fmt(total) + '</span></div>' +
             '<button class="btn-pay" id="payBtn"><i class="fas fa-lock"></i> Pay ' + R + fmt(total) + ' Securely</button>' +
             '<a href="index.html#packages" style="text-decoration:none;"><button class="btn-secondary" type="button"><i class="fas fa-arrow-left"></i> Continue Browsing</button></a>' +
-            '<div class="payment-trust"><i class="fas fa-shield-alt"></i> Secured by Razorpay &middot; PCI-DSS compliant<br><i class="fas fa-headset"></i> 24/7 support: <a href="tel:+918880195191" style="color:#16a085;font-weight:600;">+91 88801 95191</a></div>' +
+            '<div class="payment-trust"><i class="fas fa-shield-alt"></i> Secured by Razorpay &middot; PCI-DSS compliant<br><i class="fas fa-headset"></i> 24/7 support: <a href="tel:+918880195191" style="color:#1565c0;font-weight:600;">+91 88801 95191</a></div>' +
             '</div>';
     }
 
@@ -345,7 +345,7 @@
                 coupon: state.coupon ? state.coupon.code : '',
                 special_requests: notes
             },
-            theme: { color: '#1abc9c' },
+            theme: { color: '#1976d2' },
             handler: function (response) { onPaymentSuccess(response, ref, total, name, email, phone, date, notes); },
             modal: {
                 ondismiss: function () {
@@ -413,8 +413,8 @@
 
         wrap.innerHTML =
             '<div class="co-card" style="grid-column:1/-1;text-align:center;padding:3rem 1.5rem;">' +
-                '<div style="width:80px;height:80px;border-radius:50%;background:#e8f8f5;color:#16a085;display:inline-flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:1rem;"><i class="fas fa-check-circle"></i></div>' +
-                '<h2 style="color:#16a085;margin:0 0 .5rem;font-size:1.6rem;">Booking Confirmed!</h2>' +
+                '<div style="width:80px;height:80px;border-radius:50%;background:#e8f8f5;color:#1565c0;display:inline-flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:1rem;"><i class="fas fa-check-circle"></i></div>' +
+                '<h2 style="color:#1565c0;margin:0 0 .5rem;font-size:1.6rem;">Booking Confirmed!</h2>' +
                 '<p style="color:#5a6877;margin:0 0 1.5rem;font-size:1rem;">Your Andaman adventure is booked. We\'ve emailed your confirmation to <strong>' + esc(email) + '</strong>.</p>' +
                 '<div style="display:inline-block;background:#f8fafb;padding:1rem 1.5rem;border-radius:8px;text-align:left;font-size:.92rem;color:#2c3e50;border:1px dashed #cfd9df;">' +
                     '<div style="margin-bottom:.5rem;"><span style="color:#7f8c8d;">Booking Ref:</span> <strong>' + esc(ref) + '</strong></div>' +
@@ -422,10 +422,10 @@
                     '<div><span style="color:#7f8c8d;">Amount Paid:</span> <strong>' + R + fmt(total) + '</strong></div>' +
                 '</div>' +
                 '<div style="margin-top:2rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">' +
-                    '<a href="bookings.html" style="background:#1abc9c;color:#fff;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;"><i class="fas fa-suitcase-rolling"></i> View My Bookings</a>' +
+                    '<a href="bookings.html" style="background:#1976d2;color:#fff;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;"><i class="fas fa-suitcase-rolling"></i> View My Bookings</a>' +
                     '<a href="index.html" style="background:#ecf0f1;color:#2c3e50;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;"><i class="fas fa-home"></i> Back to Home</a>' +
                 '</div>' +
-                '<p style="color:#7f8c8d;font-size:.85rem;margin-top:1.5rem;">Need help? Call <a href="tel:+918880195191" style="color:#1abc9c;font-weight:600;">+91 88801 95191</a> &middot; Quote ref <strong>' + esc(ref) + '</strong></p>' +
+                '<p style="color:#7f8c8d;font-size:.85rem;margin-top:1.5rem;">Need help? Call <a href="tel:+918880195191" style="color:#1976d2;font-weight:600;">+91 88801 95191</a> &middot; Quote ref <strong>' + esc(ref) + '</strong></p>' +
             '</div>';
 
         window.Toast.success('Booking confirmed! Ref: ' + ref, { duration: 8000 });
