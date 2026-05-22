@@ -586,3 +586,11 @@ select.mmt-field-value option {
   flex-direction: column;
   gap: 1rem;
 }
+
+/* ── Sold-Out states ─────────────────────────────────────────── */
+.mmt-card-tag-soldout{background:linear-gradient(90deg,#c0392b 0%,#e74c3c 100%) !important;color:#fff;letter-spacing:.5px;font-size:.78rem;font-weight:800;padding:.4rem 1rem !important}
+.mmt-card-soldout .mmt-card-img{filter:grayscale(.55) brightness(.85)}
+.mmt-card-soldout .mmt-card-img::after{content:"";position:absolute;inset:0;background:rgba(192,57,43,.12);pointer-events:none}
+.mmt-card-cta-soldout{background:#fdedec !important;color:#c0392b !important;cursor:not-allowed;border:1px solid #f5b7b1;box-shadow:none !important}
+.mmt-card-cta-soldout:hover{filter:brightness(.97);transform:none !important;background:#f9e0dd !important}
+.mmt-card-cta-soldout i{margin-right:.4rem}

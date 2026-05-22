@@ -552,6 +552,11 @@ document.addEventListener('DOMContentLoaded', function () {
                             onchange="window._pkgUpdate(${idx},'visible',this.checked)">
                         <span>Visible</span>
                     </label>
+                    <label class="pkg-visible-toggle" style="background:${pkg.soldOut ? '#fdedec' : '#f7f9fc'};color:${pkg.soldOut ? '#c0392b' : 'inherit'};">
+                        <input type="checkbox" ${pkg.soldOut === true ? 'checked' : ''}
+                            onchange="window._pkgUpdate(${idx},'soldOut',this.checked)">
+                        <span>Sold&nbsp;Out</span>
+                    </label>
                     <button class="btn-del-pkg" onclick="window._pkgDelete(${idx})" title="Delete package">
                         <i class="fas fa-trash"></i>
                     </button>
