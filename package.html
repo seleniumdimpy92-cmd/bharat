@@ -69,6 +69,7 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>window.__toastAutoOverride = true;</script>
     <script src="js/firebase-config.js?v=15"></script>
+    <script src="js/analytics.js?v=1"></script>
     <script src="js/dataStore.js?v=14"></script>
     <script src="js/toast.js?v=1"></script>
 </head>
@@ -292,6 +293,9 @@ async function loadPackage() {
     document.title = pkg.name + ' – Bharat Tours & Travels';
     injectDynamicSEO(pkg);
     renderPage(pkg);
+
+    // GA4 — view_item event for this package details page
+    try { window.Analytics && window.Analytics.viewItem(pkg); } catch (e) {}
 
     // Load site settings (payments toggle) so the modal & guards know.
     if (window.SettingsStore && typeof window.SettingsStore.load === 'function') {

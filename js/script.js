@@ -906,6 +906,11 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             try { sessionStorage.setItem('searchContext', JSON.stringify(window.searchContext)); } catch (e) {}
 
+            // GA4 — search event
+            try {
+                window.Analytics && window.Analytics.search(`${from} → Andaman | ${date} | ${adults}A${children}C`);
+            } catch (e) {}
+
             // Reset to ALL and refresh, then scroll into view
             mmtState.cat = 'all';
             document.querySelectorAll('#mmtTabs .mmt-tab').forEach(t => {

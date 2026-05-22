@@ -38,3 +38,19 @@ window.CLOUDINARY_CONFIG = {
     cloudName:    "dwy7k3uhv",
     uploadPreset: "andaman_gallery"
 };
+
+// ── Google Analytics 4 configuration ──────────────────────────
+// 1. Sign up at https://analytics.google.com
+// 2. Create a property → Web stream → copy the Measurement ID
+//    (looks like "G-XXXXXXXXXX")
+// 3. (Optional) From the same Web stream details page, copy the
+//    Stream ID — a long number like "1234567890" — used by the
+//    Realtime widget embedded in the admin dashboard.
+//
+// While these stay as placeholders, no tracking code is loaded
+// and the dashboard tab shows a setup-needed banner. Both values
+// are safe to ship to browsers — that's how GA4 works.
+window.GA4_CONFIG = {
+    measurementId: "REPLACE_WITH_YOUR_GA4_MEASUREMENT_ID",  // e.g. G-XXXXXXXXXX
+    streamId:      ""                                       // e.g. 1234567890
+};

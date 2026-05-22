@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
         bookings: 'All Bookings',
         packages: 'Package Performance',
         gallery:  'Photo Gallery',
+        analytics:'Analytics — Google Analytics 4',
         customers: 'Customers',
         revenue: 'Revenue Analytics',
         settings: 'Site Settings'
