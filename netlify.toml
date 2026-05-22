@@ -1,6 +1,51 @@
 [build]
   functions = "netlify/functions"
 
+# ── Pretty URLs ──────────────────────────────────────────────────
+# Hide the .html suffix from URLs. Visiting /bookings serves bookings.html, etc.
+# Direct hits to /index.html, /bookings.html etc. are 301-redirected to the
+# canonical extension-less path.
+
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/bookings.html"
+  to = "/bookings"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/dashboard.html"
+  to = "/dashboard"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/package.html"
+  to = "/package"
+  status = 301
+  force = true
+
+# Map clean URLs back to the static files (rewrite, not redirect, status 200).
+[[redirects]]
+  from = "/bookings"
+  to = "/bookings.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/package"
+  to = "/package.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]

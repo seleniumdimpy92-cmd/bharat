@@ -16,7 +16,7 @@
 
     <!-- Package: Budget Andaman Escape -->
     <url>
-        <loc>https://andamanvoyages.in/package.html?id=budget</loc>
+        <loc>https://andamanvoyages.in/package?id=budget</loc>
         <lastmod>2026-05-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
@@ -28,7 +28,7 @@
 
     <!-- Package: Standard Andaman Bliss -->
     <url>
-        <loc>https://andamanvoyages.in/package.html?id=standard</loc>
+        <loc>https://andamanvoyages.in/package?id=standard</loc>
         <lastmod>2026-05-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
@@ -40,7 +40,7 @@
 
     <!-- Package: Luxury Andaman Retreat -->
     <url>
-        <loc>https://andamanvoyages.in/package.html?id=luxury</loc>
+        <loc>https://andamanvoyages.in/package?id=luxury</loc>
         <lastmod>2026-05-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
@@ -52,7 +52,7 @@
 
     <!-- Package: Honeymoon Paradise -->
     <url>
-        <loc>https://andamanvoyages.in/package.html?id=honeymoon</loc>
+        <loc>https://andamanvoyages.in/package?id=honeymoon</loc>
         <lastmod>2026-05-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
