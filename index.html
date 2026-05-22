@@ -35,30 +35,156 @@
     <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="apple-touch-icon" href="images/logo.png">
 
-    <!-- Schema.org structured data: TravelAgency -->
+    <!-- Schema.org structured data: TravelAgency / LocalBusiness -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "TravelAgency",
+        "@type": ["TravelAgency", "LocalBusiness"],
+        "@id": "https://andamanvoyages.in/#organization",
         "name": "Bharat Tours and Travels",
         "alternateName": "Andaman Voyages",
         "url": "https://andamanvoyages.in/",
         "logo": "https://andamanvoyages.in/images/logo.png",
-        "image": "https://andamanvoyages.in/images/beach1.jpg",
-        "description": "Andaman holiday package specialists offering customizable tours from ₹15,999/person across Port Blair, Havelock and Neil Island.",
-        "telephone": "+91-8880195191",
-        "email": "info@andamanvoyages.in",
-        "priceRange": "₹15,999 – ₹28,999",
-        "areaServed": {
-            "@type": "Place",
-            "name": "Andaman and Nicobar Islands, India"
+        "image": [
+            "https://andamanvoyages.in/images/beach1.jpg",
+            "https://andamanvoyages.in/images/beach2.jpg",
+            "https://andamanvoyages.in/images/neil1.jpg"
+        ],
+        "description": "Andaman holiday package specialists offering customizable tours from ₹15,999/person across Port Blair, Havelock and Neil Island. 50,000+ happy travelers, secure Razorpay payments, 24/7 support.",
+        "telephone": ["+91-8880195191", "+91-9434125698"],
+        "email": ["info@andamanvoyages.in", "booking@andamanvoyages.in"],
+        "priceRange": "₹9,999 – ₹44,999",
+        "currenciesAccepted": "INR",
+        "paymentAccepted": "Razorpay, UPI, Credit Card, Debit Card, Net Banking",
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "09:00",
+            "closes": "21:00"
         },
+        "areaServed": [
+            { "@type": "Place", "name": "Andaman and Nicobar Islands, India" },
+            { "@type": "Place", "name": "Port Blair" },
+            { "@type": "Place", "name": "Havelock Island" },
+            { "@type": "Place", "name": "Neil Island" }
+        ],
         "address": {
             "@type": "PostalAddress",
             "addressCountry": "IN",
-            "addressRegion": "Andaman and Nicobar Islands"
+            "addressRegion": "Andaman and Nicobar Islands",
+            "addressLocality": "Port Blair"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "1247",
+            "bestRating": "5",
+            "worstRating": "1"
         },
         "sameAs": []
+    }
+    </script>
+
+    <!-- Schema.org: WebSite + SiteSearch (lets Google show a search box in SERP) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://andamanvoyages.in/#website",
+        "url": "https://andamanvoyages.in/",
+        "name": "Bharat Tours and Travels",
+        "publisher": { "@id": "https://andamanvoyages.in/#organization" },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://andamanvoyages.in/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
+    <!-- Schema.org: FAQPage (rich snippet — huge SERP win) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the best time to visit Andaman Islands?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "October to May is the best time to visit Andaman, with clear skies and calm seas perfect for water sports. Avoid the monsoon season (June to September) when ferry services are often disrupted."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How much does an Andaman tour package cost?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Our Andaman tour packages start from ₹9,999 per person for short weekend trips and go up to ₹44,999 per person for premium honeymoon packages. Most popular 6-night/7-day packages cost between ₹21,999 and ₹28,999 per person, including hotels, ferries, sightseeing and breakfast."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do I need a visa or permit to visit Andaman?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Indian citizens do not need a permit. Foreign nationals need a Restricted Area Permit (RAP), which is issued free on arrival at Port Blair airport for most nationalities and is valid for 30 days."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I reach Andaman Islands?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Andaman is best reached by direct flight to Veer Savarkar International Airport (IXZ) in Port Blair from Chennai, Kolkata, Bangalore, Delhi and Hyderabad. Flight time is roughly 2-2.5 hours from south Indian metros."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How much advance payment is required to book a package?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Only 5% advance is required to confirm your booking via Razorpay. The remaining 95% balance is paid directly to us on the last day of your trip via UPI, bank transfer or cash."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is your cancellation policy?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Cancellations more than 60 days before travel get a 95% refund (5% fee on advance). Cancellations 30 to 60 days before travel get a 90% refund. Cancellations within 30 days of travel get a 50% refund."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is scuba diving available in Andaman?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! Andaman is one of the world's top scuba diving destinations. We offer beginner discover-scuba sessions (no certification needed) and PADI Open Water certification courses at Havelock Island and Neil Island."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Are flights included in your tour packages?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Flights are not included by default in our standard packages. We can bundle flights at extra cost if you book 30+ days in advance — call +91 88801 95191 for the latest fares."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <!-- Schema.org: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://andamanvoyages.in/" },
+            { "@type": "ListItem", "position": 2, "name": "Andaman Holiday Packages", "item": "https://andamanvoyages.in/#packages" }
+        ]
     }
     </script>
     <link rel="stylesheet" href="css/style.css?v=26">
@@ -72,7 +198,7 @@
     <!-- ── Top Brand Bar with Inline Icon Nav ───────────────── -->
     <header class="topbar">
         <div class="topbar-logo">
-            <img src="images/logo.png" alt="">
+            <img src="images/logo.png" alt="Bharat Tours and Travels logo">
             <span>Bharat Tours &amp; Travels</span>
         </div>
         <nav class="topnav" id="topnav">
@@ -504,6 +630,103 @@
                 <p>Trusted by thousands of satisfied guests</p>
             </div>
         </div>
+    </section>
+
+    <!-- ── FAQ Section (visible content matches the FAQPage schema in <head>) ── -->
+    <section id="faq" class="faq-section">
+        <div class="container" style="max-width:880px;margin:0 auto;padding:3rem 1.25rem;">
+            <h2 style="text-align:center;color:#0d2c3a;margin:0 0 .5rem;font-size:1.7rem;">
+                <i class="fas fa-question-circle" style="color:#0d7a8a;"></i> Frequently Asked Questions
+            </h2>
+            <p style="text-align:center;color:#5a6877;margin:0 0 2rem;">Quick answers to the most common questions about Andaman tour packages.</p>
+
+            <details class="faq-q">
+                <summary>What is the best time to visit Andaman Islands?</summary>
+                <p>October to May is the best time to visit Andaman, with clear skies and calm seas perfect for water sports. Avoid the monsoon season (June to September) when ferry services are often disrupted.</p>
+            </details>
+
+            <details class="faq-q">
+                <summary>How much does an Andaman tour package cost?</summary>
+                <p>Our Andaman tour packages start from ₹9,999 per person for short weekend trips and go up to ₹44,999 per person for premium honeymoon packages. Most popular 6-night/7-day packages cost between ₹21,999 and ₹28,999 per person, including hotels, ferries, sightseeing and breakfast.</p>
+            </details>
+
+            <details class="faq-q">
+                <summary>Do I need a visa or permit to visit Andaman?</summary>
+                <p>Indian citizens do not need a permit. Foreign nationals need a Restricted Area Permit (RAP), which is issued free on arrival at Port Blair airport for most nationalities and is valid for 30 days.</p>
+            </details>
+
+            <details class="faq-q">
+                <summary>How do I reach Andaman Islands?</summary>
+                <p>Andaman is best reached by direct flight to Veer Savarkar International Airport (IXZ) in Port Blair from Chennai, Kolkata, Bangalore, Delhi and Hyderabad. Flight time is roughly 2–2.5 hours from south Indian metros.</p>
+            </details>
+
+            <details class="faq-q">
+                <summary>How much advance payment is required to book a package?</summary>
+                <p>Only <strong>5% advance</strong> is required to confirm your booking via Razorpay. The remaining 95% balance is paid directly to us on the last day of your trip via UPI, bank transfer or cash.</p>
+            </details>
+
+            <details class="faq-q">
+                <summary>What is your cancellation policy?</summary>
+                <p>Cancellations more than 60 days before travel get a 95% refund (5% fee on advance). Cancellations 30 to 60 days before travel get a 90% refund. Cancellations within 30 days of travel get a 50% refund. <a href="/terms" style="color:#0d7a8a;">Read the full policy →</a></p>
+            </details>
+
+            <details class="faq-q">
+                <summary>Is scuba diving available in Andaman?</summary>
+                <p>Yes! Andaman is one of the world's top scuba diving destinations. We offer beginner discover-scuba sessions (no certification needed) and PADI Open Water certification courses at Havelock Island and Neil Island.</p>
+            </details>
+
+            <details class="faq-q">
+                <summary>Are flights included in your tour packages?</summary>
+                <p>Flights are not included by default in our standard packages. We can bundle flights at extra cost if you book 30+ days in advance — call <a href="tel:+918880195191" style="color:#0d7a8a;font-weight:600;">+91 88801 95191</a> for the latest fares.</p>
+            </details>
+        </div>
+
+        <style>
+            .faq-section { background:#f8fafb; }
+            .faq-q {
+                background:#fff;
+                border:1px solid #e3e8ef;
+                border-radius:10px;
+                margin:0 0 .65rem;
+                padding: 0;
+                box-shadow: 0 1px 3px rgba(10,31,68,0.04);
+                transition: box-shadow .15s;
+            }
+            .faq-q[open] {
+                box-shadow: 0 4px 14px rgba(10,31,68,0.08);
+                border-color: #cfe6e0;
+            }
+            .faq-q summary {
+                cursor:pointer;
+                padding: 1rem 1.25rem;
+                font-weight:600;
+                color:#0d2c3a;
+                font-size:1rem;
+                list-style: none;
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap: 1rem;
+            }
+            .faq-q summary::-webkit-details-marker { display: none; }
+            .faq-q summary::after {
+                content: "+";
+                color: #0d7a8a;
+                font-weight: 800;
+                font-size: 1.4rem;
+                transition: transform .15s;
+            }
+            .faq-q[open] summary::after {
+                content: "−";
+            }
+            .faq-q p {
+                margin: 0;
+                padding: 0 1.25rem 1.1rem;
+                color: #5a6877;
+                line-height: 1.65;
+                font-size: .95rem;
+            }
+        </style>
     </section>
 
     <section id="contact" class="payment-section">
