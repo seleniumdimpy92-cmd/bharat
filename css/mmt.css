@@ -144,7 +144,7 @@ select.mmt-field-value option {
 }
 .mmt-listing-container {
   max-width: 1280px;
-  margin: 1.25rem auto 0;
+  margin: -3.5rem auto 0;  /* overlap bottom of hero carousel */
   padding: 0 1.5rem;
   position: relative;
   z-index: 5;
@@ -516,7 +516,9 @@ select.mmt-field-value option {
   .mmt-card-img { min-height: 200px; }
   .mmt-card-body { border-right: none; border-bottom: 1px dashed var(--mmt-line); }
 }
+/* small screens: no overlap */
 @media (max-width: 600px) {
+  .mmt-listing-container { margin-top: 1rem; }
   .mmt-searchbar { padding: 0.75rem 1rem; }
   .mmt-search-btn { width: 100%; padding: 0.75rem; }
   .mmt-hero-band { height: 180px; padding: 1.5rem 1rem 4rem; }
