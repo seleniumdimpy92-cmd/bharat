@@ -19,6 +19,7 @@
 
     <link rel="stylesheet" href="css/style.css?v=18">
     <link rel="stylesheet" href="css/dashboard.css?v=3">
+    <link rel="stylesheet" href="css/gallery.css?v=1">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="js/firebase-config.js?v=12"></script>
@@ -72,6 +73,9 @@
             </a>
             <a href="#" class="topnav-item sidebar-link" data-section="packages">
                 <i class="fas fa-suitcase"></i><span>Packages</span>
+            </a>
+            <a href="#" class="topnav-item sidebar-link" data-section="gallery">
+                <i class="fas fa-images"></i><span>Gallery</span>
             </a>
             <a href="#" class="topnav-item sidebar-link" data-section="customers">
                 <i class="fas fa-users"></i><span>Customers</span>
@@ -261,6 +265,64 @@
             </div>
         </section>
 
+        <!-- Gallery Section -->
+        <section class="dashboard-section" id="section-gallery">
+            <div class="section-header">
+                <h2><i class="fas fa-images"></i> Photo Gallery</h2>
+                <p style="color:#666;font-size:0.92rem;margin-top:.4rem;">
+                    Upload images to Firebase Storage. They'll appear instantly on the public
+                    <a href="/gallery.html" target="_blank" rel="noopener">Gallery page</a>.
+                </p>
+            </div>
+
+            <!-- Uploader card -->
+            <div class="admin-gallery-uploader">
+                <h3><i class="fas fa-cloud-upload-alt"></i> Upload New Image(s)</h3>
+
+                <label class="admin-gallery-dropzone" id="galDropzone">
+                    <i class="fas fa-image"></i>
+                    <strong>Click to choose</strong> or drag &amp; drop one or more images here
+                    <div style="font-size:.78rem;margin-top:.25rem;color:#9aa7b1;">JPG / PNG / WEBP — up to ~10 MB each</div>
+                    <input type="file" id="galFileInput" accept="image/*" multiple>
+                </label>
+
+                <div class="admin-gallery-form-row">
+                    <input type="text" id="galTitle"    placeholder="Title (e.g. Radhanagar Beach)">
+                    <input type="text" id="galCaption"  placeholder="Caption (optional)">
+                    <input type="text" id="galCategory" placeholder="Category (e.g. Beaches)" list="galCategoryList">
+                    <datalist id="galCategoryList">
+                        <option value="Beaches">
+                        <option value="Islands">
+                        <option value="Activities">
+                        <option value="Resorts">
+                        <option value="Sunsets">
+                    </datalist>
+                    <input type="number" id="galOrder" placeholder="Order" min="0" step="1" style="text-align:center;">
+                    <button class="admin-gallery-upload-btn" id="galUploadBtn" disabled>
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                </div>
+
+                <div class="admin-gallery-progress" id="galProgress">
+                    <div class="admin-gallery-progress-bar" id="galProgressBar"></div>
+                </div>
+                <div id="galStatus" style="margin-top:.5rem;font-size:.85rem;color:#0d7a8a;"></div>
+            </div>
+
+            <!-- Existing items grid -->
+            <div class="section-header" style="margin-top:.5rem;">
+                <h2 style="font-size:1.05rem;">Uploaded Photos (<span id="galCount">0</span>)</h2>
+                <div class="section-actions">
+                    <button class="btn-add-package" id="galRefreshBtn" style="background:#3498db;">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="admin-gallery-grid" id="galGrid">
+                <p class="chart-empty" style="grid-column:1/-1;">Loading…</p>
+            </div>
+        </section>
+
         <!-- Customers Section -->
         <section class="dashboard-section" id="section-customers">
             <div class="section-header">
@@ -436,10 +498,215 @@
     <script src="js/dataStore.js?v=14"></script>
     <script src="js/toast.js?v=1"></script>
     <script src="js/dashboard.js?v=17"></script>
+    <script src="js/gallery.js?v=1"></script>
     <script src="js/security.js?v=2"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
         document.getElementById('iteDoneBtn').addEventListener('click', () => window._closeItineraryEditor());
+    </script>
+
+    <!-- ── Admin Gallery wiring ─────────────────────────────── -->
+    <script>
+    (function () {
+        const dropzone   = document.getElementById('galDropzone');
+        const fileInput  = document.getElementById('galFileInput');
+        const titleEl    = document.getElementById('galTitle');
+        const captionEl  = document.getElementById('galCaption');
+        const categoryEl = document.getElementById('galCategory');
+        const orderEl    = document.getElementById('galOrder');
+        const uploadBtn  = document.getElementById('galUploadBtn');
+        const progress   = document.getElementById('galProgress');
+        const progBar    = document.getElementById('galProgressBar');
+        const statusEl   = document.getElementById('galStatus');
+        const grid       = document.getElementById('galGrid');
+        const countEl    = document.getElementById('galCount');
+        const refreshBtn = document.getElementById('galRefreshBtn');
+
+        let pendingFiles = [];
+        let allItems = [];
+
+        function setStatus(msg, isError) {
+            statusEl.textContent = msg || '';
+            statusEl.style.color = isError ? '#c0392b' : '#0d7a8a';
+        }
+        function showProgress(pct) {
+            progress.classList.add('show');
+            progBar.style.width = (pct || 0).toFixed(1) + '%';
+        }
+        function hideProgress() {
+            progress.classList.remove('show');
+            progBar.style.width = '0%';
+        }
+        function escapeHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        // Drag & drop
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files || []).filter(f => f.type.startsWith('image/'));
+            if (files.length) setPendingFiles(files);
+        });
+        fileInput.addEventListener('change', () => {
+            const files = Array.from(fileInput.files || []);
+            if (files.length) setPendingFiles(files);
+        });
+
+        function setPendingFiles(files) {
+            pendingFiles = files;
+            uploadBtn.disabled = !files.length;
+            const names = files.map(f => f.name).join(', ');
+            setStatus(`${files.length} file(s) ready: ${names}`);
+        }
+
+        uploadBtn.addEventListener('click', async () => {
+            if (!pendingFiles.length) return;
+            uploadBtn.disabled = true;
+
+            const meta = {
+                title:    titleEl.value.trim(),
+                caption:  captionEl.value.trim(),
+                category: categoryEl.value.trim(),
+                order:    orderEl.value !== '' ? parseInt(orderEl.value, 10) : 9999
+            };
+
+            try {
+                let i = 0;
+                for (const file of pendingFiles) {
+                    i++;
+                    setStatus(`Uploading ${i}/${pendingFiles.length}: ${file.name}…`);
+                    showProgress(0);
+                    await window.GalleryStore.uploadGalleryImage(file, {
+                        // If multiple files, append index to title (or leave blank for "")
+                        title: pendingFiles.length > 1 && meta.title ? `${meta.title} (${i})` : meta.title,
+                        caption:  meta.caption,
+                        category: meta.category,
+                        order:    meta.order
+                    }, (pct) => showProgress(pct));
+                }
+                setStatus(`✓ Uploaded ${pendingFiles.length} image(s) successfully.`);
+                hideProgress();
+                pendingFiles = [];
+                fileInput.value = '';
+                titleEl.value = ''; captionEl.value = ''; orderEl.value = '';
+                await refresh();
+            } catch (err) {
+                console.error('Gallery upload error:', err);
+                setStatus('Upload failed: ' + (err && err.message ? err.message : err), true);
+                hideProgress();
+            } finally {
+                uploadBtn.disabled = pendingFiles.length === 0;
+            }
+        });
+
+        function renderGrid() {
+            countEl.textContent = String(allItems.length);
+            if (!allItems.length) {
+                grid.innerHTML = '<p class="chart-empty" style="grid-column:1/-1;">No images uploaded yet.</p>';
+                return;
+            }
+            grid.innerHTML = '';
+            allItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'admin-gallery-card';
+                card.innerHTML = `
+                    <div class="admin-gallery-card-img" style="background-image:url('${escapeHtml(item.thumbUrl || item.url)}');"></div>
+                    <div class="admin-gallery-card-body">
+                        <h4 class="admin-gallery-card-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title) || '<em style="color:#9aa7b1;">(no title)</em>'}</h4>
+                        <div class="admin-gallery-card-meta">
+                            ${item.category ? `<span>📂 ${escapeHtml(item.category)}</span> · ` : ''}<span>order: ${item.order}</span>
+                        </div>
+                        <div class="admin-gallery-card-actions">
+                            <button class="btn-edit"  data-id="${item.id}">Edit</button>
+                            <button class="btn-view"  data-url="${escapeHtml(item.url)}">View</button>
+                            <button class="btn-del"   data-id="${item.id}">Delete</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Hook actions
+            grid.querySelectorAll('.btn-view').forEach(b => b.addEventListener('click', () => {
+                window.open(b.dataset.url, '_blank', 'noopener');
+            }));
+            grid.querySelectorAll('.btn-del').forEach(b => b.addEventListener('click', async () => {
+                const id = b.dataset.id;
+                const item = allItems.find(it => it.id === id);
+                if (!item) return;
+                if (!confirm(`Delete "${item.title || 'this image'}"? This cannot be undone.`)) return;
+                try {
+                    await window.GalleryStore.deleteGalleryItem(item);
+                    setStatus('✓ Deleted.');
+                    await refresh();
+                } catch (err) {
+                    setStatus('Delete failed: ' + (err && err.message ? err.message : err), true);
+                }
+            }));
+            grid.querySelectorAll('.btn-edit').forEach(b => b.addEventListener('click', async () => {
+                const id = b.dataset.id;
+                const item = allItems.find(it => it.id === id);
+                if (!item) return;
+                const newTitle    = prompt('Title:',    item.title    || '');
+                if (newTitle === null) return;
+                const newCaption  = prompt('Caption:',  item.caption  || '');
+                if (newCaption === null) return;
+                const newCategory = prompt('Category:', item.category || '');
+                if (newCategory === null) return;
+                const newOrderStr = prompt('Order (number, lower = first):', String(item.order || 9999));
+                if (newOrderStr === null) return;
+                const newOrder = parseInt(newOrderStr, 10);
+                try {
+                    await window.GalleryStore.updateGalleryItem(id, {
+                        title: newTitle.trim(),
+                        caption: newCaption.trim(),
+                        category: newCategory.trim(),
+                        order: isNaN(newOrder) ? 9999 : newOrder
+                    });
+                    setStatus('✓ Updated.');
+                    await refresh();
+                } catch (err) {
+                    setStatus('Update failed: ' + (err && err.message ? err.message : err), true);
+                }
+            }));
+        }
+
+        async function refresh() {
+            grid.innerHTML = '<p class="chart-empty" style="grid-column:1/-1;">Loading…</p>';
+            try {
+                allItems = await window.GalleryStore.loadGalleryItems();
+                renderGrid();
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = `<p class="chart-empty" style="grid-column:1/-1;color:#c0392b;">Failed to load: ${escapeHtml(err.message)}</p>`;
+            }
+        }
+        refreshBtn.addEventListener('click', refresh);
+
+        // Lazy-load when the gallery section first becomes active
+        let loadedOnce = false;
+        document.querySelectorAll('.sidebar-link[data-section="gallery"]').forEach(link => {
+            link.addEventListener('click', () => {
+                if (loadedOnce) return;
+                loadedOnce = true;
+                refresh();
+            });
+        });
+
+        // Also extend dashboard.js's section title map
+        if (window) {
+            // best-effort: also update <h1> directly when navigating
+            const titleEl = document.getElementById('pageTitle');
+            document.querySelectorAll('.sidebar-link[data-section="gallery"]').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (titleEl) titleEl.textContent = 'Photo Gallery';
+                });
+            });
+        }
+    })();
     </script>
 </body>
 </html>

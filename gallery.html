@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery — Andaman Tours | Bharat Tours &amp; Travels</title>
+
+    <meta name="description" content="Browse stunning photos of Andaman: Radhanagar Beach, Havelock Island, Neil Island, scuba diving, Ross Island, sunsets, and more. Bharat Tours and Travels.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#0d7a8a">
+    <link rel="canonical" href="https://andamanvoyages.in/gallery.html">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Photo Gallery — Andaman Tours | Bharat Tours &amp; Travels">
+    <meta property="og:description" content="Stunning photos of Andaman beaches, islands, scuba diving, and tours.">
+    <meta property="og:url" content="https://andamanvoyages.in/gallery.html">
+    <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg">
+
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/logo.png">
+
+    <link rel="stylesheet" href="css/style.css?v=26">
+    <link rel="stylesheet" href="css/gallery.css?v=1">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="js/firebase-config.js?v=12"></script>
+</head>
+<body>
+    <!-- ── Top Brand Bar ───────────────────────────────────── -->
+    <header class="topbar">
+        <a href="/" class="topbar-logo">
+            <img src="images/logo.png" alt="">
+            <span>Bharat Tours &amp; Travels</span>
+        </a>
+        <nav class="topnav" id="topnav">
+            <a href="/" class="topnav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="/#packages" class="topnav-item"><i class="fas fa-suitcase-rolling"></i><span>Packages</span></a>
+            <a href="/gallery.html" class="topnav-item active"><i class="fas fa-images"></i><span>Gallery</span></a>
+            <a href="/about" class="topnav-item"><i class="fas fa-info-circle"></i><span>About</span></a>
+            <a href="/bookings" class="topnav-item"><i class="fas fa-calendar-check"></i><span>Bookings</span></a>
+            <a href="/#contact" class="topnav-item"><i class="fas fa-phone-alt"></i><span>Contact</span></a>
+        </nav>
+        <a href="tel:+918880195191" class="topbar-phone"><i class="fas fa-phone-alt"></i> <span>+91 88801 95191</span></a>
+        <a href="mailto:booking@andamanvoyages.in" class="topbar-email" title="Email us to book"><i class="fas fa-envelope"></i> <span>booking@andamanvoyages.in</span></a>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
+
+    <main class="main-content">
+
+        <section class="gallery-hero">
+            <h1><i class="fas fa-images"></i> Photo Gallery</h1>
+            <p>A glimpse of Andaman through our travelers' lenses.</p>
+        </section>
+
+        <section class="gallery-wrap">
+            <div class="gallery-filters" id="galleryFilters">
+                <button class="gallery-chip active" data-cat="all">All</button>
+            </div>
+
+            <div id="galleryStatus" class="gallery-empty" style="display:none;">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading gallery…</p>
+            </div>
+
+            <div id="galleryGrid" class="gallery-grid"></div>
+        </section>
+    </main>
+
+    <!-- Lightbox -->
+    <div class="gallery-lightbox" id="galleryLightbox" role="dialog" aria-modal="true">
+        <button class="lb-close" id="lbClose" aria-label="Close"><i class="fas fa-times"></i></button>
+        <button class="lb-prev"  id="lbPrev"  aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+        <button class="lb-next"  id="lbNext"  aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+        <img id="lbImage" alt="">
+        <div class="lb-caption" id="lbCaption" style="display:none;"></div>
+    </div>
+
+    <script src="js/dataStore.js?v=14"></script>
+    <script src="js/gallery.js?v=1"></script>
+    <script src="js/script.js?v=26"></script>
+    <script>
+        (function () {
+            const grid       = document.getElementById('galleryGrid');
+            const filtersEl  = document.getElementById('galleryFilters');
+            const statusEl   = document.getElementById('galleryStatus');
+            const lightbox   = document.getElementById('galleryLightbox');
+            const lbImage    = document.getElementById('lbImage');
+            const lbCaption  = document.getElementById('lbCaption');
+            const lbClose    = document.getElementById('lbClose');
+            const lbPrev     = document.getElementById('lbPrev');
+            const lbNext     = document.getElementById('lbNext');
+
+            let allItems = [];
+            let visibleItems = [];
+            let lbIndex = 0;
+
+            function renderFilters(cats) {
+                // Keep "All" + dynamic categories
+                filtersEl.innerHTML = '';
+                const allChip = document.createElement('button');
+                allChip.className = 'gallery-chip active';
+                allChip.dataset.cat = 'all';
+                allChip.textContent = 'All';
+                filtersEl.appendChild(allChip);
+                cats.forEach(cat => {
+                    const chip = document.createElement('button');
+                    chip.className = 'gallery-chip';
+                    chip.dataset.cat = cat;
+                    chip.textContent = cat;
+                    filtersEl.appendChild(chip);
+                });
+                filtersEl.addEventListener('click', (e) => {
+                    const chip = e.target.closest('.gallery-chip');
+                    if (!chip) return;
+                    filtersEl.querySelectorAll('.gallery-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    const cat = chip.dataset.cat;
+                    visibleItems = (cat === 'all')
+                        ? allItems.slice()
+                        : allItems.filter(it => (it.category || '').toLowerCase() === cat.toLowerCase());
+                    renderGrid();
+                }, { once: false });
+            }
+
+            function renderGrid() {
+                grid.innerHTML = '';
+                if (!visibleItems.length) {
+                    grid.innerHTML = `
+                        <div class="gallery-empty" style="grid-column:1/-1;">
+                            <i class="fas fa-image"></i>
+                            <h3>No photos yet</h3>
+                            <p>Check back soon — we’re adding new shots from recent tours.</p>
+                        </div>`;
+                    return;
+                }
+                visibleItems.forEach((item, idx) => {
+                    const tile = document.createElement('div');
+                    tile.className = 'gallery-tile';
+                    tile.innerHTML = `
+                        <img loading="lazy" src="${item.thumbUrl || item.url}" alt="${(item.title || 'Andaman photo').replace(/"/g, '&quot;')}">
+                        ${item.title ? `<div class="gallery-tile-caption">${escapeHtml(item.title)}</div>` : ''}
+                    `;
+                    tile.addEventListener('click', () => openLightbox(idx));
+                    grid.appendChild(tile);
+                });
+            }
+
+            function openLightbox(idx) {
+                lbIndex = idx;
+                showLightboxImage();
+                lightbox.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeLightbox() {
+                lightbox.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+            function showLightboxImage() {
+                const item = visibleItems[lbIndex];
+                if (!item) return;
+                lbImage.src = item.url;
+                if (item.title || item.caption) {
+                    lbCaption.textContent = item.title ? (item.caption ? `${item.title} — ${item.caption}` : item.title) : item.caption;
+                    lbCaption.style.display = '';
+                } else {
+                    lbCaption.style.display = 'none';
+                }
+            }
+            function nextImg() { lbIndex = (lbIndex + 1) % visibleItems.length; showLightboxImage(); }
+            function prevImg() { lbIndex = (lbIndex - 1 + visibleItems.length) % visibleItems.length; showLightboxImage(); }
+
+            lbClose.addEventListener('click', closeLightbox);
+            lbNext.addEventListener('click', nextImg);
+            lbPrev.addEventListener('click', prevImg);
+            lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+            document.addEventListener('keydown', (e) => {
+                if (!lightbox.classList.contains('open')) return;
+                if (e.key === 'Escape')      closeLightbox();
+                if (e.key === 'ArrowRight')  nextImg();
+                if (e.key === 'ArrowLeft')   prevImg();
+            });
+
+            function escapeHtml(s) {
+                return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            }
+
+            async function init() {
+                statusEl.style.display = '';
+                try {
+                    allItems = await window.GalleryStore.loadGalleryItems();
+                    visibleItems = allItems.slice();
+                    const cats = Array.from(new Set(allItems.map(i => (i.category || '').trim()).filter(Boolean))).sort();
+                    renderFilters(cats);
+                    renderGrid();
+                } catch (err) {
+                    console.error('Gallery load failed:', err);
+                    grid.innerHTML = `
+                        <div class="gallery-empty" style="grid-column:1/-1;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Couldn’t load gallery</h3>
+                            <p>${escapeHtml(err.message || 'Please try again later.')}</p>
+                        </div>`;
+                } finally {
+                    statusEl.style.display = 'none';
+                }
+            }
+            init();
+        })();
+    </script>
+</body>
+</html>

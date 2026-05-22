@@ -33,6 +33,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Public gallery collection — image metadata (URLs in Storage).
+    // Anyone can read; only admins can write.
+    match /gallery/{photoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Site-wide settings (e.g. payments toggle, maintenance mode).
     // Public read so all visitors get the live value; admin-only write.
     match /settings/{key} {
