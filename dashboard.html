@@ -243,8 +243,11 @@
                     <button class="btn-add-package" id="addPackageBtn">
                         <i class="fas fa-plus"></i> Add Package
                     </button>
+                    <button class="btn-add-package" id="seedPackagesBtn" style="background:#9b59b6;" title="Add the 10 sample Andaman packages to Firestore (skips ones that already exist)">
+                        <i class="fas fa-magic"></i> Seed Sample Packages
+                    </button>
                     <button class="btn-save-packages" id="publishBtn">
-                        <i class="fas fa-cloud-upload-alt"></i> Save & Publish
+                        <i class="fas fa-cloud-upload-alt"></i> Save &amp; Publish
                     </button>
                 </div>
             </div>
@@ -368,7 +371,7 @@
 
     <script src="js/firebase-config.js?v=12"></script>
     <script src="js/dataStore.js?v=12"></script>
-    <script src="js/dashboard.js?v=13"></script>
+    <script src="js/dashboard.js?v=14"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
         document.getElementById('iteDoneBtn').addEventListener('click', () => window._closeItineraryEditor());
