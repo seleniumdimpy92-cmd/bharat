@@ -418,9 +418,10 @@
             <div class="chart-card" style="margin-top:1.25rem;">
                 <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Embedded full report</h3>
                 <p style="color:#666;font-size:.92rem;margin:0 0 1rem;">
-                    Want a beautiful 30-day dashboard right inside this admin panel? Clone Google's
-                    free <strong>GA4 Looker Studio template</strong>, point it at your property, and paste the
-                    public report URL below to embed it here.
+                    Want a beautiful dashboard right inside this admin panel? Clone Google's
+                    free <strong>GA4 Looker Studio template</strong>, point it at your property, set
+                    "General access = Anyone with the link" in <em>Share → Manage Access</em>,
+                    then <em>File → Embed report</em> and paste the embed URL below.
                 </p>
                 <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
                     <input type="text" id="lookerUrlInput"
@@ -432,6 +433,20 @@
                         <i class="fas fa-external-link-alt"></i> Open template
                     </a>
                 </div>
+
+                <!-- Date-range pills — swap the iframe's date_range without a reload -->
+                <div id="lookerDateRange" class="looker-range-pills" style="margin-top:.85rem;display:none;">
+                    <span class="looker-range-label"><i class="fas fa-calendar-alt"></i> Date range:</span>
+                    <button type="button" class="looker-range-btn"           data-range="today">Today</button>
+                    <button type="button" class="looker-range-btn"           data-range="yesterday">Yesterday</button>
+                    <button type="button" class="looker-range-btn active"    data-range="last_24h">Last 24h</button>
+                    <button type="button" class="looker-range-btn"           data-range="last_7d">Last 7d</button>
+                    <button type="button" class="looker-range-btn"           data-range="last_28d">Last 28d</button>
+                    <button type="button" class="looker-range-btn"           data-range="last_90d">Last 90d</button>
+                    <button type="button" class="looker-range-btn"           data-range="this_month">This month</button>
+                    <button type="button" class="looker-range-btn"           data-range="last_month">Last month</button>
+                </div>
+
                 <div id="lookerEmbedWrap" style="margin-top:1rem;display:none;">
                     <iframe id="lookerIframe" src="" style="width:100%;height:720px;border:0;border-radius:8px;border:1px solid #e3e8ef;"></iframe>
                 </div>
@@ -938,14 +953,82 @@
             realtimeFrame.src = url;
         }
 
+        // ── Date-range pills ────────────────────────────────────
+        // Looker Studio supports overriding the report's date_range via the
+        // URL parameter `params={"ds0.date_range":"..."}`. Documented at
+        // https://support.google.com/looker-studio/answer/9110028
+        const datePillsEl = document.getElementById('lookerDateRange');
+        const RANGE_VALUES = {
+            today:      'today',
+            yesterday:  'yesterday',
+            last_24h:   'last_24_hours',
+            last_7d:    'last_7_days',
+            last_28d:   'last_28_days',
+            last_90d:   'last_90_days',
+            this_month: 'this_month',
+            last_month: 'last_month'
+        };
+        let activeRange = 'last_24h';
+        try {
+            const savedRange = localStorage.getItem('lookerActiveRange');
+            if (savedRange && RANGE_VALUES[savedRange]) activeRange = savedRange;
+        } catch (e) {}
+
+        // Build the iframe src by appending a `params` query argument.
+        // We preserve existing query string from the admin's pasted URL.
+        function buildLookerSrc(baseUrl, rangeKey) {
+            if (!baseUrl) return '';
+            const value = RANGE_VALUES[rangeKey] || 'last_24_hours';
+            // Looker uses ds0..dsN for each data source. We override ds0
+            // (which is the GA4 source in single-source reports — like
+            // the official template).
+            const paramObj = { 'ds0.date_range': value };
+            const paramStr = encodeURIComponent(JSON.stringify(paramObj));
+            // Preserve any existing query string the admin pasted in
+            const sep = baseUrl.includes('?') ? '&' : '?';
+            // If `params=` already exists, replace it; otherwise append.
+            if (/[?&]params=/.test(baseUrl)) {
+                return baseUrl.replace(/([?&])params=[^&]*/, `$1params=${paramStr}`);
+            }
+            return baseUrl + sep + 'params=' + paramStr;
+        }
+
+        function setActiveRange(rangeKey) {
+            if (!RANGE_VALUES[rangeKey]) return;
+            activeRange = rangeKey;
+            try { localStorage.setItem('lookerActiveRange', rangeKey); } catch (e) {}
+            // Update pill UI
+            datePillsEl.querySelectorAll('.looker-range-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.range === rangeKey);
+            });
+            // Refresh iframe with new range
+            if (lookerUrl && lookerFrame) {
+                lookerFrame.src = buildLookerSrc(lookerUrl, rangeKey);
+            }
+        }
+
+        if (datePillsEl) {
+            datePillsEl.addEventListener('click', (e) => {
+                const btn = e.target.closest('.looker-range-btn');
+                if (!btn) return;
+                setActiveRange(btn.dataset.range);
+            });
+            // Restore initial active state
+            datePillsEl.querySelectorAll('.looker-range-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.range === activeRange);
+            });
+        }
+
         function refreshLooker() {
-            if (!lookerWrap || !lookerFrame) return;
+            if (!lookerWrap || !lookerFrame || !datePillsEl) return;
             if (lookerUrl) {
                 lookerWrap.style.display = '';
-                lookerFrame.src = lookerUrl;
+                datePillsEl.style.display = '';   // show pills only when an embed is active
+                lookerFrame.src = buildLookerSrc(lookerUrl, activeRange);
                 if (lookerInput) lookerInput.value = lookerUrl;
             } else {
                 lookerWrap.style.display = 'none';
+                datePillsEl.style.display = 'none';
                 lookerFrame.src = '';
             }
         }
@@ -1026,6 +1109,58 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50%      { opacity: .35; }
+        }
+        /* Looker date-range pills */
+        .looker-range-pills {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .4rem;
+            padding: .65rem .8rem;
+            background: #f6fafb;
+            border: 1px solid #e3e8ef;
+            border-radius: 10px;
+        }
+        .looker-range-label {
+            font-size: .82rem;
+            font-weight: 600;
+            color: #5a6877;
+            margin-right: .4rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+        }
+        .looker-range-btn {
+            background: #fff;
+            border: 1px solid #cfd9df;
+            color: #2c3e50;
+            padding: .4rem .85rem;
+            border-radius: 999px;
+            font-family: inherit;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s, border-color .15s, color .15s, transform .1s;
+        }
+        .looker-range-btn:hover {
+            background: #eef6f8;
+            border-color: #b7cdd6;
+            color: #0d7a8a;
+        }
+        .looker-range-btn.active {
+            background: linear-gradient(135deg, #0d7a8a 0%, #16a085 100%);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 2px 8px rgba(13,122,138,.25);
+        }
+        .looker-range-btn.active:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+        @media (max-width: 720px) {
+            .looker-range-pills { padding: .5rem; }
+            .looker-range-btn { padding: .35rem .7rem; font-size: .78rem; }
+            .looker-range-label { width: 100%; margin-bottom: .25rem; }
         }
     </style>
 </body>
