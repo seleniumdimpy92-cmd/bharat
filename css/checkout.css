@@ -148,3 +148,76 @@ body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; bac
 /* Loading */
 .co-loading { text-align:center; padding:3rem 1rem; color:var(--muted); }
 .co-loading i { font-size:2rem; color:var(--teal); margin-bottom:.8rem; }
+/* ── 5% Advance Booking Model ────────────────────────────── */
+.advance-split {
+    background: linear-gradient(135deg, #f1f9fa 0%, #e8f5f2 100%);
+    border: 1px solid #cfe6e0;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin: 0.85rem 0 1rem;
+}
+.advance-split .row {
+    margin: 0;
+    padding: 0.25rem 0;
+}
+.advance-split .row + .row {
+    border-top: 1px dashed #cfe6e0;
+    margin-top: 0.4rem;
+    padding-top: 0.55rem;
+}
+.advance-split .row span:first-child {
+    font-weight: 600;
+    color: #0a5a68;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.advance-split .row span:first-child small {
+    color: #5a8b95;
+    font-weight: 500;
+    font-size: 0.78rem;
+}
+.advance-split .adv-amt {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0a5a68;
+    letter-spacing: -0.3px;
+}
+
+/* Cancellation policy box */
+.cxl-policy {
+    margin-top: 1rem;
+    padding: 0.85rem 1rem;
+    background: #fcfcfd;
+    border: 1px solid #e3e8ef;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #5a6877;
+}
+.cxl-policy strong {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+.cxl-policy ul {
+    margin: 0 0 0.5rem 0;
+    padding-left: 1.1rem;
+    list-style: disc;
+}
+.cxl-policy ul li {
+    margin: 0.18rem 0;
+    line-height: 1.5;
+}
+.cxl-policy ul li em {
+    color: #888;
+    font-style: italic;
+    font-size: 0.85em;
+}
+.cxl-policy small {
+    display: block;
+    color: #888;
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+    line-height: 1.5;
+}
