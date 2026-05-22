@@ -336,6 +336,33 @@
             setTimeout(function () { window.location.href = 'index.html#login'; }, 700);
             return;
         }
+        // Require verified email (admins exempt). This prevents bookings
+        // from accounts where the email address might not be reachable.
+        var u = window.__authInstance && window.__authInstance.currentUser;
+        var ADMIN_EMAILS = (Array.isArray(window.ADMIN_EMAILS) && window.ADMIN_EMAILS.length)
+            ? window.ADMIN_EMAILS.map(function (e) { return String(e).toLowerCase(); })
+            : [];
+        var isAdmin = u && u.email && ADMIN_EMAILS.indexOf(String(u.email).toLowerCase()) >= 0;
+        if (u && !u.emailVerified && !isAdmin) {
+            window.Toast.warning(
+                'Please verify your email before booking. We sent a verification link to ' +
+                u.email + ' when you registered. Click that link, then refresh this page.',
+                { duration: 9000 }
+            );
+            // Offer one-tap resend
+            if (window.UsersStore && window.UsersStore.resendEmailVerification) {
+                window.Toast.confirm(
+                    'Resend the verification email to ' + u.email + '?',
+                    { yesLabel: 'Yes, resend' }
+                ).then(function (yes) {
+                    if (!yes) return;
+                    window.UsersStore.resendEmailVerification()
+                        .then(function () { window.Toast.success('Verification email re-sent. Check your inbox.'); })
+                        .catch(function (err) { window.Toast.error(err && err.message || 'Could not resend.'); });
+                });
+            }
+            return;
+        }
         var errs = validate();
         if (errs.length) { window.Toast.warning(errs.join('\n')); return; }
         if (typeof Razorpay === 'undefined') { window.Toast.error('Payment gateway not loaded. Please refresh.'); return; }

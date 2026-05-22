@@ -107,8 +107,32 @@ async function login(identifier, password) {
   const profile = await window.UsersStore.login(identifier.trim(), password);
   currentUser = profile;
   updateAuthUI();
+
+  // Check email-verification status (admins are always exempt).
+  let needsVerify = false;
+  try {
+    if (!isAdminEmail(profile.email) && window.UsersStore.refreshEmailVerifiedStatus) {
+      const ok = await window.UsersStore.refreshEmailVerifiedStatus();
+      needsVerify = !ok;
+    }
+  } catch (e) { /* don't block login on this check */ }
+
   closeLogin();
-  alert('✅ Login successful! Welcome, ' + profile.username + '.');
+  if (needsVerify) {
+    // Soft-warn but let them in (so they can browse / resend). Booking
+    // and checkout will gate on emailVerified separately.
+    alert(
+      '⚠️ Login successful, but your email is not yet verified.\n\n' +
+      'We sent a verification link to ' + profile.email + ' when you registered. ' +
+      'Please click that link to enable booking. ' +
+      'You can also click "Resend verification email" inside your Profile.'
+    );
+    try { localStorage.setItem('pendingEmailVerify', profile.email); } catch (e) {}
+  } else {
+    alert('✅ Login successful! Welcome, ' + profile.username + '.');
+    try { localStorage.removeItem('pendingEmailVerify'); } catch (e) {}
+  }
+
   // Notify the rest of the app that auth state has changed (e.g., resume booking)
   try { document.dispatchEvent(new CustomEvent('auth:changed', { detail: { user: profile } })); } catch (e) {}
   return { user: profile };
@@ -150,13 +174,84 @@ async function register(...args) {
 
   if (!window.UsersStore) throw new Error('Auth system not loaded — please refresh the page.');
 
-  await window.UsersStore.register({ username, email, password, fullName, phone });
-  alert('✅ Registration successful! Please login with your new account.');
+  const result = await window.UsersStore.register({ username, email, password, fullName, phone });
+
+  // Remember which email needs verification, so the banner / login page can prompt the user later
+  try { localStorage.setItem('pendingEmailVerify', email); } catch (e) {}
+
   closeRegister();
+
+  if (result && result.emailVerifSent === false) {
+    // We could not send the verification email (offline, throttled, etc.)
+    alert('✅ Registration successful!\n\nWe could not send a verification email automatically. You can request one from the login screen.');
+  } else {
+    alert(
+      '✅ Registration successful!\n\n' +
+      'A verification link has been sent to:\n' + email + '\n\n' +
+      'Please check your inbox (and spam folder), click the link, then come back and log in.'
+    );
+  }
+
   openLogin();
 
   const loginEmailEl = document.getElementById('loginEmail');
   if (loginEmailEl) loginEmailEl.value = email;
+
+  // Drop a sticky banner on the login modal for the new user
+  showVerifyEmailBanner(email);
+}
+
+// Show a small "verify your email" banner on top of the login modal.
+// Lets the user click "Resend verification email" without leaving the page.
+function showVerifyEmailBanner(email) {
+  const modal = document.getElementById('loginModal');
+  if (!modal) return;
+  const content = modal.querySelector('.modal-content');
+  if (!content) return;
+  // Avoid duplicates
+  let banner = content.querySelector('#emailVerifyBanner');
+  if (banner) banner.remove();
+
+  banner = document.createElement('div');
+  banner.id = 'emailVerifyBanner';
+  banner.style.cssText =
+    'background:#e8f4ff;border-left:3px solid #2196f3;color:#0a4d6b;' +
+    'padding:.7rem .85rem;border-radius:6px;margin:0 0 1rem;' +
+    'font-size:.9rem;line-height:1.5;';
+  banner.innerHTML =
+    '<i class="fas fa-envelope-open-text"></i> ' +
+    'A verification link was sent to <strong>' + esc(email) + '</strong>. ' +
+    'Click it, then log in here. ' +
+    '<a href="#" id="resendVerifyLink" style="color:#0d7a8a;font-weight:600;">' +
+    'Resend email</a>.';
+
+  const h2 = content.querySelector('h2');
+  if (h2 && h2.nextSibling) h2.parentNode.insertBefore(banner, h2.nextSibling);
+  else content.insertBefore(banner, content.firstChild);
+
+  const link = banner.querySelector('#resendVerifyLink');
+  if (link) link.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+      // The user may not be signed in yet — try to sign them in temporarily
+      // OR fall back to a password-reset email which also confirms the address.
+      // Cleanest: ask them to log in once, then trigger resend.
+      if (!window.UsersStore || !window.UsersStore.resendEmailVerification) {
+        alert('Please log in first; we will resend the email automatically if your account isn\'t verified yet.');
+        return;
+      }
+      await window.UsersStore.resendEmailVerification();
+      alert('✅ Verification email resent. Please check your inbox.');
+    } catch (err) {
+      alert('Could not resend automatically: ' + (err.message || err) + '\n\nPlease log in once — if your email is unverified you will see a "Resend" option in your profile.');
+    }
+  });
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
 }
 
 // ── Logout ──

@@ -338,6 +338,21 @@
 
         try { await firebaseAuth.updateProfile(cred.user, { displayName: username }); } catch (_) {}
 
+        // ── Send verification email (free, unlimited via Firebase Auth) ──
+        // Admins are exempt — they're trusted by the email allowlist.
+        var emailVerifSent = false;
+        if (!isAdminEmail(email)) {
+            try {
+                await firebaseAuth.sendEmailVerification(cred.user, {
+                    url: window.location.origin + '/index.html?verified=1',
+                    handleCodeInApp: false
+                });
+                emailVerifSent = true;
+            } catch (err) {
+                console.warn('sendEmailVerification failed:', err);
+            }
+        }
+
         const batch = firestore.writeBatch(db);
         batch.set(firestore.doc(db, 'users', uid), {
             uid,
@@ -347,6 +362,7 @@
             fullName: fullName || '',
             phone: phone || '',
             role: isAdminEmail(email) ? 'admin' : 'user',
+            emailVerified: !!cred.user.emailVerified, // false for non-admins
             createdAt: firestore.serverTimestamp()
         });
         batch.set(firestore.doc(db, 'usernames', username.toLowerCase()), {
@@ -356,10 +372,43 @@
         });
         await batch.commit();
 
-        return profileFromUser(cred.user, {
+        var profile = profileFromUser(cred.user, {
             username, fullName: fullName || '', phone: phone || '',
-            role: isAdminEmail(email) ? 'admin' : 'user'
+            role: isAdminEmail(email) ? 'admin' : 'user',
+            emailVerified: !!cred.user.emailVerified
         });
+        profile.emailVerifSent = emailVerifSent; // surface to UI
+        return profile;
+    }
+
+    // Re-send the email-verification message for the currently signed-in user
+    async function resendEmailVerification() {
+        const { auth, firebaseAuth } = await window.__firebaseReady;
+        if (!auth.currentUser) throw new Error('You must be signed in to resend.');
+        if (auth.currentUser.emailVerified) throw new Error('Your email is already verified.');
+        await firebaseAuth.sendEmailVerification(auth.currentUser, {
+            url: window.location.origin + '/index.html?verified=1',
+            handleCodeInApp: false
+        });
+    }
+
+    // Force-refresh the auth user, then mirror the latest emailVerified
+    // flag into the Firestore profile so admin tables and gates see it.
+    async function refreshEmailVerifiedStatus() {
+        const { auth, db, firestore } = await window.__firebaseReady;
+        const u = auth.currentUser;
+        if (!u) return false;
+        try { await u.reload(); } catch (_) {}
+        const ok = !!u.emailVerified;
+        try {
+            await firestore.updateDoc(firestore.doc(db, 'users', u.uid), {
+                emailVerified: ok,
+                emailVerifiedAt: ok ? firestore.serverTimestamp() : null
+            });
+        } catch (err) {
+            console.warn('Failed to mirror emailVerified to Firestore:', err);
+        }
+        return ok;
     }
 
     // identifier may be a username OR an email
@@ -545,19 +594,22 @@
     }
 
     window.UsersStore = {
-        login:                  loginUser,
-        register:               registerUser,
-        logout:                 logoutUser,
-        onAuthChange:           onAuthChange,
-        getCurrentUser:         getCurrentUser,
-        isAdmin:                isAdmin,
-        updateProfile:          updateProfile,
-        sendPasswordReset:      sendPasswordReset,
-        lookupUsernamesByEmail: lookupUsernamesByEmail,
+        login:                    loginUser,
+        register:                 registerUser,
+        logout:                   logoutUser,
+        onAuthChange:             onAuthChange,
+        getCurrentUser:           getCurrentUser,
+        isAdmin:                  isAdmin,
+        updateProfile:            updateProfile,
+        sendPasswordReset:        sendPasswordReset,
+        lookupUsernamesByEmail:   lookupUsernamesByEmail,
+        // email-verification:
+        resendEmailVerification:  resendEmailVerification,
+        refreshEmailVerifiedStatus: refreshEmailVerifiedStatus,
         // admin-only:
-        listAllUsers:           listAllUsers,
-        setUserDisabled:        setUserDisabled,
-        deleteUserProfile:      deleteUserProfile,
-        adminSendPasswordReset: adminSendPasswordReset
+        listAllUsers:             listAllUsers,
+        setUserDisabled:          setUserDisabled,
+        deleteUserProfile:        deleteUserProfile,
+        adminSendPasswordReset:   adminSendPasswordReset
     };
 })();
