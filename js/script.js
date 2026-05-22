@@ -262,6 +262,13 @@ window.closePayment = function() {
 };
 
 window.confirmBooking = async function() {
+    if (!arePaymentsEnabled()) {
+        // Close any open payment modal and show the call-to-book alert.
+        const pm = document.getElementById('paymentModal');
+        if (pm) pm.style.display = 'none';
+        showPaymentsDisabledAlert();
+        return;
+    }
     const priceStr = document.getElementById('finalAmount').textContent.replace(/[^0-9]/g, '');
     const price = parseFloat(priceStr);
     const details = document.getElementById('bookingDetails').textContent;
@@ -338,8 +345,24 @@ window.confirmBooking = async function() {
     rzp1.open();
 };
 
+// ── Site-settings cache + payments-disabled helper ──────────
+window._siteSettings = { paymentsEnabled: true, paymentsDisabledMessage: '' };
+
+function arePaymentsEnabled() {
+    return window._siteSettings && window._siteSettings.paymentsEnabled !== false;
+}
+
+function showPaymentsDisabledAlert() {
+    const msg = (window._siteSettings && window._siteSettings.paymentsDisabledMessage)
+        ? window._siteSettings.paymentsDisabledMessage
+        : 'Online payments are temporarily unavailable.\n\nTo book this package, please call or WhatsApp us:\n\n📞 +91 88801 95191\n📞 +91 94341 25698\n\nOr email: booking@andamanvoyages.in\n\nWe\'ll confirm your booking and arrange a payment link / bank transfer.';
+    alert('🛎️ ' + msg);
+}
+
 window.bookPackage = function(pkg) {
     try {
+        // Hard guard: if admin has disabled payments, never open the modal.
+        if (!arePaymentsEnabled()) { showPaymentsDisabledAlert(); return; }
         window.currentPackage = pkg;
         const price = getPkgPrice(pkg);
         const paymentModal = document.getElementById('paymentModal');
@@ -393,6 +416,50 @@ window.closeProfile = function() {
 document.addEventListener('DOMContentLoaded', function() {
     // ── Load packages from API ─────────────────────────────────
     loadAndRenderSitePackages();
+
+    // ── Load site settings from Firestore (payments toggle, etc.) ──
+    if (window.SettingsStore && typeof window.SettingsStore.load === 'function') {
+        // Use cached value first (instant), then fetch fresh and re-apply
+        const cached = window.SettingsStore.cached && window.SettingsStore.cached();
+        if (cached) {
+            window._siteSettings = cached;
+            applyPaymentsState();
+        }
+        window.SettingsStore.load().then(s => {
+            window._siteSettings = s || window._siteSettings;
+            applyPaymentsState();
+        }).catch(err => console.warn('Settings load failed:', err));
+    }
+
+    function applyPaymentsState() {
+        const enabled = arePaymentsEnabled();
+        // Re-render package cards so the CTA labels update
+        if (typeof renderSitePackages === 'function') renderSitePackages();
+        // Show/hide a banner above #packages
+        let banner = document.getElementById('paymentsDisabledBanner');
+        if (!enabled) {
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'paymentsDisabledBanner';
+                banner.className = 'payments-disabled-banner';
+                const target = document.getElementById('packages') || document.querySelector('main');
+                if (target) target.parentNode.insertBefore(banner, target);
+            }
+            const customMsg = (window._siteSettings && window._siteSettings.paymentsDisabledMessage) || '';
+            banner.innerHTML =
+                '<i class="fas fa-info-circle"></i> ' +
+                (customMsg ||
+                'Online payments are temporarily unavailable. Please call <a href="tel:+918880195191">+91 88801 95191</a> or email <a href="mailto:booking@andamanvoyages.in">booking@andamanvoyages.in</a> to book.');
+        } else if (banner) {
+            banner.remove();
+        }
+
+        // Also tweak the modal "Pay Now" button label and the modal subtitle
+        const cb = document.getElementById('confirmBookingBtn');
+        if (cb) cb.innerHTML = enabled
+            ? '<i class="fas fa-credit-card"></i> Pay Now with Razorpay'
+            : '<i class="fas fa-phone-alt"></i> Call to Book — Payments Disabled';
+    }
 
     // ── Hero Carousel ──────────────────────────────────────────
     (function initCarousel() {

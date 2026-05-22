@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', function () {
         bookings: 'All Bookings',
         packages: 'Package Performance',
         customers: 'Customers',
-        revenue: 'Revenue Analytics'
+        revenue: 'Revenue Analytics',
+        settings: 'Site Settings'
     };
 
     sidebarLinks.forEach(link => {
@@ -1065,6 +1066,71 @@ document.addEventListener('DOMContentLoaded', function () {
     // table are ready by the time the user clicks the Customers tab).
     if (typeof refreshCustomers === 'function') {
         refreshCustomers();
+    }
+
+    // ── Site Settings (Firestore-backed) ────────────────────────
+    const settingsToggle = document.getElementById('paymentsEnabledToggle');
+    const settingsMessage = document.getElementById('paymentsDisabledMessage');
+    const settingsCurrentInfo = document.getElementById('settingsCurrentInfo');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    const settingsStatus = document.getElementById('settingsStatus');
+
+    async function loadSiteSettings() {
+        if (!window.SettingsStore) return;
+        try {
+            const s = await window.SettingsStore.load();
+            if (settingsToggle) settingsToggle.checked = s.paymentsEnabled !== false;
+            if (settingsMessage) settingsMessage.value = s.paymentsDisabledMessage || '';
+            if (settingsCurrentInfo) {
+                settingsCurrentInfo.textContent = s.paymentsEnabled === false
+                    ? '⚠️ Online payments are currently DISABLED on the live site.'
+                    : '✅ Online payments are LIVE.';
+                settingsCurrentInfo.style.color = s.paymentsEnabled === false ? '#c0392b' : '#16a085';
+            }
+        } catch (e) {
+            console.warn('Could not load settings:', e);
+        }
+    }
+    loadSiteSettings();
+
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', async () => {
+            if (!window.SettingsStore) {
+                alert('Settings store not loaded. Refresh the page.');
+                return;
+            }
+            saveSettingsBtn.disabled = true;
+            saveSettingsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+            settingsStatus.style.display = 'block';
+            settingsStatus.className = 'publish-status publish-info';
+            settingsStatus.innerHTML = '⏳ Saving settings to Firebase…';
+
+            try {
+                const patch = {
+                    paymentsEnabled: !!(settingsToggle && settingsToggle.checked),
+                    paymentsDisabledMessage: (settingsMessage && settingsMessage.value || '').trim()
+                };
+                await window.SettingsStore.save(patch);
+                settingsStatus.className = 'publish-status publish-success';
+                settingsStatus.innerHTML = patch.paymentsEnabled
+                    ? '✅ Settings saved. Online payments are now LIVE.'
+                    : '✅ Settings saved. Online payments are now DISABLED — visitors will see the call-to-book CTA instead.';
+                if (settingsCurrentInfo) {
+                    settingsCurrentInfo.textContent = patch.paymentsEnabled
+                        ? '✅ Online payments are LIVE.'
+                        : '⚠️ Online payments are currently DISABLED on the live site.';
+                    settingsCurrentInfo.style.color = patch.paymentsEnabled ? '#16a085' : '#c0392b';
+                }
+            } catch (err) {
+                settingsStatus.className = 'publish-status publish-error';
+                settingsStatus.innerHTML = '❌ ' + (err.message || 'Failed to save settings.');
+            } finally {
+                setTimeout(() => {
+                    saveSettingsBtn.disabled = false;
+                    saveSettingsBtn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
+                }, 2000);
+            }
+        });
     }
 
     // Auto-refresh when localStorage changes (e.g. from another tab)
