@@ -34,7 +34,7 @@
         if (/exclude|not include|extra|additional/.test(q))
             return '❌ **Generally NOT included:**\n• Airfare to Port Blair\n• Lunch & dinner (Budget/Standard)\n• Personal expenses\n• Travel insurance\n• Extra water sports\n\nContact us for custom add-ons!';
         if (/contact|phone|email|call|reach|whatsapp|support/.test(q))
-            return '📞 **Contact Us:**\n• Phone: +91 98765 43210\n• Email: info@bharattours.com\n• Visit: Contact section on homepage\n• Hours: Mon–Sat, 9am–7pm IST\n\nWe\'d love to plan your dream trip! 🌴';
+            return '📞 **Contact Us:**\n• Phone: +91 88801 95191 / +91 94341 25698\n• Email: info@andamanvoyages.in\n  · Bookings: booking@andamanvoyages.in\n  · Cancellations: cancellation@andamanvoyages.in\n• Hours: Mon–Sat, 9am–7pm IST\n\nWe\'d love to plan your dream trip! 🌴';
         if (/cancel|refund|policy/.test(q))
             return '📋 **Cancellation Policy:**\n• 15+ days before: 100% refund\n• 7–14 days before: 50% refund\n• Within 7 days: No refund\n\nWe recommend travel insurance for peace of mind!';
         if (/activity|activities|what to do|adventure|fun/.test(q))
