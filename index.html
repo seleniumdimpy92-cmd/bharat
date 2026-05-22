@@ -64,38 +64,100 @@
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8154901590978667"
             crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="css/style.css?v=14">
-    <link rel="stylesheet" href="css/mmt.css?v=14">
+    <link rel="stylesheet" href="css/style.css?v=15">
+    <link rel="stylesheet" href="css/mmt.css?v=15">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Razorpay Payment Gateway -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <div class="nav-container">
-                <div class="logo" style="display:flex;align-items:center;gap:0.6rem;">
-                    <img src="images/logo.png" alt="" style="height:48px;width:auto;object-fit:contain;">
-                    <span>Bharat Tours &amp; Travels</span>
+    <!-- ── Slim Top Bar ─────────────────────────────────────── -->
+    <header class="topbar">
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-logo">
+            <img src="images/logo.png" alt="">
+            <span>Bharat Tours &amp; Travels</span>
+        </div>
+        <a href="tel:+919876543210" class="topbar-phone"><i class="fas fa-phone-alt"></i> <span>+91 98765 43210</span></a>
+    </header>
+
+    <!-- ── Sidebar Backdrop (mobile) ─────────────────────────── -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ── Left Sidebar Navigation ───────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <img src="images/logo.png" alt="">
+            <div class="sidebar-brand">
+                <span class="brand-main">Bharat Tours</span>
+                <span class="brand-sub">&amp; Travels</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="#home"><i class="fas fa-home"></i> <span>Home</span></a></li>
+                <li><a href="#packages"><i class="fas fa-suitcase"></i> <span>Packages</span></a></li>
+                <li><a href="#customize"><i class="fas fa-cog"></i> <span>Customize</span></a></li>
+                <li><a href="#contact"><i class="fas fa-phone"></i> <span>Contact</span></a></li>
+                <li><a href="dashboard.html"><i class="fas fa-th-large"></i> <span>Dashboard</span></a></li>
+            </ul>
+            <div class="sidebar-divider"></div>
+            <ul>
+                <li><a href="javascript:void(0)" id="signUpNavLink"><i class="fas fa-user-plus"></i> <span>Sign Up</span></a></li>
+                <li><a href="#" id="authLink" class="sidebar-cta"><i class="fas fa-sign-in-alt"></i> <span>Login</span></a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="tel:+919876543210"><i class="fas fa-phone-alt"></i> +91 98765 43210</a>
+        </div>
+    </aside>
+
+    <!-- ── Main Content (offset by sidebar) ─────────────────── -->
+    <main class="main-content">
+
+        <!-- ── Top Search Bar ──────────────────────── -->
+        <div class="mmt-searchbar mmt-searchbar-top">
+            <div class="mmt-search-fields">
+                <div class="mmt-field">
+                    <span class="mmt-field-label">Travelling From</span>
+                    <select class="mmt-field-value" id="mmtFrom" data-cities data-default="Bangalore (Bengaluru)"></select>
                 </div>
-                <ul class="nav-menu">
-                    <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
-                    <li><a href="#packages"><i class="fas fa-suitcase"></i> Packages</a></li>
-                    <li><a href="#customize"><i class="fas fa-cog"></i> Customize</a></li>
-                    <li><a href="#contact"><i class="fas fa-phone"></i> Contact</a></li>
-                    <li><a href="dashboard.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
-                    <li><a href="javascript:void(0)" id="signUpNavLink"><i class="fas fa-user-plus"></i> Sign Up</a></li>
-                    <li><a href="#" id="authLink"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-                </ul>
-                <div class="hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                <div class="mmt-field">
+                    <span class="mmt-field-label">Going To</span>
+                    <input class="mmt-field-value" id="mmtTo" type="text" value="Andaman" readonly>
+                </div>
+                <div class="mmt-field">
+                    <span class="mmt-field-label">Travel Date</span>
+                    <input class="mmt-field-value" id="mmtDate" type="date">
+                </div>
+                <div class="mmt-field">
+                    <span class="mmt-field-label">Adults</span>
+                    <select class="mmt-field-value" id="mmtAdults">
+                        <option value="1">1 Adult</option>
+                        <option value="2" selected>2 Adults</option>
+                        <option value="3">3 Adults</option>
+                        <option value="4">4 Adults</option>
+                        <option value="5">5 Adults</option>
+                        <option value="6">6 Adults</option>
+                    </select>
+                </div>
+                <div class="mmt-field">
+                    <span class="mmt-field-label">Children (Under 5)</span>
+                    <select class="mmt-field-value" id="mmtChildren">
+                        <option value="0" selected>0 Children</option>
+                        <option value="1">1 Child</option>
+                        <option value="2">2 Children</option>
+                        <option value="3">3 Children</option>
+                        <option value="4">4 Children</option>
+                    </select>
                 </div>
             </div>
-        </nav>
-    </header>
+            <button class="mmt-search-btn" id="mmtSearchBtn">SEARCH</button>
+        </div>
+
 
     <section id="home" class="hero">
         <!-- Hero Carousel -->
@@ -152,167 +214,7 @@
             </div>
         </div>
 
-        <!-- ── Search Bar overlaid on hero ──────────────────────── -->
-        <div class="mmt-searchbar mmt-searchbar-hero">
-            <div class="mmt-search-fields">
-                <div class="mmt-field">
-                    <span class="mmt-field-label">Travelling From</span>
-                    <select class="mmt-field-value" id="mmtFrom">
-                        <option value="">Select your city</option>
-                        <option value="Agartala">Agartala</option>
-                        <option value="Agra">Agra</option>
-                        <option value="Ahmedabad">Ahmedabad</option>
-                        <option value="Ajmer">Ajmer</option>
-                        <option value="Aligarh">Aligarh</option>
-                        <option value="Allahabad">Allahabad (Prayagraj)</option>
-                        <option value="Amravati">Amravati</option>
-                        <option value="Amritsar">Amritsar</option>
-                        <option value="Aurangabad">Aurangabad</option>
-                        <option value="Bangalore" selected>Bangalore (Bengaluru)</option>
-                        <option value="Bareilly">Bareilly</option>
-                        <option value="Belgaum">Belgaum</option>
-                        <option value="Bhavnagar">Bhavnagar</option>
-                        <option value="Bhilai">Bhilai</option>
-                        <option value="Bhopal">Bhopal</option>
-                        <option value="Bhubaneswar">Bhubaneswar</option>
-                        <option value="Bikaner">Bikaner</option>
-                        <option value="Bilaspur">Bilaspur</option>
-                        <option value="Bokaro">Bokaro</option>
-                        <option value="Chandigarh">Chandigarh</option>
-                        <option value="Chennai">Chennai</option>
-                        <option value="Coimbatore">Coimbatore</option>
-                        <option value="Cuttack">Cuttack</option>
-                        <option value="Dehradun">Dehradun</option>
-                        <option value="Delhi">Delhi / New Delhi</option>
-                        <option value="Dhanbad">Dhanbad</option>
-                        <option value="Dharamshala">Dharamshala</option>
-                        <option value="Dibrugarh">Dibrugarh</option>
-                        <option value="Dimapur">Dimapur</option>
-                        <option value="Durgapur">Durgapur</option>
-                        <option value="Erode">Erode</option>
-                        <option value="Faridabad">Faridabad</option>
-                        <option value="Gandhinagar">Gandhinagar</option>
-                        <option value="Gangtok">Gangtok</option>
-                        <option value="Gaya">Gaya</option>
-                        <option value="Ghaziabad">Ghaziabad</option>
-                        <option value="Goa">Goa (Panaji)</option>
-                        <option value="Gorakhpur">Gorakhpur</option>
-                        <option value="Greater Noida">Greater Noida</option>
-                        <option value="Gulbarga">Gulbarga (Kalaburagi)</option>
-                        <option value="Guntur">Guntur</option>
-                        <option value="Gurgaon">Gurgaon (Gurugram)</option>
-                        <option value="Guwahati">Guwahati</option>
-                        <option value="Gwalior">Gwalior</option>
-                        <option value="Haldwani">Haldwani</option>
-                        <option value="Haridwar">Haridwar</option>
-                        <option value="Hisar">Hisar</option>
-                        <option value="Hubli">Hubli-Dharwad</option>
-                        <option value="Hyderabad">Hyderabad</option>
-                        <option value="Imphal">Imphal</option>
-                        <option value="Indore">Indore</option>
-                        <option value="Itanagar">Itanagar</option>
-                        <option value="Jabalpur">Jabalpur</option>
-                        <option value="Jaipur">Jaipur</option>
-                        <option value="Jalandhar">Jalandhar</option>
-                        <option value="Jammu">Jammu</option>
-                        <option value="Jamnagar">Jamnagar</option>
-                        <option value="Jamshedpur">Jamshedpur</option>
-                        <option value="Jhansi">Jhansi</option>
-                        <option value="Jodhpur">Jodhpur</option>
-                        <option value="Kakinada">Kakinada</option>
-                        <option value="Kanpur">Kanpur</option>
-                        <option value="Karnal">Karnal</option>
-                        <option value="Kochi">Kochi (Cochin)</option>
-                        <option value="Kohima">Kohima</option>
-                        <option value="Kolhapur">Kolhapur</option>
-                        <option value="Kolkata">Kolkata</option>
-                        <option value="Kota">Kota</option>
-                        <option value="Kozhikode">Kozhikode (Calicut)</option>
-                        <option value="Kurnool">Kurnool</option>
-                        <option value="Lucknow">Lucknow</option>
-                        <option value="Ludhiana">Ludhiana</option>
-                        <option value="Madurai">Madurai</option>
-                        <option value="Mangalore">Mangalore (Mangaluru)</option>
-                        <option value="Mathura">Mathura</option>
-                        <option value="Meerut">Meerut</option>
-                        <option value="Moradabad">Moradabad</option>
-                        <option value="Mumbai">Mumbai</option>
-                        <option value="Muzaffarpur">Muzaffarpur</option>
-                        <option value="Mysore">Mysore (Mysuru)</option>
-                        <option value="Nagpur">Nagpur</option>
-                        <option value="Nashik">Nashik</option>
-                        <option value="Nellore">Nellore</option>
-                        <option value="Noida">Noida</option>
-                        <option value="Panaji">Panaji</option>
-                        <option value="Panchkula">Panchkula</option>
-                        <option value="Patiala">Patiala</option>
-                        <option value="Patna">Patna</option>
-                        <option value="Pondicherry">Pondicherry (Puducherry)</option>
-                        <option value="Pune">Pune</option>
-                        <option value="Raipur">Raipur</option>
-                        <option value="Rajahmundry">Rajahmundry</option>
-                        <option value="Rajkot">Rajkot</option>
-                        <option value="Ranchi">Ranchi</option>
-                        <option value="Rohtak">Rohtak</option>
-                        <option value="Rourkela">Rourkela</option>
-                        <option value="Saharanpur">Saharanpur</option>
-                        <option value="Salem">Salem</option>
-                        <option value="Shillong">Shillong</option>
-                        <option value="Shimla">Shimla</option>
-                        <option value="Siliguri">Siliguri</option>
-                        <option value="Solapur">Solapur</option>
-                        <option value="Srinagar">Srinagar</option>
-                        <option value="Surat">Surat</option>
-                        <option value="Thane">Thane</option>
-                        <option value="Thiruvananthapuram">Thiruvananthapuram (Trivandrum)</option>
-                        <option value="Thrissur">Thrissur</option>
-                        <option value="Tiruchirappalli">Tiruchirappalli (Trichy)</option>
-                        <option value="Tirunelveli">Tirunelveli</option>
-                        <option value="Tirupati">Tirupati</option>
-                        <option value="Tiruppur">Tiruppur</option>
-                        <option value="Udaipur">Udaipur</option>
-                        <option value="Ujjain">Ujjain</option>
-                        <option value="Vadodara">Vadodara (Baroda)</option>
-                        <option value="Varanasi">Varanasi (Banaras)</option>
-                        <option value="Vasai-Virar">Vasai-Virar</option>
-                        <option value="Vellore">Vellore</option>
-                        <option value="Vijayawada">Vijayawada</option>
-                        <option value="Visakhapatnam">Visakhapatnam (Vizag)</option>
-                        <option value="Warangal">Warangal</option>
-                    </select>
-                </div>
-                <div class="mmt-field">
-                    <span class="mmt-field-label">Going To</span>
-                    <input class="mmt-field-value" id="mmtTo" type="text" value="Andaman" readonly>
-                </div>
-                <div class="mmt-field">
-                    <span class="mmt-field-label">Travel Date</span>
-                    <input class="mmt-field-value" id="mmtDate" type="date">
-                </div>
-                <div class="mmt-field">
-                    <span class="mmt-field-label">Adults</span>
-                    <select class="mmt-field-value" id="mmtAdults">
-                        <option value="1">1 Adult</option>
-                        <option value="2" selected>2 Adults</option>
-                        <option value="3">3 Adults</option>
-                        <option value="4">4 Adults</option>
-                        <option value="5">5 Adults</option>
-                        <option value="6">6 Adults</option>
-                    </select>
-                </div>
-                <div class="mmt-field">
-                    <span class="mmt-field-label">Children (Under 5)</span>
-                    <select class="mmt-field-value" id="mmtChildren">
-                        <option value="0" selected>0 Children</option>
-                        <option value="1">1 Child</option>
-                        <option value="2">2 Children</option>
-                        <option value="3">3 Children</option>
-                        <option value="4">4 Children</option>
-                    </select>
-                </div>
-            </div>
-            <button class="mmt-search-btn" id="mmtSearchBtn">SEARCH</button>
-        </div>
+
     </section>
 
     <!-- Features Section -->
@@ -618,10 +520,13 @@
         </div>
     </footer>
 
+    </main>
+
     <!-- Firebase config + dataStore load first; auth/script depend on them -->
     <script src="js/firebase-config.js?v=13"></script>
     <script src="js/dataStore.js?v=13"></script>
     <script src="js/auth.js?v=13"></script>
+    <script src="js/cities.js?v=15"></script>
     <script src="js/script.js?v=13"></script>
     <script src="js/chat.js?v=13"></script>
 </body>

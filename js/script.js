@@ -452,21 +452,16 @@ document.addEventListener('DOMContentLoaded', function() {
         startAuto();
     })();
 
-    // Mobile menu toggle
-    const hamburger = document.querySelector('.hamburger');
-    const navMenu = document.querySelector('.nav-menu');
-
-    if (hamburger && navMenu) {
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
-
-        document.querySelectorAll('.nav-menu a').forEach(n => n.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-        }));
-    }
+    // Sidebar toggle (mobile)
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    const closeSidebar = () => document.body.classList.remove('sidebar-open');
+    const openSidebar  = () => document.body.classList.add('sidebar-open');
+    if (hamburgerBtn) hamburgerBtn.addEventListener('click', () => {
+        document.body.classList.toggle('sidebar-open');
+    });
+    if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.addEventListener('click', closeSidebar));
 
     // Sign Up nav link
     const signUpNavLink = document.getElementById('signUpNavLink');
