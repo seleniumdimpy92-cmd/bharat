@@ -16,8 +16,8 @@
     <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="apple-touch-icon" href="images/logo.png">
 
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/style.css?v=18">
+    <link rel="stylesheet" href="css/dashboard.css?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="js/firebase-config.js?v=12"></script>
@@ -56,51 +56,44 @@
     </script>
 </head>
 <body class="dashboard-body">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">
-                <img src="images/logo.png" alt="Bharat Tours" style="height:52px;width:auto;object-fit:contain;filter:brightness(1.1);">
-            </div>
-            <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="#" class="sidebar-link active" data-section="overview">
-                <i class="fas fa-th-large"></i> Overview
+    <!-- ── Top Brand Bar with Inline Icon Nav ───────────────── -->
+    <header class="topbar dashboard-topbar-merged">
+        <a href="index.html" class="topbar-logo" title="Back to site">
+            <img src="images/logo.png" alt="">
+            <span>Admin Dashboard</span>
+        </a>
+        <nav class="topnav" id="topnav">
+            <a href="#" class="topnav-item sidebar-link active" data-section="overview">
+                <i class="fas fa-th-large"></i><span>Overview</span>
             </a>
-            <a href="#" class="sidebar-link" data-section="bookings">
-                <i class="fas fa-calendar-check"></i> Bookings
+            <a href="#" class="topnav-item sidebar-link" data-section="bookings">
+                <i class="fas fa-calendar-check"></i><span>Bookings</span>
             </a>
-            <a href="#" class="sidebar-link" data-section="packages">
-                <i class="fas fa-suitcase"></i> Packages
+            <a href="#" class="topnav-item sidebar-link" data-section="packages">
+                <i class="fas fa-suitcase"></i><span>Packages</span>
             </a>
-            <a href="#" class="sidebar-link" data-section="customers">
-                <i class="fas fa-users"></i> Customers
+            <a href="#" class="topnav-item sidebar-link" data-section="customers">
+                <i class="fas fa-users"></i><span>Customers</span>
             </a>
-            <a href="#" class="sidebar-link" data-section="revenue">
-                <i class="fas fa-chart-line"></i> Revenue
+            <a href="#" class="topnav-item sidebar-link" data-section="revenue">
+                <i class="fas fa-chart-line"></i><span>Revenue</span>
+            </a>
+            <a href="index.html" class="topnav-item">
+                <i class="fas fa-arrow-left"></i><span>Back to Site</span>
             </a>
         </nav>
-        <div class="sidebar-footer">
-            <a href="index.html" class="sidebar-link">
-                <i class="fas fa-arrow-left"></i> Back to Site
-            </a>
-        </div>
-    </aside>
+        <span class="topbar-user" id="topbarUser">
+            <i class="fas fa-user-circle"></i> <span id="dashUsername">Admin</span>
+        </span>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
 
     <!-- Main Content -->
     <main class="dashboard-main">
-        <!-- Top Bar -->
-        <header class="dashboard-topbar">
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
+        <header class="dashboard-page-title">
             <h1 class="topbar-title" id="pageTitle">Dashboard Overview</h1>
-            <div class="topbar-actions">
-                <span class="topbar-user" id="topbarUser">
-                    <i class="fas fa-user-circle"></i> <span id="dashUsername">Admin</span>
-                </span>
-            </div>
         </header>
 
         <!-- Overview Section -->
@@ -375,7 +368,7 @@
 
     <script src="js/firebase-config.js?v=12"></script>
     <script src="js/dataStore.js?v=12"></script>
-    <script src="js/dashboard.js?v=12"></script>
+    <script src="js/dashboard.js?v=13"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
         document.getElementById('iteDoneBtn').addEventListener('click', () => window._closeItineraryEditor());
