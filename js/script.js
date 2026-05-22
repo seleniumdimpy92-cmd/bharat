@@ -636,6 +636,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+
+
+    // View toggle (Grid / List)
+    (function () {
+        const grid = document.getElementById('packagesGrid');
+        if (!grid) return;
+        const buttons = document.querySelectorAll('.mmt-view-toggle .view-btn');
+        function applyView(view) {
+            grid.classList.remove('view-grid', 'view-list');
+            grid.classList.add(view === 'list' ? 'view-list' : 'view-grid');
+            buttons.forEach(b => b.classList.toggle('active', b.dataset.view === view));
+            try { localStorage.setItem('pkgView', view); } catch (e) {}
+        }
+        // Restore preference
+        const saved = (function () { try { return localStorage.getItem('pkgView'); } catch (e) { return null; } })();
+        if (saved === 'list' || saved === 'grid') applyView(saved);
+        buttons.forEach(b => b.addEventListener('click', () => applyView(b.dataset.view)));
+    })();
+
     // Sort dropdown
     const mmtSort = document.getElementById('mmtSort');
     if (mmtSort) {
