@@ -258,6 +258,11 @@ window.closeCustomize = function() {
 };
 
 window.proceedToPayment = function() {
+    // 🔒 Require login before opening the payment modal
+    if (typeof requireLoginOrPrompt === 'function' && !requireLoginOrPrompt('book ' + window.currentPackage)) {
+        document.getElementById('customizeModal').style.display = 'none';
+        return;
+    }
     const totalStr = document.getElementById('totalPrice').textContent.match(/₹([\d,]+)/)[1].replace(/,/g, '');
     const total = parseFloat(totalStr);
     document.getElementById('finalAmount').textContent = `₹${total.toLocaleString()}`;
@@ -278,6 +283,12 @@ window.confirmBooking = async function() {
         showPaymentsDisabledAlert();
         return;
     }
+    // 🔒 Final defence: even if the modal somehow opened without login, block payment.
+    if (typeof requireLoginOrPrompt === 'function' && !requireLoginOrPrompt('pay for ' + window.currentPackage)) {
+        const pm = document.getElementById('paymentModal');
+        if (pm) pm.style.display = 'none';
+        return;
+    }
     const priceStr = document.getElementById('finalAmount').textContent.replace(/[^0-9]/g, '');
     const price = parseFloat(priceStr);
     const details = document.getElementById('bookingDetails').textContent;
@@ -293,7 +304,7 @@ window.confirmBooking = async function() {
         currency: 'INR',
         name: 'Bharat Tours & Travels',
         description: `${window.currentPackage} Package - Travel Booking`,
-        image: 'https://bharatandaman.netlify.app/images/logo.png',
+        image: 'https://andamanvoyages.in/images/logo.png',
         handler: async function(response) {
             // Payment successful
             const bookingData = {
@@ -368,11 +379,74 @@ function showPaymentsDisabledAlert() {
     alert('🛎️ ' + msg);
 }
 
+// ── Login-required helper ─────────────────────────────────
+// Cache the live Firebase auth instance once it's ready, so
+// isUserLoggedIn() can do a synchronous check on every click.
+window.__authInstance = null;
+window.__firebaseAuthReady = false;
+if (window.__firebaseReady && typeof window.__firebaseReady.then === 'function') {
+    window.__firebaseReady.then(({ auth, firebaseAuth }) => {
+        window.__authInstance = auth;
+        // Wait for the FIRST auth-state event (definitive answer about login state).
+        // Until this fires, Firebase may still be restoring a persisted session.
+        if (firebaseAuth && typeof firebaseAuth.onAuthStateChanged === 'function') {
+            const stop = firebaseAuth.onAuthStateChanged(auth, (u) => {
+                window.__firebaseAuthReady = true;
+                // If Firebase says no user, scrub stale local cache too.
+                if (!u) {
+                    try { localStorage.removeItem('currentUser'); } catch (e) {}
+                    try { localStorage.removeItem('token'); } catch (e) {}
+                }
+            });
+        } else {
+            window.__firebaseAuthReady = true;
+        }
+    }).catch(() => { window.__firebaseAuthReady = true; });
+}
+
+function isUserLoggedIn() {
+    // 1) Primary source of truth: live Firebase Auth instance (modular SDK v9+)
+    if (window.__authInstance) {
+        const u = window.__authInstance.currentUser;
+        const ok = !!(u && u.uid);
+        // Debug aid: leave a breadcrumb in console so we can verify the check.
+        try { console.debug('[auth] isUserLoggedIn (Firebase)=', ok, u && u.email); } catch (e) {}
+        return ok;
+    }
+    // 2) Firebase not yet ready → require BOTH localStorage entries (token + uid)
+    //    so any orphan value gets rejected.
+    try {
+        const cu = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        const tok = localStorage.getItem('token');
+        const ok = !!(cu && (cu.uid || cu.id) && tok);
+        try { console.debug('[auth] isUserLoggedIn (localStorage)=', ok); } catch (e) {}
+        return ok;
+    } catch (e) { return false; }
+}
+
+function requireLoginOrPrompt(intentLabel) {
+    if (isUserLoggedIn()) return true;
+    // Remember what the user was trying to do, so we can resume after login.
+    try {
+        sessionStorage.setItem('postLoginIntent', JSON.stringify({
+            type: 'book',
+            pkg: window.currentPackage || null,
+            label: intentLabel || 'continue booking',
+            ts: Date.now()
+        }));
+    } catch (e) {}
+    alert('🔒 Please log in to continue with the booking.\n\nYour package selection has been saved — you can complete the payment after signing in.');
+    if (typeof window.openLogin === 'function') window.openLogin();
+    return false;
+}
+
 window.bookPackage = function(pkg) {
     try {
         // Hard guard: if admin has disabled payments, never open the modal.
         if (!arePaymentsEnabled()) { showPaymentsDisabledAlert(); return; }
         window.currentPackage = pkg;
+        // 🔒 Require login before opening the payment modal
+        if (!requireLoginOrPrompt('book ' + pkg)) return;
         const price = getPkgPrice(pkg);
         const paymentModal = document.getElementById('paymentModal');
         if (!paymentModal) { alert('Booking system error. paymentModal not found'); return; }
@@ -425,6 +499,15 @@ window.closeProfile = function() {
 document.addEventListener('DOMContentLoaded', function() {
     // ── Load packages from API ─────────────────────────────────
     loadAndRenderSitePackages();
+
+    // 🔑 Open the login modal automatically when navigating to #login
+    // (e.g. from package.html when user tries to book without being logged in)
+    if (window.location.hash === '#login' && !isUserLoggedIn()) {
+        // Small delay so DOM is fully ready
+        setTimeout(() => {
+            if (typeof window.openLogin === 'function') window.openLogin();
+        }, 100);
+    }
 
     // ── Load site settings from Firestore (payments toggle, etc.) ──
     if (window.SettingsStore && typeof window.SettingsStore.load === 'function') {
@@ -591,6 +674,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Re-run when login/logout occurs
     window.addEventListener('storage', refreshBookingsSection);
     document.addEventListener('auth:changed', refreshBookingsSection);
+
+    // 🔁 Auto-resume booking after successful login
+    document.addEventListener('auth:changed', () => {
+        try {
+            const raw = sessionStorage.getItem('postLoginIntent');
+            if (!raw) return;
+            const intent = JSON.parse(raw);
+            // Ignore stale intents (older than 30 minutes)
+            if (!intent || (Date.now() - (intent.ts || 0)) > 30 * 60 * 1000) {
+                sessionStorage.removeItem('postLoginIntent');
+                return;
+            }
+            sessionStorage.removeItem('postLoginIntent');
+            if (intent.type === 'book' && intent.pkg && typeof window.bookPackage === 'function') {
+                // Small delay so login modal has time to close cleanly
+                setTimeout(() => window.bookPackage(intent.pkg), 250);
+            }
+        } catch (e) { console.warn('postLoginIntent resume failed:', e); }
+    });
 
     // Sign Up nav link
     const signUpNavLink = document.getElementById('signUpNavLink');
