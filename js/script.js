@@ -39,50 +39,179 @@ async function loadAndRenderSitePackages() {
     renderSitePackages();
 }
 
+// ── MMT-style listing helpers ───────────────────────────────────
+// Active filter / tab / sort state (module-scoped)
+const mmtState = { cat: 'all', sort: 'popular', dur: [], budget: [], hotel: [], theme: [] };
+
+// Derived helpers from a package
+function pkgDuration(pkg) {
+    // Try parse leading number from `duration` (e.g. "6 Nights / 7 Days") or fallback by id heuristics
+    const d = pkg.duration || pkg.desc || '';
+    const m = String(d).match(/(\d+)\s*N/i) || String(d).match(/(\d+)\s*Night/i);
+    if (m) return parseInt(m[1], 10);
+    return ({ budget: 4, standard: 6, luxury: 6, honeymoon: 5 }[pkg.id] || 5);
+}
+function pkgRoute(pkg) {
+    if (Array.isArray(pkg.cities) && pkg.cities.length) return pkg.cities;
+    return ({
+        budget:    ['1N Port Blair', '2N Havelock', '1N Port Blair'],
+        standard:  ['1N Port Blair', '2N Havelock', '1N Neil Island', '2N Port Blair'],
+        luxury:    ['2N Port Blair', '3N Havelock', '1N Neil Island'],
+        honeymoon: ['1N Port Blair', '3N Havelock', '1N Neil Island'],
+        test:      ['Test Package']
+    }[pkg.id] || ['Andaman Tour']);
+}
+function pkgCategory(pkg) {
+    if (pkg.id === 'test') return 'budget';
+    if (pkg.id === 'budget') return 'budget';
+    if (pkg.id === 'honeymoon') return 'honeymoon';
+    if (pkg.id === 'luxury') return 'premium';
+    if (pkg.id === 'standard') return 'standard';
+    return 'standard';
+}
+function pkgHotelCategory(pkg) {
+    return ({ budget: 3, standard: 3, luxury: 5, honeymoon: 4, test: 3 }[pkg.id] || 3);
+}
+function pkgPerks(pkg) {
+    return ({
+        budget:    ['Daily Breakfast', 'Cellular Jail Visit'],
+        standard:  ['Snorkeling at Elephant Beach', 'Visit to Radhanagar Beach'],
+        luxury:    ['Scuba Diving Included', 'Private Beach Access', 'Spa Treatments'],
+        honeymoon: ['Candlelight Dinner', 'Couple Photoshoot', 'Sunset Cruise'],
+        test:      ['Live Razorpay Test']
+    }[pkg.id] || []);
+}
+
+function applyFilters(packages) {
+    return packages.filter(pkg => {
+        if (pkg.visible === false) return false;
+        // Category tab
+        if (mmtState.cat !== 'all' && pkgCategory(pkg) !== mmtState.cat) return false;
+        // Duration filter
+        if (mmtState.dur.length) {
+            const d = pkgDuration(pkg);
+            const ok = mmtState.dur.some(range => {
+                if (range === '1-3') return d >= 1 && d <= 3;
+                if (range === '4-5') return d >= 4 && d <= 5;
+                if (range === '6-7') return d >= 6 && d <= 7;
+                if (range === '8+')  return d >= 8;
+                return true;
+            });
+            if (!ok) return false;
+        }
+        // Budget filter
+        if (mmtState.budget.length) {
+            const p = Number(pkg.price);
+            const ok = mmtState.budget.some(range => {
+                if (range === '0-15000')      return p < 15000;
+                if (range === '15000-22000')  return p >= 15000 && p <= 22000;
+                if (range === '22000-30000')  return p > 22000 && p <= 30000;
+                if (range === '30000+')       return p > 30000;
+                return true;
+            });
+            if (!ok) return false;
+        }
+        // Hotel category filter
+        if (mmtState.hotel.length) {
+            const h = pkgHotelCategory(pkg);
+            if (!mmtState.hotel.map(Number).includes(h)) return false;
+        }
+        return true;
+    });
+}
+
+function sortPackages(arr) {
+    const a = arr.slice();
+    switch (mmtState.sort) {
+        case 'price-asc':  a.sort((x, y) => x.price - y.price); break;
+        case 'price-desc': a.sort((x, y) => y.price - x.price); break;
+        case 'rating':     a.sort((x, y) => (y.rating || 0) - (x.rating || 0)); break;
+        case 'duration':   a.sort((x, y) => pkgDuration(x) - pkgDuration(y)); break;
+        default: /* popular = leave order */ break;
+    }
+    return a;
+}
+
+function updateTabCounts(packages) {
+    const counts = { all: 0, budget: 0, honeymoon: 0, premium: 0, standard: 0 };
+    packages.filter(p => p.visible !== false).forEach(p => {
+        counts.all += 1;
+        const c = pkgCategory(p);
+        if (counts[c] != null) counts[c] += 1;
+    });
+    Object.keys(counts).forEach(k => {
+        const el = document.querySelector(`[data-count="${k}"]`);
+        if (el) el.textContent = `(${counts[k]})`;
+    });
+}
+
 function renderSitePackages() {
     const grid = document.getElementById('packagesGrid');
     if (!grid || !window._packages) return;
 
-    const visible = window._packages.filter(p => p.visible !== false);
-    grid.innerHTML = visible.map(pkg => {
+    updateTabCounts(window._packages);
+
+    const filtered = sortPackages(applyFilters(window._packages));
+
+    if (!filtered.length) {
+        grid.innerHTML = `
+            <div class="mmt-empty">
+                <i class="fas fa-search"></i>
+                <h3>No packages match your filters</h3>
+                <p>Try widening your filters or switching tabs.</p>
+            </div>`;
+        return;
+    }
+
+    grid.innerHTML = filtered.map(pkg => {
         const isTest = pkg.id === 'test' || pkg.price <= 1;
+        const dur = pkgDuration(pkg);
+        const days = dur + 1;
+        const route = pkgRoute(pkg);
+        const perks = pkgPerks(pkg);
+        const incl = (pkg.inclusions || []).slice(0, 6);
+        const totalPrice = isTest ? pkg.price : pkg.price * 2;
+        const emi = Math.round(pkg.price / 6);
+        const tag = pkg.id === 'standard' ? 'Deal of the day' : (pkg.id === 'luxury' ? 'MMT Premium' : '');
+
         return `
-        <div class="package-card" data-name="${pkg.id}" data-pkgid="${pkg.id}" style="cursor:pointer;">
-            <div class="card-image" data-nav="${pkg.id}" style="background-image:linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3)),url('${pkg.image}');background-size:cover;background-position:center;position:relative;cursor:pointer;">
-                <div style="position:absolute;bottom:10px;right:10px;background:rgba(26,188,156,0.9);color:#fff;padding:0.25rem 0.7rem;border-radius:20px;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.3rem;">
-                    <i class="fas fa-eye"></i> View Details
-                </div>
+        <div class="mmt-card" data-pkgid="${pkg.id}" data-name="${pkg.id}">
+            <div class="mmt-card-img" data-nav="${pkg.id}" style="background-image:url('${pkg.image}');">
+                ${tag ? `<span class="mmt-card-tag">${tag}</span>` : ''}
+                <span class="mmt-more-options">${perks.length} More Options Available</span>
             </div>
-            <div class="card-content">
-                <div class="rating">${Number(pkg.rating).toFixed(1)} <i class="fas fa-star"></i></div>
-                <h3 class="package-title" data-nav="${pkg.id}" style="cursor:pointer;">${pkg.name}</h3>
-                <p class="package-desc">${pkg.desc || ''}</p>
-                <div class="price">₹${Number(pkg.price).toLocaleString()} <span>${isTest ? '/test' : '/person'}</span></div>
-                <div class="inclusions">
-                    ${(pkg.inclusions || []).map(inc => `<span class="inclusion-badge"><i class="fas ${getInclIcon(inc)}"></i> ${inc}</span>`).join('')}
+            <div class="mmt-card-body">
+                <div class="mmt-card-title-row">
+                    <h3 class="mmt-card-title" data-nav="${pkg.id}">${pkg.name}</h3>
+                    <span class="mmt-card-duration">${dur}N/${days}D</span>
                 </div>
-                <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
-                    ${!isTest ? `<button class="btn-outline" style="flex:1;" data-action="customize" data-pkg="${pkg.id}">Customize</button>` : ''}
-                    <button class="btn-primary" style="flex:1;" data-action="book" data-pkg="${pkg.id}">${isTest ? 'Pay ₹1 Now' : 'Book Now'}</button>
+                <div class="mmt-route">
+                    ${route.map((r, i) => `<span>${r}</span>${i < route.length - 1 ? '<span class="dot"></span>' : ''}`).join('')}
                 </div>
+                ${incl.length ? `
+                <div class="mmt-incl-grid">
+                    ${incl.map(i => `<div class="mmt-incl-item">${i}</div>`).join('')}
+                </div>` : ''}
+                ${perks.length ? `
+                <div class="mmt-perks">
+                    ${perks.map(p => `<div class="mmt-perk"><i class="fas fa-check"></i> ${p}</div>`).join('')}
+                </div>` : ''}
+            </div>
+            <div class="mmt-card-price">
+                ${tag === 'Deal of the day' ? `<div class="mmt-price-tagline">Specially Curated For You</div>` : ''}
+                ${pkg.price >= 20000 ? `<div class="mmt-price-emi">No Cost EMI at <strong>₹${emi.toLocaleString()}</strong>/month</div>` : ''}
+                <div class="mmt-price-row">
+                    <span class="mmt-price-amt">₹${Number(pkg.price).toLocaleString()}</span>
+                    <span class="mmt-price-per">${isTest ? '/test' : '/person'}</span>
+                </div>
+                ${!isTest ? `<div class="mmt-price-total">Total Price ₹${totalPrice.toLocaleString()}</div>` : ''}
+                <button class="mmt-card-cta" data-action="book" data-pkg="${pkg.id}">
+                    ${isTest ? 'Pay ₹1 Now' : 'Book Now'}
+                </button>
+                ${!isTest ? `<button class="mmt-card-cta-secondary" data-action="customize" data-pkg="${pkg.id}">Customize</button>` : ''}
             </div>
         </div>`;
     }).join('');
-
-    // Event delegation — one listener on the grid, handles all cards
-    grid.addEventListener('click', function handler(e) {
-        // Book Now
-        const bookBtn = e.target.closest('[data-action="book"]');
-        if (bookBtn) { e.stopPropagation(); window.bookPackage(bookBtn.dataset.pkg); return; }
-
-        // Customize
-        const custBtn = e.target.closest('[data-action="customize"]');
-        if (custBtn) { e.stopPropagation(); window.openCustomize(custBtn.dataset.pkg); return; }
-
-        // Card image or title — navigate to details
-        const navEl = e.target.closest('[data-nav]');
-        if (navEl) { window.location.href = 'package.html?id=' + navEl.dataset.nav; return; }
-    });
 }
 
 function getPkgPrice(pkgId) {
@@ -419,29 +548,92 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Package search and filter
-    const packageSearch = document.getElementById('packageSearch');
-    const sortSelect = document.getElementById('sortSelect');
-    const packageCards = document.querySelectorAll('.package-card');
+    // ── MMT-style listing event wiring ─────────────────────────
+    // Tab clicks (All / Budget / Honeymoon / Premium / Standard)
+    document.querySelectorAll('#mmtTabs .mmt-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('#mmtTabs .mmt-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            mmtState.cat = tab.dataset.cat || 'all';
+            renderSitePackages();
+        });
+    });
 
-    function filterPackages(query) {
-        packageCards.forEach(card => {
-            const name = card.getAttribute('data-name').toLowerCase();
-            card.style.display = name.includes(query.toLowerCase()) ? 'block' : 'none';
+    // Tab arrow scroll
+    document.querySelectorAll('#mmtTabs [data-tab-scroll]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabs = document.getElementById('mmtTabs');
+            if (!tabs) return;
+            tabs.scrollBy({ left: btn.dataset.tabScroll === 'right' ? 200 : -200, behavior: 'smooth' });
+        });
+    });
+
+    // Filter group accordion + checkbox changes
+    document.querySelectorAll('.mmt-filter-group').forEach(group => {
+        const head = group.querySelector('.mmt-filter-head');
+        if (head) {
+            head.addEventListener('click', () => group.classList.toggle('open'));
+        }
+    });
+    document.querySelectorAll('#mmtFilters input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const name = cb.name; // 'dur' | 'budget' | 'hotel' | 'theme'
+            if (!Array.isArray(mmtState[name])) mmtState[name] = [];
+            if (cb.checked) {
+                if (!mmtState[name].includes(cb.value)) mmtState[name].push(cb.value);
+            } else {
+                mmtState[name] = mmtState[name].filter(v => v !== cb.value);
+            }
+            renderSitePackages();
+        });
+    });
+
+    // Sort dropdown
+    const mmtSort = document.getElementById('mmtSort');
+    if (mmtSort) {
+        mmtSort.addEventListener('change', () => {
+            mmtState.sort = mmtSort.value;
+            renderSitePackages();
         });
     }
 
-    if (packageSearch) {
-        packageSearch.addEventListener('input', (e) => filterPackages(e.target.value));
+    // Search button (top navy bar) — currently just scrolls + flashes
+    const mmtSearchBtn = document.getElementById('mmtSearchBtn');
+    if (mmtSearchBtn) {
+        mmtSearchBtn.addEventListener('click', () => {
+            // Reset to ALL and refresh, then scroll into view
+            mmtState.cat = 'all';
+            document.querySelectorAll('#mmtTabs .mmt-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.cat === 'all');
+            });
+            renderSitePackages();
+            const grid = document.getElementById('packagesGrid');
+            if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
     }
 
-    if (sortSelect) {
-        sortSelect.addEventListener('change', (e) => {
-            const cardsArray = Array.from(packageCards);
-            cardsArray.sort((a, b) => {
-                // Simple sort by data-price or rating - extend as needed
-                return 0; // Placeholder
-            }).forEach(card => document.getElementById('packagesGrid').appendChild(card));
+    // Card click delegation (Book / Customize / View Details)
+    const grid = document.getElementById('packagesGrid');
+    if (grid) {
+        grid.addEventListener('click', (e) => {
+            const bookBtn = e.target.closest('[data-action="book"]');
+            if (bookBtn) { e.stopPropagation(); window.bookPackage(bookBtn.dataset.pkg); return; }
+            const custBtn = e.target.closest('[data-action="customize"]');
+            if (custBtn) { e.stopPropagation(); window.openCustomize(custBtn.dataset.pkg); return; }
+            const navEl = e.target.closest('[data-nav]');
+            if (navEl) { window.location.href = 'package.html?id=' + navEl.dataset.nav; return; }
+        });
+    }
+
+    // Legacy compatibility (in case old #packageSearch / #sortSelect still exist)
+    const packageSearch = document.getElementById('packageSearch');
+    if (packageSearch) {
+        packageSearch.addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            document.querySelectorAll('#packagesGrid .mmt-card, #packagesGrid .package-card').forEach(card => {
+                const name = (card.getAttribute('data-name') || '').toLowerCase();
+                card.style.display = name.includes(q) ? '' : 'none';
+            });
         });
     }
 

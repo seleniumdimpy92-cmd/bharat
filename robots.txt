@@ -1,0 +1,21 @@
+# robots.txt — Bharat Tours and Travels (andamanvoyages.in)
+User-agent: *
+Allow: /
+
+# Disallow admin / restricted areas
+Disallow: /dashboard.html
+Disallow: /netlify/
+Disallow: /data/
+Disallow: /js/firebase-config.js
+
+# Allow major search engines explicitly
+User-agent: Googlebot
+Allow: /
+Disallow: /dashboard.html
+
+User-agent: Bingbot
+Allow: /
+Disallow: /dashboard.html
+
+# Sitemap
+Sitemap: https://andamanvoyages.in/sitemap.xml

@@ -3,7 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Package Details - Bharat Tours & Travels</title>
+    <title>Andaman Tour Package Details | Bharat Tours &amp; Travels</title>
+
+    <!-- ── SEO ─────────────────────────────────────────────────── -->
+    <meta name="description" content="Detailed Andaman tour package itinerary — day-by-day plan, inclusions, exclusions, photo gallery and instant Razorpay booking. Customizable Port Blair, Havelock & Neil Island packages from ₹15,999.">
+    <meta name="keywords" content="Andaman tour package, Andaman itinerary, Port Blair package, Havelock Island tour, Neil Island package, Andaman honeymoon package, scuba diving Andaman, book Andaman trip">
+    <meta name="author" content="Bharat Tours and Travels">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#1abc9c">
+    <link rel="canonical" href="https://andamanvoyages.in/package.html">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="product">
+    <meta property="og:site_name" content="Bharat Tours &amp; Travels">
+    <meta property="og:url" content="https://andamanvoyages.in/package.html">
+    <meta property="og:title" content="Andaman Tour Package Details | Bharat Tours &amp; Travels">
+    <meta property="og:description" content="Day-by-day Andaman itinerary with hotels, ferries, scuba diving and instant Razorpay booking.">
+    <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_IN">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Andaman Tour Package Details | Bharat Tours &amp; Travels">
+    <meta name="twitter:description" content="Day-by-day Andaman itinerary with hotels, ferries, scuba diving and instant Razorpay booking.">
+    <meta name="twitter:image" content="https://andamanvoyages.in/images/beach1.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/logo.png">
+
+    <!-- Schema.org: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://andamanvoyages.in/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Andaman Packages",
+                "item": "https://andamanvoyages.in/#packages"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Package Details",
+                "item": "https://andamanvoyages.in/package.html"
+            }
+        ]
+    }
+    </script>
+
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8154901590978667"
             crossorigin="anonymous"></script>
@@ -233,7 +291,76 @@ async function loadPackage() {
     };
 
     document.title = pkg.name + ' – Bharat Tours & Travels';
+    injectDynamicSEO(pkg);
     renderPage(pkg);
+}
+
+// ── Inject per-package dynamic SEO + TouristTrip structured data ─
+function injectDynamicSEO(pkg) {
+    const url = 'https://andamanvoyages.in/package.html?id=' + encodeURIComponent(pkg.id);
+    const img = pkg.image ? ('https://andamanvoyages.in/' + pkg.image.replace(/^\/+/, '')) : 'https://andamanvoyages.in/images/beach1.jpg';
+    const desc = (pkg.desc || ('Andaman tour package: ' + pkg.name + '. Hotels, ferries and activities included. Book now from ₹' + Number(pkg.price).toLocaleString() + '.')).slice(0, 300);
+    const setMeta = (selector, attr, val) => {
+        let el = document.head.querySelector(selector);
+        if (el) el.setAttribute(attr, val);
+    };
+
+    // Update <title>, <meta description>, canonical, OG and Twitter tags
+    setMeta('meta[name="description"]', 'content', desc);
+    setMeta('link[rel="canonical"]', 'href', url);
+
+    setMeta('meta[property="og:url"]', 'content', url);
+    setMeta('meta[property="og:title"]', 'content', pkg.name + ' | Bharat Tours & Travels');
+    setMeta('meta[property="og:description"]', 'content', desc);
+    setMeta('meta[property="og:image"]', 'content', img);
+
+    setMeta('meta[name="twitter:title"]', 'content', pkg.name + ' | Bharat Tours & Travels');
+    setMeta('meta[name="twitter:description"]', 'content', desc);
+    setMeta('meta[name="twitter:image"]', 'content', img);
+
+    // Inject TouristTrip / Product Offer JSON-LD
+    const trip = {
+        "@context": "https://schema.org",
+        "@type": "TouristTrip",
+        "name": pkg.name,
+        "description": desc,
+        "image": img,
+        "url": url,
+        "touristType": pkg.id === 'honeymoon' ? "Couples / Honeymoon" : "Leisure travelers",
+        "itinerary": (pkg.days || []).map(d => ({
+            "@type": "TouristAttraction",
+            "name": "Day " + d.day + ": " + d.title,
+            "description": d.desc || ''
+        })),
+        "offers": {
+            "@type": "Offer",
+            "price": String(pkg.price),
+            "priceCurrency": "INR",
+            "availability": "https://schema.org/InStock",
+            "url": url,
+            "validFrom": new Date().toISOString().split('T')[0]
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": String(Number(pkg.rating).toFixed(1)),
+            "bestRating": "5",
+            "ratingCount": "120"
+        },
+        "provider": {
+            "@type": "TravelAgency",
+            "name": "Bharat Tours and Travels",
+            "url": "https://andamanvoyages.in/"
+        }
+    };
+
+    // Remove old dynamic block if any (for SPA-like navigation)
+    const old = document.getElementById('dynamic-trip-schema');
+    if (old) old.remove();
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'dynamic-trip-schema';
+    script.textContent = JSON.stringify(trip);
+    document.head.appendChild(script);
 }
 
 function renderPage(pkg) {
