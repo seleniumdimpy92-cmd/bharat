@@ -390,6 +390,26 @@
                     <span id="settingsCurrentInfo" style="color:#666;font-size:.9rem;"></span>
                 </div>
             </div>
+
+            <!-- Developer Console / DevTools lock -->
+            <div class="settings-card" style="margin-top:1.5rem;">
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <h3><i class="fas fa-terminal"></i> Developer Console Lock</h3>
+                        <p>When <strong>on</strong>, normal visitors cannot open DevTools (F12, Ctrl+Shift+I), right-click for "View Source", or save the page. <strong>Admins are always exempt</strong> &mdash; you keep full DevTools access whenever you're logged in. Toggle off to allow everyone to use the console (useful when debugging on the live site).</p>
+                    </div>
+                    <label class="toggle-switch" title="Lock the console for non-admin visitors">
+                        <input type="checkbox" id="consoleLockToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-actions" style="margin-top:1.2rem;display:flex;gap:.6rem;align-items:center;">
+                    <button class="btn-save-packages" id="saveConsoleLockBtn">
+                        <i class="fas fa-save"></i> Save Console Lock
+                    </button>
+                    <span id="consoleLockInfo" style="color:#666;font-size:.9rem;"></span>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -414,7 +434,9 @@
 
     <script src="js/firebase-config.js?v=12"></script>
     <script src="js/dataStore.js?v=14"></script>
-    <script src="js/dashboard.js?v=16"></script>
+    <script src="js/toast.js?v=1"></script>
+    <script src="js/dashboard.js?v=17"></script>
+    <script src="js/security.js?v=2"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
         document.getElementById('iteDoneBtn').addEventListener('click', () => window._closeItineraryEditor());
