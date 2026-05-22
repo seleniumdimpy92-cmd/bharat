@@ -197,3 +197,28 @@ footer{background:var(--primary-dark);color:#fff;padding:2rem;text-align:center}
   .destinations h2{font-size:1.5rem}
   .btn-primary,.btn-outline{padding:.7rem 1rem}
 }
+
+
+/* ── About Us section ─────────────────────────────────────────── */
+.about-section{background:#fff;padding:4rem 0}
+.about-section .container{max-width:1100px}
+.about-grid{display:grid;grid-template-columns:2fr 1fr;gap:3rem;align-items:start}
+.about-text h2{font-size:2rem;font-weight:800;color:var(--mmt-text);margin-bottom:1.25rem;display:flex;align-items:center;gap:.6rem}
+.about-text h2 i{color:var(--primary-teal)}
+.about-text p{color:#444;font-size:1rem;line-height:1.75;margin-bottom:1rem}
+.about-points{list-style:none;padding:0;margin:1rem 0 1.5rem}
+.about-points li{padding:.5rem 0;display:flex;gap:.75rem;align-items:flex-start;color:#444;font-size:.96rem}
+.about-points li i{color:var(--primary-teal);font-size:1.1rem;margin-top:.15rem;flex-shrink:0;width:22px;text-align:center}
+.about-stats{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.stat-block{background:linear-gradient(135deg,#f6f7fb 0%,#eef3ff 100%);border-radius:14px;padding:1.5rem 1rem;text-align:center;box-shadow:0 2px 10px rgba(10,31,68,.06);border:1px solid #e6e9f0}
+.stat-block .stat-num{display:block;font-size:1.7rem;font-weight:800;color:var(--mmt-blue);margin-bottom:.25rem;letter-spacing:-.5px}
+.stat-block .stat-cap{display:block;font-size:.78rem;font-weight:600;color:var(--mmt-muted);text-transform:uppercase;letter-spacing:.4px}
+@media (max-width:900px){
+  .about-grid{grid-template-columns:1fr}
+  .about-stats{grid-template-columns:repeat(4,1fr)}
+}
+@media (max-width:600px){
+  .about-section{padding:2.5rem 0}
+  .about-text h2{font-size:1.5rem}
+  .about-stats{grid-template-columns:1fr 1fr}
+}
