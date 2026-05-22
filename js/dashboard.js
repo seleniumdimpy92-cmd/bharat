@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const PACKAGES = {
         budget: { name: 'Budget Andaman Escape', price: 15999, color: '#3498db' },
-        standard: { name: 'Standard Andaman Bliss', price: 21999, color: '#1976d2' },
+        standard: { name: 'Standard Andaman Bliss', price: 21999, color: '#0d7a8a' },
         luxury: { name: 'Luxury Andaman Retreat', price: 28999, color: '#9b59b6' },
         honeymoon: { name: 'Honeymoon Paradise', price: 24999, color: '#e74c3c' },
         test: { name: 'Payment Test', price: 1, color: '#95a5a6' }
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (total > 0) {
             const confirmedDeg = (confirmedCount / total) * 360;
             chart.style.background = `conic-gradient(
-                #1976d2 0deg ${confirmedDeg}deg,
+                #0d7a8a 0deg ${confirmedDeg}deg,
                 #e74c3c ${confirmedDeg}deg 360deg
             )`;
         } else {
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         container.innerHTML = entries.map(([pkg, rev]) => {
             const pct = maxVal > 0 ? (rev / maxVal) * 100 : 0;
-            const color = PACKAGES[pkg] ? PACKAGES[pkg].color : '#1976d2';
+            const color = PACKAGES[pkg] ? PACKAGES[pkg].color : '#0d7a8a';
             return `
                 <div class="bar-item">
                     <span class="bar-label">${getPackageName(pkg)}</span>
@@ -876,7 +876,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td title="${u.uid}">#${String(u.uid || '').slice(-6)}</td>
                     <td>${u.username || '-'}${u.fullName ? `<br><small style="color:#888;">${u.fullName}</small>` : ''}</td>
                     <td>${u.email || '-'}</td>
-                    <td>${u.phone ? `<a href="tel:${u.phone}" style="color:#1976d2;text-decoration:none;">${u.phone}</a>` : '<span style="color:#bbb;">—</span>'}</td>
+                    <td>${u.phone ? `<a href="tel:${u.phone}" style="color:#0d7a8a;text-decoration:none;">${u.phone}</a>` : '<span style="color:#bbb;">—</span>'}</td>
                     <td>${userBookings.length}</td>
                     <td>${formatCurrency(totalSpent)}</td>
                     <td>${statusBadge}</td>
@@ -989,7 +989,7 @@ document.addEventListener('DOMContentLoaded', function () {
             breakdownContainer.innerHTML = '<p class="chart-empty">No revenue data yet</p>';
         } else {
             const maxRev = Math.max(...entries.map(e => e[1]));
-            const colors = ['#1976d2', '#3498db', '#9b59b6', '#e74c3c', '#f39c12'];
+            const colors = ['#0d7a8a', '#3498db', '#9b59b6', '#e74c3c', '#f39c12'];
 
             breakdownContainer.innerHTML = entries.map(([pkg, rev], i) => {
                 const pct = maxRev > 0 ? (rev / maxRev) * 100 : 0;
@@ -1090,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 settingsCurrentInfo.textContent = s.paymentsEnabled === false
                     ? '⚠️ Online payments are currently DISABLED on the live site.'
                     : '✅ Online payments are LIVE.';
-                settingsCurrentInfo.style.color = s.paymentsEnabled === false ? '#c0392b' : '#1565c0';
+                settingsCurrentInfo.style.color = s.paymentsEnabled === false ? '#c0392b' : '#0a5a68';
             }
         } catch (e) {
             console.warn('Could not load settings:', e);
@@ -1124,7 +1124,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     settingsCurrentInfo.textContent = patch.paymentsEnabled
                         ? '✅ Online payments are LIVE.'
                         : '⚠️ Online payments are currently DISABLED on the live site.';
-                    settingsCurrentInfo.style.color = patch.paymentsEnabled ? '#1565c0' : '#c0392b';
+                    settingsCurrentInfo.style.color = patch.paymentsEnabled ? '#0a5a68' : '#c0392b';
                 }
             } catch (err) {
                 settingsStatus.className = 'publish-status publish-error';
@@ -1153,7 +1153,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 consoleLockInfo.textContent = on
                     ? '🔒 Console lock is ON for non-admin visitors. Admins are always exempt.'
                     : '🔓 Console lock is OFF — anyone can use DevTools right now.';
-                consoleLockInfo.style.color = on ? '#1565c0' : '#c0392b';
+                consoleLockInfo.style.color = on ? '#0a5a68' : '#c0392b';
             }
         } catch (e) {
             console.warn('Could not load console-lock setting:', e);
@@ -1177,7 +1177,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     consoleLockInfo.textContent = on
                         ? '🔒 Console lock is ON for non-admin visitors. Admins are always exempt.'
                         : '🔓 Console lock is OFF — anyone can use DevTools right now.';
-                    consoleLockInfo.style.color = on ? '#1565c0' : '#c0392b';
+                    consoleLockInfo.style.color = on ? '#0a5a68' : '#c0392b';
                 }
                 if (window.Toast) {
                     window.Toast.success(on

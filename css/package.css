@@ -69,7 +69,7 @@ body {
 }
 
 .pkg-hero-meta .price-badge {
-    background: #1976d2;
+    background: #0d7a8a;
     padding: 0.4rem 1.2rem;
     border-radius: 30px;
     font-size: 1.2rem;
@@ -103,7 +103,7 @@ body {
 }
 
 .pkg-highlight-item i {
-    color: #1976d2;
+    color: #0d7a8a;
     font-size: 1rem;
 }
 
@@ -139,7 +139,7 @@ body {
     border-bottom: 2px solid #f0f2f5;
 }
 
-.pkg-section h2 i { color: #1976d2; }
+.pkg-section h2 i { color: #0d7a8a; }
 
 /* ── Itinerary Timeline ── */
 .timeline {
@@ -154,7 +154,7 @@ body {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(to bottom, #1976d2, #3498db);
+    background: linear-gradient(to bottom, #0d7a8a, #3498db);
 }
 
 .timeline-day {
@@ -171,7 +171,7 @@ body {
     top: 0.15rem;
     width: 28px;
     height: 28px;
-    background: #1976d2;
+    background: #0d7a8a;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -193,7 +193,7 @@ body {
 
 .day-badge {
     background: #e8f8f5;
-    color: #1976d2;
+    color: #0d7a8a;
     font-size: 0.75rem;
     font-weight: 700;
     padding: 0.2rem 0.6rem;
@@ -234,11 +234,11 @@ body {
     padding: 0.4rem 0.75rem;
     background: #f8f9fa;
     border-radius: 6px;
-    border-left: 3px solid #1976d2;
+    border-left: 3px solid #0d7a8a;
 }
 
 .timeline-activities li i {
-    color: #1976d2;
+    color: #0d7a8a;
     font-size: 0.75rem;
     margin-top: 3px;
     flex-shrink: 0;
@@ -268,7 +268,7 @@ body {
     color: #444;
 }
 
-.incl-list.inclusions li i { color: #1976d2; }
+.incl-list.inclusions li i { color: #0d7a8a; }
 .incl-list.exclusions li i { color: #e74c3c; }
 
 .incl-subtitle {
@@ -318,7 +318,7 @@ body {
 .booking-card .bc-price {
     font-size: 2rem;
     font-weight: 800;
-    color: #1976d2;
+    color: #0d7a8a;
     line-height: 1;
     margin-bottom: 0.25rem;
 }
@@ -364,12 +364,12 @@ body {
     color: #555;
 }
 
-.bc-inclusions li i { color: #1976d2; font-size: 0.85rem; }
+.bc-inclusions li i { color: #0d7a8a; font-size: 0.85rem; }
 
 .btn-book-now {
     width: 100%;
     padding: 0.9rem;
-    background: linear-gradient(135deg, #1976d2, #1565c0);
+    background: linear-gradient(135deg, #0d7a8a, #0a5a68);
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -385,7 +385,7 @@ body {
 }
 
 .btn-book-now:hover {
-    background: linear-gradient(135deg, #1565c0, #1976d2);
+    background: linear-gradient(135deg, #0a5a68, #0d7a8a);
     transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(26,188,156,0.4);
 }
@@ -394,8 +394,8 @@ body {
     width: 100%;
     padding: 0.75rem;
     background: #fff;
-    color: #1976d2;
-    border: 2px solid #1976d2;
+    color: #0d7a8a;
+    border: 2px solid #0d7a8a;
     border-radius: 10px;
     font-family: inherit;
     font-size: 0.95rem;
@@ -424,7 +424,7 @@ body {
     line-height: 1.5;
 }
 
-.bc-assurance i { color: #1976d2; }
+.bc-assurance i { color: #0d7a8a; }
 
 /* ── Loading / Error ── */
 .pkg-loading {
@@ -435,7 +435,7 @@ body {
 
 .pkg-loading i {
     font-size: 3rem;
-    color: #1976d2;
+    color: #0d7a8a;
     display: block;
     margin-bottom: 1rem;
 }

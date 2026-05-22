@@ -343,7 +343,7 @@ window.confirmBooking = async function() {
             duration: document.getElementById('duration') ? document.getElementById('duration').value : 'Standard'
         },
         theme: {
-            color: '#1976d2' // Teal color to match our theme
+            color: '#0d7a8a' // Teal color to match our theme
         }
     };
     
