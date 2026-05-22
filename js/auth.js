@@ -109,6 +109,8 @@ async function login(identifier, password) {
   updateAuthUI();
   closeLogin();
   alert('✅ Login successful! Welcome, ' + profile.username + '.');
+  // Notify the rest of the app that auth state has changed (e.g., resume booking)
+  try { document.dispatchEvent(new CustomEvent('auth:changed', { detail: { user: profile } })); } catch (e) {}
   return { user: profile };
 }
 
