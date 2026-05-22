@@ -1,35 +1,32 @@
 /* ── gallery.js ──────────────────────────────────────────────────
    Reusable gallery module:
    - Public read of `gallery` Firestore collection (image metadata)
-   - Admin upload to Firebase Storage (path: gallery/{timestamp}_{name})
-   - Admin add / delete / reorder
+   - Admin upload to **Cloudinary** (free 25 GB tier, no credit card)
+   - Admin add / delete / update
+
+   Architecture:
+     - Cloudinary stores the actual image binary + serves it via CDN
+     - Firestore stores the metadata (URL, title, caption, category, order)
+     - We use an UNSIGNED upload preset so the browser can upload directly
+       without ever exposing the API secret.
 
    Depends on:
-     - js/firebase-config.js (window.FIREBASE_CONFIG)
-     - js/dataStore.js       (provides window.__firebaseReady,
-                              which initializes app/auth/db)
-
-   This file additionally lazy-loads firebase-storage.
+     - js/firebase-config.js  (window.FIREBASE_CONFIG, window.CLOUDINARY_CONFIG)
+     - js/dataStore.js        (provides window.__firebaseReady)
    ──────────────────────────────────────────────────────────────── */
 
 (function () {
     'use strict';
 
-    const SDK_VERSION  = '10.13.2';
-    const STORAGE_URL  = `https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-storage.js`;
-
-    let storageModPromise = null;
-    function loadStorageMod() {
-        if (!storageModPromise) {
-            storageModPromise = import(STORAGE_URL);
+    function getCloudinaryCfg() {
+        const cfg = window.CLOUDINARY_CONFIG || {};
+        if (!cfg.cloudName || cfg.cloudName === 'REPLACE_WITH_YOUR_CLOUD_NAME') {
+            throw new Error('Cloudinary cloudName is not set. Edit js/firebase-config.js → window.CLOUDINARY_CONFIG.');
         }
-        return storageModPromise;
-    }
-
-    async function getStorage() {
-        const { app } = await window.__firebaseReady;
-        const storageMod = await loadStorageMod();
-        return { storage: storageMod.getStorage(app), storageMod };
+        if (!cfg.uploadPreset) {
+            throw new Error('Cloudinary uploadPreset is not set. Edit js/firebase-config.js → window.CLOUDINARY_CONFIG.');
+        }
+        return cfg;
     }
 
     // ── Public: load all gallery items (sorted by `order`, then createdAt desc)
@@ -48,7 +45,8 @@
                 caption: data.caption || '',
                 category: data.category || '',
                 order: typeof data.order === 'number' ? data.order : 9999,
-                storagePath: data.storagePath || '',
+                publicId: data.publicId || '',          // Cloudinary public_id
+                storagePath: data.storagePath || '',    // legacy (Firebase Storage)
                 createdAt: data.createdAt || null
             });
         });
@@ -61,57 +59,95 @@
         return items;
     }
 
-    // ── Admin: upload a single File to Firebase Storage and create
-    //          its Firestore document. Returns the new item.
+    // ── Helper: build a Cloudinary URL with transforms (e.g. resize)
+    //   transform examples:
+    //     'f_auto,q_auto'           → auto format + quality (recommended default)
+    //     'w_400,c_fill,f_auto'     → 400px width thumbnail
+    //     'w_1600,c_limit,f_auto'   → high-res with cap
+    function buildCloudinaryUrl(publicId, transform) {
+        const { cloudName } = getCloudinaryCfg();
+        const t = transform ? `${transform}/` : '';
+        return `https://res.cloudinary.com/${cloudName}/image/upload/${t}${publicId}`;
+    }
+
+    // ── Admin: upload a single File to Cloudinary, then create the
+    //          Firestore metadata document. Returns the new item.
     async function uploadGalleryImage(file, meta, onProgress) {
         if (!file) throw new Error('No file selected');
         if (!file.type || file.type.indexOf('image/') !== 0) {
             throw new Error('Only image files are allowed');
         }
+
         const { auth, db, firestore } = await window.__firebaseReady;
         if (!auth.currentUser) {
             throw new Error('You must be signed in as admin to upload');
         }
 
-        const { storage, storageMod } = await getStorage();
-        const safeName = String(file.name).replace(/[^a-zA-Z0-9._-]+/g, '_');
-        const path = `gallery/${Date.now()}_${safeName}`;
-        const sref = storageMod.ref(storage, path);
+        const { cloudName, uploadPreset } = getCloudinaryCfg();
+        const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
-        const task = storageMod.uploadBytesResumable(sref, file, {
-            contentType: file.type,
-            cacheControl: 'public, max-age=31536000'
+        // Use XMLHttpRequest so we can track upload progress (fetch() can't)
+        const cloudinaryRes = await new Promise((resolve, reject) => {
+            const form = new FormData();
+            form.append('file', file);
+            form.append('upload_preset', uploadPreset);
+            // Optional: tag uploads so they're easy to find/manage in Cloudinary
+            form.append('tags', 'andaman_gallery');
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', endpoint);
+
+            xhr.upload.onprogress = (e) => {
+                if (typeof onProgress === 'function' && e.lengthComputable) {
+                    onProgress((e.loaded / e.total) * 100, e);
+                }
+            };
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try { resolve(JSON.parse(xhr.responseText)); }
+                    catch (err) { reject(new Error('Cloudinary returned invalid JSON')); }
+                } else {
+                    let msg = 'Cloudinary upload failed (' + xhr.status + ')';
+                    try {
+                        const j = JSON.parse(xhr.responseText);
+                        if (j && j.error && j.error.message) msg = 'Cloudinary: ' + j.error.message;
+                    } catch (_) {}
+                    reject(new Error(msg));
+                }
+            };
+            xhr.onerror = () => reject(new Error('Network error contacting Cloudinary'));
+            xhr.send(form);
         });
 
-        await new Promise((resolve, reject) => {
-            task.on('state_changed',
-                (snap) => {
-                    if (typeof onProgress === 'function') {
-                        const pct = snap.totalBytes ? (snap.bytesTransferred / snap.totalBytes) * 100 : 0;
-                        onProgress(pct, snap);
-                    }
-                },
-                (err) => reject(err),
-                () => resolve()
-            );
-        });
+        // Cloudinary response keys we use:
+        //   secure_url   → CDN HTTPS URL
+        //   public_id    → asset id (used to delete or transform later)
+        //   format       → e.g. "jpg", "webp"
+        //   width/height → original dimensions
+        const url = cloudinaryRes.secure_url;
+        const publicId = cloudinaryRes.public_id;
 
-        const url = await storageMod.getDownloadURL(sref);
+        // Build a 600px-wide auto-optimized thumbnail URL
+        const thumbUrl = buildCloudinaryUrl(publicId, 'w_600,c_fill,f_auto,q_auto');
 
         const docData = {
             url,
-            thumbUrl: url, // could be a generated thumb later
-            storagePath: path,
+            thumbUrl,
+            publicId,
             title:    (meta && meta.title)    || '',
             caption:  (meta && meta.caption)  || '',
             category: (meta && meta.category) || '',
             order:    (meta && typeof meta.order === 'number') ? meta.order : 9999,
+            width:    cloudinaryRes.width  || null,
+            height:   cloudinaryRes.height || null,
+            format:   cloudinaryRes.format || '',
+            bytes:    cloudinaryRes.bytes  || 0,
             createdAt: firestore.serverTimestamp(),
             uploadedBy: auth.currentUser.email || auth.currentUser.uid || ''
         };
         const colRef = firestore.collection(db, 'gallery');
         const docRef = await firestore.addDoc(colRef, docData);
-        return { id: docRef.id, ...docData, url, thumbUrl: url, storagePath: path };
+        return { id: docRef.id, ...docData };
     }
 
     // ── Admin: update metadata only (title/caption/category/order)
@@ -128,22 +164,21 @@
         await firestore.updateDoc(ref, allowed);
     }
 
-    // ── Admin: delete (Storage object + Firestore doc)
+    // ── Admin: delete (Firestore doc only).
+    //
+    // NOTE: Cloudinary deletes require a signed call with API secret, which
+    // we cannot do safely from a browser. The Firestore doc is removed so
+    // the asset disappears from the public site immediately. The actual
+    // Cloudinary file remains in your media library and can be cleaned up
+    // periodically using:
+    //   - Cloudinary dashboard → Media Library → search by tag "andaman_gallery"
+    //   - OR a server-side cleanup script (not included)
+    //
+    // For typical use this is fine — orphan assets just consume a tiny bit
+    // of your free 25 GB quota.
     async function deleteGalleryItem(item) {
         if (!item || !item.id) throw new Error('Invalid item');
         const { db, firestore } = await window.__firebaseReady;
-        const { storage, storageMod } = await getStorage();
-
-        // Delete Storage file (best-effort — ignore "not-found")
-        if (item.storagePath) {
-            try {
-                await storageMod.deleteObject(storageMod.ref(storage, item.storagePath));
-            } catch (err) {
-                if (err && err.code !== 'storage/object-not-found') {
-                    console.warn('Storage delete failed:', err);
-                }
-            }
-        }
         await firestore.deleteDoc(firestore.doc(db, 'gallery', item.id));
     }
 
@@ -152,6 +187,7 @@
         loadGalleryItems,
         uploadGalleryImage,
         updateGalleryItem,
-        deleteGalleryItem
+        deleteGalleryItem,
+        buildCloudinaryUrl
     };
 })();
