@@ -3,11 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bharat Tours and Travels - Best Andaman Holiday Packages</title>
+    <title>Andaman Holiday Packages from ₹15,999 | Bharat Tours &amp; Travels</title>
+
+    <!-- ── SEO ─────────────────────────────────────────────────── -->
+    <meta name="description" content="Book customizable Andaman tour packages from ₹15,999/person. Port Blair, Havelock & Neil Island trips with hotels, ferries, scuba diving and instant secure Razorpay payments. 50,000+ happy travelers.">
+    <meta name="keywords" content="Andaman holiday packages, Andaman tour package, Port Blair tour, Havelock Island package, Neil Island package, scuba diving Andaman, honeymoon Andaman, cheap Andaman tour, Bharat Tours Andaman, Andaman travel agency">
+    <meta name="author" content="Bharat Tours and Travels">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#1abc9c">
+    <link rel="canonical" href="https://andamanvoyages.in/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Bharat Tours &amp; Travels">
+    <meta property="og:url" content="https://andamanvoyages.in/">
+    <meta property="og:title" content="Andaman Holiday Packages from ₹15,999 | Bharat Tours &amp; Travels">
+    <meta property="og:description" content="Customizable Andaman tour packages: Port Blair, Havelock & Neil Island. Hotels, ferries, scuba diving included. Secure Razorpay payment.">
+    <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_IN">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Andaman Holiday Packages from ₹15,999 | Bharat Tours &amp; Travels">
+    <meta name="twitter:description" content="Book Andaman tour packages: Port Blair, Havelock & Neil Island with hotels, ferries & scuba diving from ₹15,999.">
+    <meta name="twitter:image" content="https://andamanvoyages.in/images/beach1.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/logo.png">
+
+    <!-- Schema.org structured data: TravelAgency -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "TravelAgency",
+        "name": "Bharat Tours and Travels",
+        "alternateName": "Andaman Voyages",
+        "url": "https://andamanvoyages.in/",
+        "logo": "https://andamanvoyages.in/images/logo.png",
+        "image": "https://andamanvoyages.in/images/beach1.jpg",
+        "description": "Andaman holiday package specialists offering customizable tours from ₹15,999/person across Port Blair, Havelock and Neil Island.",
+        "telephone": "+91-9876543210",
+        "email": "info@bharattours.com",
+        "priceRange": "₹15,999 – ₹28,999",
+        "areaServed": {
+            "@type": "Place",
+            "name": "Andaman and Nicobar Islands, India"
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "IN",
+            "addressRegion": "Andaman and Nicobar Islands"
+        },
+        "sameAs": []
+    }
+    </script>
+
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8154901590978667"
             crossorigin="anonymous"></script>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mmt.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Razorpay Payment Gateway -->
@@ -122,22 +180,115 @@
         </div>
     </section>
 
-    <section id="packages" class="destinations">
-        <div class="container">
-            <h2><i class="fas fa-suitcase"></i> Popular Andaman Packages</h2>
-            <div class="search-filter">
-                <input type="text" id="packageSearch" placeholder="Search packages by duration, price...">
-                <select id="sortSelect">
-                    <option>Sort by: Price Low-High</option>
-                    <option>Price High-Low</option>
-                    <option>Duration Short-Long</option>
-                    <option>Rating High-Low</option>
-                </select>
+    <!-- ── MakeMyTrip-style Search Bar ──────────────────────── -->
+    <section id="packages" class="mmt-listing-wrap">
+        <div class="mmt-searchbar">
+            <div class="mmt-search-fields">
+                <div class="mmt-field">
+                    <span class="mmt-field-label">Starting From</span>
+                    <input class="mmt-field-value" id="mmtFrom" type="text" value="Bangalore">
+                </div>
+                <div class="mmt-field">
+                    <span class="mmt-field-label">Going To</span>
+                    <input class="mmt-field-value" id="mmtTo" type="text" value="Andaman" readonly>
+                </div>
+                <div class="mmt-field">
+                    <span class="mmt-field-label">Starting Date</span>
+                    <input class="mmt-field-value" id="mmtDate" type="date">
+                </div>
             </div>
-            <div id="packagesGrid" class="destinations-grid">
-                <div style="text-align:center;padding:3rem;width:100%;grid-column:1/-1;">
-                    <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#1abc9c;"></i>
-                    <p style="color:#888;margin-top:0.75rem;">Loading packages…</p>
+            <button class="mmt-search-btn" id="mmtSearchBtn">SEARCH</button>
+        </div>
+
+        <!-- Hero Band -->
+        <div class="mmt-hero-band" style="background-image: url('images/beach1.jpg');">
+            <div class="mmt-hero-band-inner">
+                <h1>Andaman Packages From Bangalore</h1>
+                <p>A Paradise of Beaches</p>
+            </div>
+        </div>
+
+        <!-- Listing Container -->
+        <div class="mmt-listing-container">
+            <!-- Tabs -->
+            <div class="mmt-tabs-card">
+                <div class="mmt-tabs" id="mmtTabs">
+                    <button class="mmt-tab-arrow" data-tab-scroll="left" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
+                    <button class="mmt-tab active" data-cat="all">ALL PACKAGES <span class="mmt-tab-count" data-count="all">(0)</span></button>
+                    <button class="mmt-tab" data-cat="budget">BUDGET <span class="mmt-tab-count" data-count="budget">(0)</span></button>
+                    <button class="mmt-tab" data-cat="honeymoon">HONEYMOON <span class="mmt-tab-count" data-count="honeymoon">(0)</span></button>
+                    <button class="mmt-tab" data-cat="premium">PREMIUM <span class="mmt-tab-count" data-count="premium">(0)</span></button>
+                    <button class="mmt-tab" data-cat="standard">STANDARD <span class="mmt-tab-count" data-count="standard">(0)</span></button>
+                    <button class="mmt-tab-arrow" data-tab-scroll="right" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Body: Filters | Results -->
+            <div class="mmt-body">
+                <!-- Filters Sidebar -->
+                <aside class="mmt-filters" id="mmtFilters">
+                    <div class="mmt-filters-title">Filters</div>
+
+                    <div class="mmt-filter-group open">
+                        <div class="mmt-filter-head">Duration (in Nights) <i class="fas fa-chevron-up chev"></i></div>
+                        <div class="mmt-filter-body">
+                            <label><input type="checkbox" name="dur" value="1-3"> 1–3 Nights</label>
+                            <label><input type="checkbox" name="dur" value="4-5"> 4–5 Nights</label>
+                            <label><input type="checkbox" name="dur" value="6-7"> 6–7 Nights</label>
+                            <label><input type="checkbox" name="dur" value="8+"> 8+ Nights</label>
+                        </div>
+                    </div>
+
+                    <div class="mmt-filter-group">
+                        <div class="mmt-filter-head">Budget (per person) <i class="fas fa-chevron-up chev"></i></div>
+                        <div class="mmt-filter-body">
+                            <label><input type="checkbox" name="budget" value="0-15000"> Under ₹15,000</label>
+                            <label><input type="checkbox" name="budget" value="15000-22000"> ₹15,000 – ₹22,000</label>
+                            <label><input type="checkbox" name="budget" value="22000-30000"> ₹22,000 – ₹30,000</label>
+                            <label><input type="checkbox" name="budget" value="30000+"> Above ₹30,000</label>
+                        </div>
+                    </div>
+
+                    <div class="mmt-filter-group">
+                        <div class="mmt-filter-head">Hotel Category <i class="fas fa-chevron-up chev"></i></div>
+                        <div class="mmt-filter-body">
+                            <label><input type="checkbox" name="hotel" value="3"> 3 Star</label>
+                            <label><input type="checkbox" name="hotel" value="4"> 4 Star</label>
+                            <label><input type="checkbox" name="hotel" value="5"> 5 Star</label>
+                        </div>
+                    </div>
+
+                    <div class="mmt-filter-group">
+                        <div class="mmt-filter-head">Themes <i class="fas fa-chevron-up chev"></i></div>
+                        <div class="mmt-filter-body">
+                            <label><input type="checkbox" name="theme" value="honeymoon"> Honeymoon</label>
+                            <label><input type="checkbox" name="theme" value="adventure"> Adventure</label>
+                            <label><input type="checkbox" name="theme" value="luxury"> Luxury</label>
+                            <label><input type="checkbox" name="theme" value="family"> Family</label>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Results -->
+                <div>
+                    <div class="mmt-sort-row">
+                        <label for="mmtSort">Sorted By:</label>
+                        <select id="mmtSort">
+                            <option value="popular">Popular</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="rating">Top Rated</option>
+                            <option value="duration">Duration</option>
+                        </select>
+                    </div>
+
+                    <div id="packagesGrid" class="mmt-results">
+                        <div class="mmt-empty">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <h3>Loading packages…</h3>
+                            <p>Please hold on a moment.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -330,10 +481,10 @@
     </footer>
 
     <!-- Firebase config + dataStore load first; auth/script depend on them -->
-    <script src="js/firebase-config.js?v=12"></script>
-    <script src="js/dataStore.js?v=12"></script>
-    <script src="js/auth.js?v=12"></script>
-    <script src="js/script.js?v=12"></script>
-    <script src="js/chat.js?v=12"></script>
+    <script src="js/firebase-config.js?v=13"></script>
+    <script src="js/dataStore.js?v=13"></script>
+    <script src="js/auth.js?v=13"></script>
+    <script src="js/script.js?v=13"></script>
+    <script src="js/chat.js?v=13"></script>
 </body>
 </html>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+    <!-- Home page -->
+    <url>
+        <loc>https://andamanvoyages.in/</loc>
+        <lastmod>2026-05-22</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://andamanvoyages.in/images/beach1.jpg</image:loc>
+            <image:title>Andaman Holiday Packages</image:title>
+        </image:image>
+    </url>
+
+    <!-- Package: Budget Andaman Escape -->
+    <url>
+        <loc>https://andamanvoyages.in/package.html?id=budget</loc>
+        <lastmod>2026-05-22</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+        <image:image>
+            <image:loc>https://andamanvoyages.in/images/beach1.jpg</image:loc>
+            <image:title>Budget Andaman Escape</image:title>
+        </image:image>
+    </url>
+
+    <!-- Package: Standard Andaman Bliss -->
+    <url>
+        <loc>https://andamanvoyages.in/package.html?id=standard</loc>
+        <lastmod>2026-05-22</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+        <image:image>
+            <image:loc>https://andamanvoyages.in/images/beach2.jpg</image:loc>
+            <image:title>Standard Andaman Bliss</image:title>
+        </image:image>
+    </url>
+
+    <!-- Package: Luxury Andaman Retreat -->
+    <url>
+        <loc>https://andamanvoyages.in/package.html?id=luxury</loc>
+        <lastmod>2026-05-22</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+        <image:image>
+            <image:loc>https://andamanvoyages.in/images/beach3.jpg</image:loc>
+            <image:title>Luxury Andaman Retreat</image:title>
+        </image:image>
+    </url>
+
+    <!-- Package: Honeymoon Paradise -->
+    <url>
+        <loc>https://andamanvoyages.in/package.html?id=honeymoon</loc>
+        <lastmod>2026-05-22</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+        <image:image>
+            <image:loc>https://andamanvoyages.in/images/beach4.jpg</image:loc>
+            <image:title>Andaman Honeymoon Paradise</image:title>
+        </image:image>
+    </url>
+
+</urlset>
