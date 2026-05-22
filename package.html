@@ -66,8 +66,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="js/firebase-config.js?v=12"></script>
-    <script src="js/dataStore.js?v=12"></script>
+    <script src="js/firebase-config.js?v=13"></script>
+    <script src="js/dataStore.js?v=14"></script>
 </head>
 <body>
 
@@ -289,6 +289,20 @@ async function loadPackage() {
     document.title = pkg.name + ' – Bharat Tours & Travels';
     injectDynamicSEO(pkg);
     renderPage(pkg);
+
+    // Load site settings (payments toggle) so the modal & guards know.
+    if (window.SettingsStore && typeof window.SettingsStore.load === 'function') {
+        const cached = window.SettingsStore.cached && window.SettingsStore.cached();
+        if (cached) window._siteSettings = cached;
+        window.SettingsStore.load().then(s => {
+            window._siteSettings = s || window._siteSettings;
+            // If payments are off, soften the modal CTA label too
+            const cb = document.getElementById('confirmBookingBtn');
+            if (cb && !arePaymentsEnabled()) {
+                cb.innerHTML = '<i class="fas fa-phone-alt"></i> Call to Book — Payments Disabled';
+            }
+        }).catch(() => {});
+    }
 }
 
 // ── Inject per-package dynamic SEO + TouristTrip structured data ─
@@ -475,6 +489,14 @@ function renderPage(pkg) {
                         ${(pkg.inclusions || []).slice(0,6).map(i => `<li><i class="fas ${getIcon(i)}"></i> ${i}</li>`).join('')}
                     </ul>
 
+                    ${pkg.soldOut === true ? `
+                    <div style="background:linear-gradient(90deg,#c0392b 0%,#e74c3c 100%);color:#fff;padding:.75rem 1rem;border-radius:8px;text-align:center;font-weight:800;letter-spacing:.5px;margin-bottom:.75rem;">
+                        <i class="fas fa-times-circle"></i> SOLD OUT
+                    </div>
+                    <button class="btn-book-now" id="bookNowBtn" style="background:#fdedec;color:#c0392b;border:1px solid #f5b7b1;cursor:not-allowed;">
+                        <i class="fas fa-times-circle"></i> Sold Out — Notify Me
+                    </button>
+                    ` : `
                     <button class="btn-book-now" id="bookNowBtn">
                         <i class="fas fa-credit-card"></i>
                         ${isTest ? 'Pay ₹1 Now (Test)' : 'Book Now'}
@@ -483,6 +505,7 @@ function renderPage(pkg) {
                     <button class="btn-customize-pkg" id="customizeNowBtn">
                         <i class="fas fa-sliders-h"></i> Customize This Package
                     </button>` : ''}
+                    `}
 
                     <div class="bc-assurance">
                         <i class="fas fa-shield-alt"></i> 100% Secure Payment via Razorpay<br>
@@ -532,8 +555,32 @@ function openImgLightbox(src) {
     lb.style.display = 'flex';
 }
 
+// ── Site-settings cache + helpers (mirror js/script.js) ──────
+window._siteSettings = { paymentsEnabled: true, paymentsDisabledMessage: '' };
+
+function arePaymentsEnabled() {
+    return window._siteSettings && window._siteSettings.paymentsEnabled !== false;
+}
+function showPaymentsDisabledAlert() {
+    const msg = (window._siteSettings && window._siteSettings.paymentsDisabledMessage)
+        ? window._siteSettings.paymentsDisabledMessage
+        : 'Online payments are temporarily unavailable.\n\nTo book this package, please call or WhatsApp us:\n\n📞 +91 88801 95191\n📞 +91 94341 25698\n\nOr email: booking@andamanvoyages.in\n\nWe\'ll confirm your booking and arrange a payment link / bank transfer.';
+    alert('🛎️ ' + msg);
+}
+function showSoldOutAlert(pkgName) {
+    alert(
+        '⚠️ "' + pkgName + '" is currently SOLD OUT.\n\n' +
+        'Drop us a line to be notified when this package is available again, ' +
+        'or to ask about similar packages with open dates:\n\n' +
+        '📞 +91 88801 95191 / +91 94341 25698\n' +
+        '📧 booking@andamanvoyages.in'
+    );
+}
+
 function bookNow() {
     if (!currentPkg) return;
+    if (currentPkg.soldOut === true) { showSoldOutAlert(currentPkg.name); return; }
+    if (!arePaymentsEnabled()) { showPaymentsDisabledAlert(); return; }
     const price = currentPkg.price;
     document.getElementById('finalAmount').textContent = '₹' + Number(price).toLocaleString();
     document.getElementById('bookingDetails').textContent = 'Package: ' + currentPkg.name;
@@ -544,6 +591,7 @@ function bookNow() {
 
 function customizeNow() {
     if (!currentPkg) return;
+    if (currentPkg.soldOut === true) { showSoldOutAlert(currentPkg.name); return; }
     document.getElementById('modalTitle').textContent = 'Customize ' + currentPkg.name;
     window.currentPackage = currentPkg.id;
     window.currentBasePrice = currentPkg.price;
@@ -568,6 +616,20 @@ function proceedToPayment() {
 }
 
 window.confirmBooking = async function() {
+    // Defence-in-depth: never let the Pay Now button take a payment for a
+    // sold-out package or while the admin has paused payments site-wide.
+    if (currentPkg && currentPkg.soldOut === true) {
+        const pm = document.getElementById('paymentModal');
+        if (pm) pm.style.display = 'none';
+        showSoldOutAlert(currentPkg.name);
+        return;
+    }
+    if (!arePaymentsEnabled()) {
+        const pm = document.getElementById('paymentModal');
+        if (pm) pm.style.display = 'none';
+        showPaymentsDisabledAlert();
+        return;
+    }
     const priceStr = document.getElementById('finalAmount').textContent.replace(/[^0-9]/g,'');
     const price = parseFloat(priceStr);
     const currentUser = localStorage.getItem('currentUser');
