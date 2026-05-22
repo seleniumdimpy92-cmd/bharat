@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout — Bharat Tours &amp; Travels</title>
+    <meta name="description" content="Review your Andaman tour booking, fill traveler details, apply coupons and pay securely with Razorpay.">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="theme-color" content="#1abc9c">
+
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/checkout.css?v=1">
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="js/firebase-config.js?v=13"></script>
+    <script src="js/dataStore.js?v=14"></script>
+    <script src="js/toast.js?v=1"></script>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="co-header">
+        <a href="index.html" style="display:flex;align-items:center;gap:.75rem;">
+            <img src="images/logo.png" alt="Bharat Tours">
+            <span style="font-weight:700;font-size:1rem;">Bharat Tours &amp; Travels</span>
+        </a>
+        <div style="display:flex;gap:1rem;align-items:center;">
+            <a href="index.html#packages" class="home-link"><i class="fas fa-suitcase"></i> All Packages</a>
+            <a href="index.html" id="navAuthLink" class="auth-link">Login</a>
+        </div>
+    </header>
+
+    <!-- Stepper -->
+    <div class="co-stepbar">
+        <div class="co-step done"><span class="num"><i class="fas fa-check"></i></span> Choose Package</div>
+        <span class="co-step-divider"><i class="fas fa-chevron-right"></i></span>
+        <div class="co-step active"><span class="num">2</span> Review &amp; Details</div>
+        <span class="co-step-divider"><i class="fas fa-chevron-right"></i></span>
+        <div class="co-step"><span class="num">3</span> Payment</div>
+        <span class="co-step-divider"><i class="fas fa-chevron-right"></i></span>
+        <div class="co-step"><span class="num">4</span> Confirmation</div>
+    </div>
+
+    <main class="co-wrap" id="checkoutWrap">
+        <div class="co-loading" style="grid-column:1/-1;">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading your cart…</p>
+        </div>
+    </main>
+
+    <footer class="co-footer">
+        © 2026 Bharat Tours and Travels &middot;
+        <a href="index.html">Home</a> &middot;
+        <a href="index.html#packages">Packages</a> &middot;
+        <a href="index.html#contact">Contact</a> &middot;
+        <a href="privacy.html">Privacy</a> &middot;
+        <a href="terms.html">Terms</a>
+    </footer>
+
+    <script src="js/checkout.js?v=1"></script>
+</body>
+</html>

@@ -67,9 +67,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>window.__toastAutoOverride = true;</script>
     <script src="js/firebase-config.js?v=13"></script>
     <script src="js/dataStore.js?v=14"></script>
-    <script>window.__pkgPageVersion = 'v=27';</script>
+    <script src="js/toast.js?v=1"></script>
 </head>
 <body>
 
@@ -618,14 +619,30 @@ function bookNow() {
     if (!currentPkg) return;
     if (currentPkg.soldOut === true) { showSoldOutAlert(currentPkg.name); return; }
     if (!arePaymentsEnabled()) { showPaymentsDisabledAlert(); return; }
-    // 🔒 Require login before opening the payment modal
-    if (!requireLoginForBooking()) return;
-    const price = currentPkg.price;
-    document.getElementById('finalAmount').textContent = '₹' + Number(price).toLocaleString();
-    document.getElementById('bookingDetails').textContent = 'Package: ' + currentPkg.name;
-    window.currentPackage = currentPkg.id;
-    window.currentBasePrice = price;
-    document.getElementById('paymentModal').style.display = 'block';
+    // Save cart and navigate to dedicated checkout page
+    var cart = {
+        pkgId: currentPkg.id,
+        name: currentPkg.name,
+        price: currentPkg.price,
+        image: currentPkg.image || 'images/beach1.jpg',
+        duration: currentPkg.duration || '',
+        adults: 2,
+        children: 0,
+        travelDate: '',
+        addons: [],
+        duration_pref: '',
+        meals: ''
+    };
+    try {
+        var sc = JSON.parse(sessionStorage.getItem('searchContext') || 'null');
+        if (sc) {
+            cart.adults = sc.adults || 2;
+            cart.children = sc.children || 0;
+            cart.travelDate = sc.date || '';
+        }
+    } catch (e) {}
+    try { sessionStorage.setItem('checkoutCart', JSON.stringify(cart)); } catch (e) {}
+    window.location.href = 'checkout.html';
 }
 
 function customizeNow() {
