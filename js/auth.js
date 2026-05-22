@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const usernames = await window.UsersStore.lookupUsernamesByEmail(email);
         if (usernames && usernames.length) {
-          usernameMsg = `<div style="background:#e8f8f5;border-left:3px solid #1976d2;padding:0.6rem 0.85rem;border-radius:4px;margin-bottom:0.6rem;color:#0d47a1;">
+          usernameMsg = `<div style="background:#e8f8f5;border-left:3px solid #0d7a8a;padding:0.6rem 0.85rem;border-radius:4px;margin-bottom:0.6rem;color:#053944;">
               <strong>Your username:</strong> ${usernames.map(u => `<code>${u}</code>`).join(', ')}
           </div>`;
         } else {
