@@ -2,8 +2,11 @@
 User-agent: *
 Allow: /
 
-# Disallow admin / restricted areas
+# Disallow admin / restricted / private user areas
+Disallow: /dashboard
 Disallow: /dashboard.html
+Disallow: /bookings
+Disallow: /bookings.html
 Disallow: /netlify/
 Disallow: /data/
 Disallow: /js/firebase-config.js
@@ -11,11 +14,17 @@ Disallow: /js/firebase-config.js
 # Allow major search engines explicitly
 User-agent: Googlebot
 Allow: /
+Disallow: /dashboard
 Disallow: /dashboard.html
+Disallow: /bookings
+Disallow: /bookings.html
 
 User-agent: Bingbot
 Allow: /
+Disallow: /dashboard
 Disallow: /dashboard.html
+Disallow: /bookings
+Disallow: /bookings.html
 
 # Sitemap
 Sitemap: https://andamanvoyages.in/sitemap.xml
