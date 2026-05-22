@@ -341,15 +341,38 @@
         // ── Send verification email (free, unlimited via Firebase Auth) ──
         // Admins are exempt — they're trusted by the email allowlist.
         var emailVerifSent = false;
+        var emailVerifError = null;
         if (!isAdminEmail(email)) {
             try {
-                await firebaseAuth.sendEmailVerification(cred.user, {
-                    url: window.location.origin + '/index.html?verified=1',
-                    handleCodeInApp: false
-                });
-                emailVerifSent = true;
+                // The redirect URL must be on your Firebase Authorized Domains
+                // list (Firebase Console → Authentication → Settings →
+                // Authorized domains). If it isn't, the call fails with
+                // 'auth/unauthorized-continue-uri'. As a fallback we omit
+                // the continue URL (Firebase then uses its default page).
+                try {
+                    await firebaseAuth.sendEmailVerification(cred.user, {
+                        url: window.location.origin + '/index.html?verified=1',
+                        handleCodeInApp: false
+                    });
+                    emailVerifSent = true;
+                } catch (innerErr) {
+                    if (innerErr && innerErr.code === 'auth/unauthorized-continue-uri') {
+                        console.warn('Continue URL not authorized, retrying without redirect…');
+                        await firebaseAuth.sendEmailVerification(cred.user);
+                        emailVerifSent = true;
+                    } else {
+                        throw innerErr;
+                    }
+                }
             } catch (err) {
-                console.warn('sendEmailVerification failed:', err);
+                emailVerifError = err && (err.code || err.message) || String(err);
+                console.error('[Firebase] sendEmailVerification FAILED:', err);
+                console.error('  → code:', err && err.code);
+                console.error('  → message:', err && err.message);
+                console.error('  → If code is auth/unauthorized-continue-uri:');
+                console.error('     Add your domain at https://console.firebase.google.com/project/' +
+                    (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.projectId) +
+                    '/authentication/settings (Authorized domains).');
             }
         }
 
