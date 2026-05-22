@@ -55,7 +55,7 @@ window.GA4_CONFIG = {
     // Firebase project's auto-linked GA4 property. Open
     // https://analytics.google.com to manage the property.
     measurementId: "G-B2EH7QRMGE",
-    // Optional: paste your Web Stream ID from GA4 → Admin → Data streams
-    // to enable the realtime iframe widget in the admin dashboard.
-    streamId:      ""
+    // Web Stream ID from GA4 → Admin → Data streams. Used by the
+    // realtime iframe widget in the admin dashboard.
+    streamId:      "14922182432"
 };
