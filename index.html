@@ -60,8 +60,8 @@
         "sameAs": []
     }
     </script>
-    <link rel="stylesheet" href="css/style.css?v=21">
-    <link rel="stylesheet" href="css/mmt.css?v=21">
+    <link rel="stylesheet" href="css/style.css?v=22">
+    <link rel="stylesheet" href="css/mmt.css?v=22">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Razorpay Payment Gateway -->
@@ -277,6 +277,15 @@
                 <!-- Results -->
                 <div>
                     <div class="mmt-sort-row">
+                        <div class="mmt-view-toggle" role="group" aria-label="View mode">
+                            <button type="button" class="view-btn active" data-view="grid" title="Grid / card view" aria-label="Grid view">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button type="button" class="view-btn" data-view="list" title="List / detail view" aria-label="List view">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                        <span class="mmt-sort-spacer"></span>
                         <label for="mmtSort">Sorted By:</label>
                         <select id="mmtSort">
                             <option value="popular">Popular</option>
@@ -287,7 +296,7 @@
                         </select>
                     </div>
 
-                    <div id="packagesGrid" class="mmt-results">
+                    <div id="packagesGrid" class="mmt-results view-grid">
                         <div class="mmt-empty">
                             <i class="fas fa-spinner fa-spin"></i>
                             <h3>Loading packages…</h3>
@@ -528,7 +537,7 @@
     <script src="js/dataStore.js?v=13"></script>
     <script src="js/auth.js?v=13"></script>
     <script src="js/cities.js?v=18"></script>
-    <script src="js/script.js?v=19"></script>
+    <script src="js/script.js?v=22"></script>
     <script src="js/chat.js?v=13"></script>
 </body>
 </html>
