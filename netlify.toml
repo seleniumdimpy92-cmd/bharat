@@ -69,6 +69,18 @@
   to = "/terms.html"
   status = 200
 
+
+[[redirects]]
+  from = "/about.html"
+  to = "/about"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/about"
+  to = "/about.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
