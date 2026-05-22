@@ -26,5 +26,28 @@ Disallow: /dashboard.html
 Disallow: /bookings
 Disallow: /bookings.html
 
+
+# Explicitly allow Google AdSense crawlers (Mediapartners + AdsBot)
+User-agent: Mediapartners-Google
+Allow: /
+Disallow: /dashboard
+Disallow: /dashboard.html
+Disallow: /bookings
+Disallow: /bookings.html
+
+User-agent: AdsBot-Google
+Allow: /
+Disallow: /dashboard
+Disallow: /dashboard.html
+Disallow: /bookings
+Disallow: /bookings.html
+
+User-agent: AdsBot-Google-Mobile
+Allow: /
+Disallow: /dashboard
+Disallow: /dashboard.html
+Disallow: /bookings
+Disallow: /bookings.html
+
 # Sitemap
 Sitemap: https://andamanvoyages.in/sitemap.xml
