@@ -165,6 +165,7 @@ function renderSitePackages() {
 
     grid.innerHTML = filtered.map(pkg => {
         const isTest = pkg.id === 'test' || pkg.price <= 1;
+        const isSoldOut = pkg.soldOut === true;
         const dur = pkgDuration(pkg);
         const days = dur + 1;
         const route = pkgRoute(pkg);
@@ -172,12 +173,16 @@ function renderSitePackages() {
         const incl = (pkg.inclusions || []).slice(0, 6);
         const totalPrice = isTest ? pkg.price : pkg.price * 2;
         const emi = Math.round(pkg.price / 6);
-        const tag = pkg.id === 'standard' ? 'Deal of the day' : (pkg.id === 'luxury' ? 'AD Premium' : '');
+        // Sold-out always wins as the headline tag.
+        const tag = isSoldOut
+            ? 'Sold Out'
+            : (pkg.id === 'standard' ? 'Deal of the day' : (pkg.id === 'luxury' ? 'AD Premium' : ''));
+        const tagClass = isSoldOut ? 'mmt-card-tag mmt-card-tag-soldout' : 'mmt-card-tag';
 
         return `
-        <div class="mmt-card" data-pkgid="${pkg.id}" data-name="${pkg.id}">
+        <div class="mmt-card${isSoldOut ? ' mmt-card-soldout' : ''}" data-pkgid="${pkg.id}" data-name="${pkg.id}">
             <div class="mmt-card-img" data-nav="${pkg.id}" style="background-image:url('${pkg.image}');">
-                ${tag ? `<span class="mmt-card-tag">${tag}</span>` : ''}
+                ${tag ? `<span class="${tagClass}">${tag}</span>` : ''}
                 <span class="mmt-more-options">${perks.length} More Options Available</span>
             </div>
             <div class="mmt-card-body">
@@ -205,10 +210,14 @@ function renderSitePackages() {
                     <span class="mmt-price-per">${isTest ? '/test' : '/person'}</span>
                 </div>
                 ${!isTest ? `<div class="mmt-price-total">Total Price ₹${totalPrice.toLocaleString()}</div>` : ''}
-                <button class="mmt-card-cta" data-action="book" data-pkg="${pkg.id}">
-                    ${isTest ? 'Pay ₹1 Now' : 'Book Now'}
-                </button>
-                ${!isTest ? `<button class="mmt-card-cta-secondary" data-action="customize" data-pkg="${pkg.id}">Customize</button>` : ''}
+                ${isSoldOut
+                    ? `<button class="mmt-card-cta mmt-card-cta-soldout" data-action="enquire" data-pkg="${pkg.id}">
+                         <i class="fas fa-times-circle"></i> Sold Out — Notify Me
+                       </button>`
+                    : `<button class="mmt-card-cta" data-action="book" data-pkg="${pkg.id}">
+                         ${isTest ? 'Pay ₹1 Now' : 'Book Now'}
+                       </button>`}
+                ${(!isTest && !isSoldOut) ? `<button class="mmt-card-cta-secondary" data-action="customize" data-pkg="${pkg.id}">Customize</button>` : ''}
             </div>
         </div>`;
     }).join('');
@@ -774,12 +783,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Card click delegation (Book / Customize / View Details)
+    // Card click delegation (Book / Customize / Enquire / View Details)
     const grid = document.getElementById('packagesGrid');
     if (grid) {
         grid.addEventListener('click', (e) => {
             const bookBtn = e.target.closest('[data-action="book"]');
             if (bookBtn) { e.stopPropagation(); window.bookPackage(bookBtn.dataset.pkg); return; }
+            const enqBtn = e.target.closest('[data-action="enquire"]');
+            if (enqBtn) {
+                e.stopPropagation();
+                const pkgId = enqBtn.dataset.pkg;
+                const pkg = (window._packages || []).find(p => p.id === pkgId);
+                const name = pkg ? pkg.name : pkgId;
+                alert(
+                    '⚠️ "' + name + '" is currently SOLD OUT.\n\n' +
+                    'Drop us a line to be notified when this package is available again, ' +
+                    'or to ask about similar packages with open dates:\n\n' +
+                    '📞 +91 88801 95191 / +91 94341 25698\n' +
+                    '📧 booking@andamanvoyages.in'
+                );
+                return;
+            }
             const custBtn = e.target.closest('[data-action="customize"]');
             if (custBtn) { e.stopPropagation(); window.openCustomize(custBtn.dataset.pkg); return; }
             const navEl = e.target.closest('[data-nav]');
