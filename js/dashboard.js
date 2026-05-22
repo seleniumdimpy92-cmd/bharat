@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
         overview: 'Dashboard Overview',
         bookings: 'All Bookings',
         packages: 'Package Performance',
+        gallery:  'Photo Gallery',
         customers: 'Customers',
         revenue: 'Revenue Analytics',
         settings: 'Site Settings'

@@ -1,0 +1,40 @@
+// ── Firebase Storage Security Rules ─────────────────────────────
+// Paste these into Firebase Console → Storage → Rules tab and click
+// "Publish".
+//
+// What they enforce:
+//   • Anyone can READ /gallery/* (so the public Gallery page works
+//     without login).
+//   • Only signed-in admin users (matched by email, same list as
+//     firestore.rules) can WRITE / DELETE files in /gallery/*.
+//   • Image-only uploads, max 10 MB.
+//   • All other paths default-deny.
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper — must match the admin list in firestore.rules
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in [
+          "deb@andamanvoyages.in",
+          "admin@admin.com"
+        ];
+    }
+
+    // Public gallery folder
+    match /gallery/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAdmin();
+    }
+
+    // Default deny everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
