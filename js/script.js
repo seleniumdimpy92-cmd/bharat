@@ -435,7 +435,7 @@ function requireLoginOrPrompt(intentLabel) {
             ts: Date.now()
         }));
     } catch (e) {}
-    alert('🔒 Please log in to continue with the booking.\n\nYour package selection has been saved — you can complete the payment after signing in.');
+    // No browser alert — just open the login modal silently.
     if (typeof window.openLogin === 'function') window.openLogin();
     return false;
 }
@@ -502,9 +502,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 🔑 Open the login modal automatically when navigating to #login
     // (e.g. from package.html when user tries to book without being logged in)
-    if (window.location.hash === '#login' && !isUserLoggedIn()) {
+    function showLoginRequiredNotice() {
+        const modal = document.getElementById('loginModal');
+        if (!modal) return;
+        const content = modal.querySelector('.modal-content');
+        if (!content || content.querySelector('#loginRequiredNotice')) return;
+        const notice = document.createElement('div');
+        notice.id = 'loginRequiredNotice';
+        notice.style.cssText = 'background:#fff8e7;color:#8a6d3b;padding:.7rem .9rem;border-radius:6px;border-left:3px solid #f39c12;margin:0 0 1rem;font-size:.92rem;line-height:1.45;';
+        notice.innerHTML = '<i class="fas fa-info-circle"></i> Please log in to continue with your booking. Your package selection has been saved &mdash; payment will resume automatically after sign-in.';
+        const h2 = content.querySelector('h2');
+        if (h2 && h2.nextSibling) h2.parentNode.insertBefore(notice, h2.nextSibling);
+        else content.insertBefore(notice, content.firstChild);
+    }
+    const _hasPendingIntent = (function () {
+        try { return !!sessionStorage.getItem('postLoginIntent'); } catch (e) { return false; }
+    })();
+    if ((window.location.hash === '#login' || _hasPendingIntent) && !isUserLoggedIn()) {
         // Small delay so DOM is fully ready
         setTimeout(() => {
+            showLoginRequiredNotice();
             if (typeof window.openLogin === 'function') window.openLogin();
         }, 100);
     }

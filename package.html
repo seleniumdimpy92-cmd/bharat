@@ -608,8 +608,8 @@ function requireLoginForBooking() {
             ts: Date.now()
         }));
     } catch (e) {}
-    alert('🔒 Please log in to continue with the booking.\n\nYour package selection has been saved — you can complete the payment after signing in.');
-    // Redirect to home page where the login modal lives
+    // Silently redirect to home page where the login modal will auto-open.
+    // No browser alert — the login modal is the prompt.
     window.location.href = 'index.html#login';
     return false;
 }
