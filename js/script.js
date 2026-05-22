@@ -172,7 +172,7 @@ function renderSitePackages() {
         const incl = (pkg.inclusions || []).slice(0, 6);
         const totalPrice = isTest ? pkg.price : pkg.price * 2;
         const emi = Math.round(pkg.price / 6);
-        const tag = pkg.id === 'standard' ? 'Deal of the day' : (pkg.id === 'luxury' ? 'MMT Premium' : '');
+        const tag = pkg.id === 'standard' ? 'Deal of the day' : (pkg.id === 'luxury' ? 'AD Premium' : '');
 
         return `
         <div class="mmt-card" data-pkgid="${pkg.id}" data-name="${pkg.id}">
