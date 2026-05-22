@@ -442,22 +442,32 @@ function requireLoginOrPrompt(intentLabel) {
 
 window.bookPackage = function(pkg) {
     try {
-        // Hard guard: if admin has disabled payments, never open the modal.
         if (!arePaymentsEnabled()) { showPaymentsDisabledAlert(); return; }
         window.currentPackage = pkg;
-        // 🔒 Require login before opening the payment modal
-        if (!requireLoginOrPrompt('book ' + pkg)) return;
-        const price = getPkgPrice(pkg);
-        const paymentModal = document.getElementById('paymentModal');
-        if (!paymentModal) { alert('Booking system error. paymentModal not found'); return; }
-        const finalAmountEl = document.getElementById('finalAmount');
-        const bookingDetailsEl = document.getElementById('bookingDetails');
-        if (finalAmountEl) finalAmountEl.textContent = `₹${Number(price).toLocaleString()}`;
-        if (bookingDetailsEl) bookingDetailsEl.textContent = `Package: ${pkg.charAt(0).toUpperCase() + pkg.slice(1)}`;
-        paymentModal.style.display = 'block';
+        // Build a cart object and navigate to the dedicated checkout page.
+        const pkgData = (window._packages || []).find(p => p.id === pkg) ||
+                        { id: pkg, name: pkg, price: getPkgPrice(pkg), image: '', duration: '' };
+        const sc = (function () {
+            try { return JSON.parse(sessionStorage.getItem('searchContext') || 'null'); } catch (e) { return null; }
+        })();
+        const cart = {
+            pkgId: pkgData.id,
+            name: pkgData.name,
+            price: pkgData.price,
+            image: pkgData.image || 'images/beach1.jpg',
+            duration: pkgData.duration || '',
+            adults: (sc && sc.adults) || 2,
+            children: (sc && sc.children) || 0,
+            travelDate: (sc && sc.date) || '',
+            addons: [],
+            duration_pref: '',
+            meals: ''
+        };
+        try { sessionStorage.setItem('checkoutCart', JSON.stringify(cart)); } catch (e) {}
+        window.location.href = 'checkout.html';
     } catch (e) {
         console.error('Error in bookPackage:', e);
-        alert('An error occurred: ' + e.message);
+        if (window.Toast) window.Toast.error('Could not start booking: ' + e.message);
     }
 };
 
@@ -704,6 +714,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             sessionStorage.removeItem('postLoginIntent');
+            if (intent.type === 'checkout') {
+                if (window.Toast) window.Toast.success('Welcome back! Redirecting to checkout…');
+                setTimeout(() => { window.location.href = 'checkout.html'; }, 600);
+                return;
+            }
             if (intent.type === 'book' && intent.pkg && typeof window.bookPackage === 'function') {
                 // Small delay so login modal has time to close cleanly
                 setTimeout(() => window.bookPackage(intent.pkg), 250);
