@@ -85,7 +85,7 @@ body{font-family:'Poppins',sans-serif;color:var(--dark-gray);background:#fff;lin
   .bookings-header h2{font-size:1.5rem}
   .bookings-empty,.bookings-empty-inline{padding:2rem 1rem}
 }
-.hero{position:relative;color:#fff;text-align:center;min-height:85vh;display:flex;align-items:center;justify-content:center;padding:2rem 0}
+.hero{position:relative;color:#fff;text-align:center;min-height:78vh;display:flex;align-items:flex-start;justify-content:center;padding:1rem 0 2rem}
 .hero-carousel{position:absolute;inset:0;z-index:0;overflow:hidden}
 .carousel-track{width:100%;height:100%;position:relative}
 .carousel-slide{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;opacity:0;transition:opacity 1s ease-in-out}
@@ -98,7 +98,7 @@ body{font-family:'Poppins',sans-serif;color:var(--dark-gray);background:#fff;lin
 .carousel-dots{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;z-index:10}
 .carousel-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.5);border:none;cursor:pointer;transition:all .3s;padding:0}
 .carousel-dot.active{background:var(--primary-teal);transform:scale(1.3);width:28px;border-radius:5px}
-.hero-content{position:relative;z-index:5;width:100%;max-width:1280px;margin:0 auto;padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:stretch;gap:1.5rem}
+.hero-content{position:relative;z-index:5;width:100%;max-width:1280px;margin:0 auto;padding:1rem 1.5rem 2rem;display:flex;flex-direction:column;align-items:stretch;gap:1.25rem}
 .hero-heading{text-align:center}
 .hero-heading h1{font-size:2.8rem;font-weight:800;margin:0;line-height:1.15;text-shadow:0 2px 8px rgba(0,0,0,.4)}
 .hero-heading h1 small{display:block;font-size:1.3rem;font-weight:600;margin-top:.4rem;opacity:.95}
