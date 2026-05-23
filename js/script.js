@@ -643,6 +643,19 @@ document.addEventListener('DOMContentLoaded', function() {
     if (hamburgerBtn) hamburgerBtn.addEventListener('click', () => {
         document.body.classList.toggle('nav-open');
     });
+
+    // Topbar scroll state — adds .scrolled when the page is scrolled past 30px,
+    // bumping the translucent header to a more opaque look so text stays legible.
+    (function () {
+        const tb = document.querySelector('.topbar');
+        if (!tb) return;
+        const apply = () => {
+            if (window.scrollY > 30) tb.classList.add('scrolled');
+            else                     tb.classList.remove('scrolled');
+        };
+        apply();
+        window.addEventListener('scroll', apply, { passive: true });
+    })();
     document.addEventListener('click', (e) => {
         if (!document.body.classList.contains('nav-open')) return;
         const topnav = document.getElementById('topnav');
