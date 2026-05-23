@@ -157,6 +157,7 @@
     </footer>
 
     <script src="js/flights.js?v=1"></script>
+    <script src="js/flight-results.js?v=1"></script>
     <script>
     (function () {
         var form     = document.getElementById('flightSearchForm');
@@ -299,7 +300,14 @@
             };
             if (!params.from || !params.date) return;
             try { sessionStorage.setItem('flightLastSearch', JSON.stringify(params)); } catch (e) {}
-            renderPartners(params);
+            ctaStub.style.display = 'none';
+
+            // Prefer the new live-results renderer if loaded; fall back to partner cards.
+            if (window.FlightResults && typeof window.FlightResults.render === 'function') {
+                window.FlightResults.render(partners, params, openPartnerSafe);
+            } else {
+                renderPartners(params);
+            }
         });
 
         // Mobile hamburger
