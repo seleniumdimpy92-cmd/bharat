@@ -2,16 +2,61 @@
 // This config is **safe to ship to browsers** — it identifies the
 // project but does not grant write access. Real security is enforced
 // by Firestore security rules (see firestore.rules in the repo).
+//
+// ── TWO-PROJECT SETUP ──────────────────────────────────────────
+// We have two Firebase projects available:
+//   • PRIMARY  : andaman-b886d  (current production — all live data)
+//   • SECONDARY: andaman-c85f0  (new — empty, awaiting migration)
+//
+// To switch the live site to the new project, set window.FIREBASE_USE
+// below to "secondary" and re-deploy.  To go back, change it to
+// "primary" again — no other file edits needed.
+//
+// IMPORTANT: each project is a completely separate database, so users,
+// bookings, packages, gallery items etc. are NOT automatically copied
+// between them. Migrate data manually via the Firebase Console
+// (export → import) or with a one-off script BEFORE switching.
 
-window.FIREBASE_CONFIG = {
-    apiKey: "AIzaSyCRezAvtDfPv9vHxOXF7zhv5WZhCLRFBho",
-    authDomain: "andaman-b886d.firebaseapp.com",
-    projectId: "andaman-b886d",
-    storageBucket: "andaman-b886d.firebasestorage.app",
-    messagingSenderId: "1090773870572",
-    appId: "1:1090773870572:web:f1d772ecf4937b205942c9",
-    measurementId: "G-B2EH7QRMGE"
+const FIREBASE_PROJECTS = {
+    primary: {
+        // andaman-b886d — original / production
+        apiKey:            "AIzaSyCRezAvtDfPv9vHxOXF7zhv5WZhCLRFBho",
+        authDomain:        "andaman-b886d.firebaseapp.com",
+        projectId:         "andaman-b886d",
+        storageBucket:     "andaman-b886d.firebasestorage.app",
+        messagingSenderId: "1090773870572",
+        appId:             "1:1090773870572:web:f1d772ecf4937b205942c9",
+        measurementId:     "G-B2EH7QRMGE"
+    },
+    secondary: {
+        // andaman-c85f0 — newly created, ready to migrate to
+        apiKey:            "AIzaSyB13askn_x12iTHsWbgvYmUz6MVDfXEAco",
+        authDomain:        "andaman-c85f0.firebaseapp.com",
+        projectId:         "andaman-c85f0",
+        storageBucket:     "andaman-c85f0.firebasestorage.app",
+        messagingSenderId: "914557305468",
+        appId:             "1:914557305468:web:7c2df6a76ddfeea4a17ff9",
+        measurementId:     "G-98PFHRYCSR"
+    }
 };
+
+// Per-host override:
+//   • Anyone visiting localhost / 127.0.0.1 → uses the SECONDARY project
+//     (handy for local dev so you don't write test data to production).
+//   • Everyone else (incl. andamanvoyages.in) → uses PRIMARY.
+// To change the production project, just flip the default below.
+const _hostIsLocal = (typeof location !== 'undefined') &&
+    /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(location.hostname);
+
+window.FIREBASE_USE = window.FIREBASE_USE || (_hostIsLocal ? 'secondary' : 'primary');
+window.FIREBASE_CONFIG = FIREBASE_PROJECTS[window.FIREBASE_USE] || FIREBASE_PROJECTS.primary;
+
+// Expose both maps so other scripts (e.g. an admin migration tool) can
+// reach into the secondary project without a hard refresh.
+window.FIREBASE_PROJECTS = FIREBASE_PROJECTS;
+
+console.info('[firebase] using project →', window.FIREBASE_CONFIG.projectId,
+    '(' + window.FIREBASE_USE + ')');
 
 // List of admin emails. Anyone signed in with one of these emails can
 // write the packages collection and access the dashboard. Must match
