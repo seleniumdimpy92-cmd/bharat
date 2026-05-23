@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Hide .html and /index from the URL bar without re-loading the page -->
+    <script>(function(){try{var p=location.pathname;if(/\/index(\.html)?$/i.test(p)){history.replaceState(null,"",p.replace(/\/index(\.html)?$/i,"/")+location.search+location.hash);}else if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Bharat Tours and Travels</title>
@@ -11,7 +13,7 @@
     <meta name="googlebot" content="noindex, nofollow">
     <meta name="theme-color" content="#0d7a8a">
     <meta name="google-adsense-account" content="ca-pub-8154901590978667">
-    <link rel="canonical" href="https://andamanvoyages.in/dashboard.html">
+    <link rel="canonical" href="https://andamanvoyages.in/dashboard">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="images/logo.png">
@@ -36,7 +38,7 @@
             var raw   = localStorage.getItem('currentUser');
             if (!token || !raw) {
                 alert('⛔ Access denied. Please login first.');
-                window.location.replace('index.html');
+                window.location.replace('/');
                 return;
             }
             try {
@@ -49,10 +51,10 @@
                 );
                 if (!isAdmin) {
                     alert('⛔ Access denied. This dashboard is restricted.');
-                    window.location.replace('index.html');
+                    window.location.replace('/');
                 }
             } catch(e) {
-                window.location.replace('index.html');
+                window.location.replace('/');
             }
         })();
     </script>
@@ -276,7 +278,7 @@
                 <p style="color:#666;font-size:0.92rem;margin-top:.4rem;">
                     Images upload to <strong>Cloudinary</strong> (free 25 GB, auto-CDN, auto WebP) and metadata
                     is stored in Firestore. They'll appear instantly on the public
-                    <a href="/gallery.html" target="_blank" rel="noopener">Gallery page</a>.
+                    <a href="/gallery" target="_blank" rel="noopener">Gallery page</a>.
                     First-time setup: see <code>gallery_setup.md</code> in the repo.
                 </p>
             </div>

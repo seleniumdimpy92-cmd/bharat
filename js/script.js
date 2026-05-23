@@ -464,7 +464,7 @@ window.bookPackage = function(pkg) {
             meals: ''
         };
         try { sessionStorage.setItem('checkoutCart', JSON.stringify(cart)); } catch (e) {}
-        window.location.href = 'checkout.html';
+        window.location.href = '/checkout';
     } catch (e) {
         console.error('Error in bookPackage:', e);
         if (window.Toast) window.Toast.error('Could not start booking: ' + e.message);
@@ -716,7 +716,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sessionStorage.removeItem('postLoginIntent');
             if (intent.type === 'checkout') {
                 if (window.Toast) window.Toast.success('Welcome back! Redirecting to checkout…');
-                setTimeout(() => { window.location.href = 'checkout.html'; }, 600);
+                setTimeout(() => { window.location.href = '/checkout'; }, 600);
                 return;
             }
             if (intent.type === 'book' && intent.pkg && typeof window.bookPackage === 'function') {
@@ -946,7 +946,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const custBtn = e.target.closest('[data-action="customize"]');
             if (custBtn) { e.stopPropagation(); window.openCustomize(custBtn.dataset.pkg); return; }
             const navEl = e.target.closest('[data-nav]');
-            if (navEl) { window.location.href = 'package.html?id=' + navEl.dataset.nav; return; }
+            if (navEl) { window.location.href = '/package?id=' + navEl.dataset.nav; return; }
         });
     }
 

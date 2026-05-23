@@ -355,7 +355,7 @@
                 // the continue URL (Firebase then uses its default page).
                 try {
                     await firebaseAuth.sendEmailVerification(cred.user, {
-                        url: window.location.origin + '/index.html?verified=1',
+                        url: window.location.origin + '/?verified=1',
                         handleCodeInApp: false
                     });
                     emailVerifSent = true;
@@ -414,7 +414,7 @@
         if (!auth.currentUser) throw new Error('You must be signed in to resend.');
         if (auth.currentUser.emailVerified) throw new Error('Your email is already verified.');
         await firebaseAuth.sendEmailVerification(auth.currentUser, {
-            url: window.location.origin + '/index.html?verified=1',
+            url: window.location.origin + '/?verified=1',
             handleCodeInApp: false
         });
     }

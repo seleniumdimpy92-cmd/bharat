@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Hide .html and /index from the URL bar without re-loading the page -->
+    <script>(function(){try{var p=location.pathname;if(/\/index(\.html)?$/i.test(p)){history.replaceState(null,"",p.replace(/\/index(\.html)?$/i,"/")+location.search+location.hash);}else if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Andaman Tour Package Details | Bharat Tours &amp; Travels</title>
@@ -12,12 +14,12 @@
     <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="theme-color" content="#0d7a8a">
     <meta name="google-adsense-account" content="ca-pub-8154901590978667">
-    <link rel="canonical" href="https://andamanvoyages.in/package.html">
+    <link rel="canonical" href="https://andamanvoyages.in/package">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="product">
     <meta property="og:site_name" content="Bharat Tours &amp; Travels">
-    <meta property="og:url" content="https://andamanvoyages.in/package.html">
+    <meta property="og:url" content="https://andamanvoyages.in/package">
     <meta property="og:title" content="Andaman Tour Package Details | Bharat Tours &amp; Travels">
     <meta property="og:description" content="Day-by-day Andaman itinerary with hotels, ferries, scuba diving and instant Razorpay booking.">
     <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg">
@@ -57,7 +59,7 @@
                 "@type": "ListItem",
                 "position": 3,
                 "name": "Package Details",
-                "item": "https://andamanvoyages.in/package.html"
+                "item": "https://andamanvoyages.in/package"
             }
         ]
     }
@@ -79,12 +81,12 @@
     <!-- Minimal Navbar -->
     <header style="position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(20,20,20,0.96);backdrop-filter:blur(10px);">
         <nav style="display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;max-width:1400px;margin:0 auto;">
-            <a href="index.html" style="text-decoration:none;display:flex;align-items:center;">
+            <a href="/" style="text-decoration:none;display:flex;align-items:center;">
                 <img src="images/logo.png" alt="Bharat Tours & Travels" style="height:58px;width:auto;object-fit:contain;">
             </a>
             <div style="display:flex;gap:1rem;align-items:center;">
-                <a href="index.html#packages" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;"><i class="fas fa-suitcase"></i> All Packages</a>
-                <a href="index.html" id="navAuthLink" style="color:#fff;background:#0d7a8a;padding:0.4rem 1rem;border-radius:6px;text-decoration:none;font-size:0.88rem;font-weight:600;">Login</a>
+                <a href="/#packages" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;"><i class="fas fa-suitcase"></i> All Packages</a>
+                <a href="/" id="navAuthLink" style="color:#fff;background:#0d7a8a;padding:0.4rem 1rem;border-radius:6px;text-decoration:none;font-size:0.88rem;font-weight:600;">Login</a>
             </div>
         </nav>
     </header>
@@ -272,7 +274,7 @@ async function loadPackage() {
         document.getElementById('pageContent').innerHTML = `
             <div class="pkg-loading" style="padding-top:6rem;">
                 <i class="fas fa-exclamation-circle" style="color:#e74c3c;"></i>
-                <p>Package not found. <a href="index.html#packages">Browse all packages</a></p>
+                <p>Package not found. <a href="/#packages">Browse all packages</a></p>
             </div>`;
         return;
     }
@@ -315,7 +317,7 @@ async function loadPackage() {
 
 // ── Inject per-package dynamic SEO + TouristTrip structured data ─
 function injectDynamicSEO(pkg) {
-    const url = 'https://andamanvoyages.in/package.html?id=' + encodeURIComponent(pkg.id);
+    const url = 'https://andamanvoyages.in/package?id=' + encodeURIComponent(pkg.id);
     const img = pkg.image ? ('https://andamanvoyages.in/' + pkg.image.replace(/^\/+/, '')) : 'https://andamanvoyages.in/images/beach1.jpg';
     const desc = (pkg.desc || ('Andaman tour package: ' + pkg.name + '. Hotels, ferries and activities included. Book now from ₹' + Number(pkg.price).toLocaleString() + '.')).slice(0, 300);
     const setMeta = (selector, attr, val) => {
@@ -389,7 +391,7 @@ function renderPage(pkg) {
         <!-- Hero -->
         <div class="pkg-hero" style="background-image:url('${heroImg}');">
             <div class="pkg-hero-content">
-                <a href="index.html#packages" class="back-btn"><i class="fas fa-arrow-left"></i> All Packages</a>
+                <a href="/#packages" class="back-btn"><i class="fas fa-arrow-left"></i> All Packages</a>
                 <h1>${pkg.name}</h1>
                 <div class="pkg-hero-meta">
                     <span class="price-badge">₹${Number(pkg.price).toLocaleString()} ${isTest ? '/test' : '/person'}</span>
@@ -525,9 +527,9 @@ function renderPage(pkg) {
 
         <!-- Footer -->
         <footer style="background:#1a1a1a;color:rgba(255,255,255,0.6);text-align:center;padding:1.5rem;margin-top:2rem;font-size:0.88rem;">
-            © 2026 Bharat Tours and Travels · <a href="index.html" style="color:#0d7a8a;">Home</a> · 
-            <a href="index.html#packages" style="color:#0d7a8a;">All Packages</a> · 
-            <a href="index.html#contact" style="color:#0d7a8a;">Contact</a>
+            © 2026 Bharat Tours and Travels · <a href="/" style="color:#0d7a8a;">Home</a> · 
+            <a href="/#packages" style="color:#0d7a8a;">All Packages</a> · 
+            <a href="/#contact" style="color:#0d7a8a;">Contact</a>
         </footer>
 
         <!-- Lightbox -->
@@ -616,7 +618,7 @@ function requireLoginForBooking() {
     } catch (e) {}
     // Silently redirect to home page where the login modal will auto-open.
     // No browser alert — the login modal is the prompt.
-    window.location.href = 'index.html#login';
+    window.location.href = '/#login';
     return false;
 }
 
@@ -647,7 +649,7 @@ function bookNow() {
         }
     } catch (e) {}
     try { sessionStorage.setItem('checkoutCart', JSON.stringify(cart)); } catch (e) {}
-    window.location.href = 'checkout.html';
+    window.location.href = '/checkout';
 }
 
 function customizeNow() {
@@ -747,7 +749,7 @@ function updateNavAuth() {
     if (user && localStorage.getItem('token')) {
         const u = JSON.parse(user);
         link.textContent = u.username;
-        link.href = 'index.html';
+        link.href = '/';
     }
 }
 updateNavAuth();

@@ -63,10 +63,10 @@
         if (!link) return;
         if (user && user.email) {
             link.textContent = (user.displayName || user.email.split('@')[0]).slice(0, 18);
-            link.href = 'index.html';
+            link.href = '/';
         } else {
             link.textContent = 'Login';
-            link.href = 'index.html#login';
+            link.href = '/#login';
         }
     }
     function prefillFromUser(user) {
@@ -153,7 +153,7 @@
             '<i class="fas fa-shopping-cart"></i>' +
             '<h2 style="margin:.5rem 0;">Your cart is empty</h2>' +
             '<p>Browse our handpicked Andaman packages and start planning your dream trip.</p>' +
-            '<p style="margin-top:1.2rem;"><a href="index.html#packages" style="display:inline-block;padding:.8rem 1.5rem;background:#0d7a8a;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;">Browse Packages</a></p>' +
+            '<p style="margin-top:1.2rem;"><a href="/#packages" style="display:inline-block;padding:.8rem 1.5rem;background:#0d7a8a;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;">Browse Packages</a></p>' +
             '</div>';
     }
 
@@ -244,7 +244,7 @@
             '<button class="btn-pay" id="payBtn"><i class="fas fa-lock"></i> Pay ' + R + fmt(advance) + ' Advance &amp; Confirm</button>' +
             // Embedded Razorpay container — checkout renders inline here (no popup)
             '<div id="rzp-embed-container" class="rzp-embed-container" style="display:none;"></div>' +
-            '<a href="index.html#packages" style="text-decoration:none;"><button class="btn-secondary" type="button"><i class="fas fa-arrow-left"></i> Continue Browsing</button></a>' +
+            '<a href="/#packages" style="text-decoration:none;"><button class="btn-secondary" type="button"><i class="fas fa-arrow-left"></i> Continue Browsing</button></a>' +
 
             // Cancellation policy summary
             '<div class="cxl-policy">' +
@@ -345,7 +345,7 @@
         if (!isLoggedIn()) {
             try { sessionStorage.setItem('postLoginIntent', JSON.stringify({ type: 'checkout', ts: Date.now() })); } catch (e) {}
             window.Toast.info('Please log in to continue with payment.', { duration: 3000 });
-            setTimeout(function () { window.location.href = 'index.html#login'; }, 700);
+            setTimeout(function () { window.location.href = '/#login'; }, 700);
             return;
         }
         // Require verified email (admins exempt). This prevents bookings
@@ -542,8 +542,8 @@
                 '</div>' +
 
                 '<div style="margin-top:2rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">' +
-                    '<a href="bookings.html" style="background:#0d7a8a;color:#fff;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;"><i class="fas fa-suitcase-rolling"></i> View My Bookings</a>' +
-                    '<a href="index.html" style="background:#ecf0f1;color:#2c3e50;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;"><i class="fas fa-home"></i> Back to Home</a>' +
+                    '<a href="/bookings" style="background:#0d7a8a;color:#fff;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;"><i class="fas fa-suitcase-rolling"></i> View My Bookings</a>' +
+                    '<a href="/" style="background:#ecf0f1;color:#2c3e50;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;"><i class="fas fa-home"></i> Back to Home</a>' +
                 '</div>' +
                 '<p style="color:#7f8c8d;font-size:.85rem;margin-top:1.5rem;">Need help? Call <a href="tel:+918880195191" style="color:#0d7a8a;font-weight:600;">+91 88801 95191</a> &middot; Quote ref <strong>' + esc(ref) + '</strong></p>' +
             '</div>';

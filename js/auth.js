@@ -48,7 +48,7 @@ function isAdmin(user) {
 
 // ── UI: show/hide nav based on auth & role ──
 function findDashboardNavItem() {
-  const links = document.querySelectorAll('a[href$="dashboard.html"]');
+  const links = document.querySelectorAll('a[href$="/dashboard"]');
   for (const a of links) {
     return a.closest('li') || a;
   }

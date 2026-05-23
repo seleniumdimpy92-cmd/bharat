@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Hide .html and /index from the URL bar without re-loading the page -->
+    <script>(function(){try{var p=location.pathname;if(/\/index(\.html)?$/i.test(p)){history.replaceState(null,"",p.replace(/\/index(\.html)?$/i,"/")+location.search+location.hash);}else if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photo Gallery — Andaman Tours | Bharat Tours &amp; Travels</title>
@@ -8,12 +10,12 @@
     <meta name="description" content="Browse stunning photos of Andaman: Radhanagar Beach, Havelock Island, Neil Island, scuba diving, Ross Island, sunsets, and more. Bharat Tours and Travels.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="theme-color" content="#0d7a8a">
-    <link rel="canonical" href="https://andamanvoyages.in/gallery.html">
+    <link rel="canonical" href="https://andamanvoyages.in/gallery">
 
     <meta property="og:type" content="website">
     <meta property="og:title" content="Photo Gallery — Andaman Tours | Bharat Tours &amp; Travels">
     <meta property="og:description" content="Stunning photos of Andaman beaches, islands, scuba diving, and tours.">
-    <meta property="og:url" content="https://andamanvoyages.in/gallery.html">
+    <meta property="og:url" content="https://andamanvoyages.in/gallery">
     <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg">
 
     <link rel="icon" type="image/png" href="images/logo.png">
@@ -26,7 +28,7 @@
         "@type": "ImageGallery",
         "name": "Andaman Photo Gallery",
         "description": "Travel photos from Andaman tours by Bharat Tours and Travels — Radhanagar Beach, Havelock Island, Neil Island, scuba diving, Ross Island, sunsets and more.",
-        "url": "https://andamanvoyages.in/gallery.html",
+        "url": "https://andamanvoyages.in/gallery",
         "publisher": {
             "@type": "TravelAgency",
             "name": "Bharat Tours and Travels",
@@ -41,7 +43,7 @@
         "@type": "BreadcrumbList",
         "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://andamanvoyages.in/" },
-            { "@type": "ListItem", "position": 2, "name": "Photo Gallery", "item": "https://andamanvoyages.in/gallery.html" }
+            { "@type": "ListItem", "position": 2, "name": "Photo Gallery", "item": "https://andamanvoyages.in/gallery" }
         ]
     }
     </script>
@@ -65,7 +67,7 @@
         <nav class="topnav" id="topnav">
             <a href="/" class="topnav-item"><i class="fas fa-home"></i><span>Home</span></a>
             <a href="/#packages" class="topnav-item"><i class="fas fa-suitcase-rolling"></i><span>Packages</span></a>
-            <a href="/gallery.html" class="topnav-item active"><i class="fas fa-images"></i><span>Gallery</span></a>
+            <a href="/gallery" class="topnav-item active"><i class="fas fa-images"></i><span>Gallery</span></a>
             <a href="/about" class="topnav-item"><i class="fas fa-info-circle"></i><span>About</span></a>
             <a href="/bookings" class="topnav-item"><i class="fas fa-calendar-check"></i><span>Bookings</span></a>
             <a href="/#contact" class="topnav-item"><i class="fas fa-phone-alt"></i><span>Contact</span></a>
