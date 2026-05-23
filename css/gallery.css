@@ -529,3 +529,82 @@
 @media (max-width: 720px) {
     .gal-edit-row2 { grid-template-columns: 1fr; }
 }
+
+/* ── Admin uploader: structured field sections ──────────── */
+.admin-gallery-fields {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.agf-section {
+    background: #fff;
+    border: 1px solid #e3e8ef;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+}
+.agf-section-trip {
+    background: linear-gradient(180deg, #f0fbfb 0%, #fff 100%);
+    border-color: #bfe6ec;
+}
+.agf-title {
+    margin: 0 0 .8rem;
+    font-size: .92rem;
+    font-weight: 700;
+    color: #0d7a8a;
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+}
+.agf-title i { color: #16a085; }
+.agf-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: .85rem;
+}
+.agf-field {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    font-size: .78rem;
+    font-weight: 600;
+    color: #5a6877;
+}
+.agf-field span {
+    line-height: 1.25;
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+}
+.agf-field span i { color: #0d7a8a; }
+.agf-field input {
+    width: 100%;
+    padding: .55rem .7rem;
+    border: 1px solid #cfd9df;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: .9rem;
+    color: #2c3e50;
+    background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+}
+.agf-field input:focus {
+    outline: none;
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13,122,138,.18);
+}
+.agf-field input[type="date"] {
+    /* date pickers look weird without a min height in some browsers */
+    min-height: 38px;
+}
+.agf-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+.agf-actions .admin-gallery-upload-btn {
+    min-width: 160px;
+}
+
+@media (max-width: 720px) {
+    .agf-grid { grid-template-columns: 1fr; }
+}

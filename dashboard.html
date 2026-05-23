@@ -21,7 +21,7 @@
 
     <link rel="stylesheet" href="css/style.css?v=27">
     <link rel="stylesheet" href="css/dashboard.css?v=3">
-    <link rel="stylesheet" href="css/gallery.css?v=2">
+    <link rel="stylesheet" href="css/gallery.css?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="js/firebase-config.js?v=17"></script>
@@ -294,41 +294,78 @@
                     <input type="file" id="galFileInput" accept="image/*" multiple>
                 </label>
 
-                <div class="admin-gallery-form-row">
-                    <input type="text" id="galTitle"    placeholder="Title (e.g. Radhanagar Beach)">
-                    <input type="text" id="galCaption"  placeholder="Caption (optional)">
-                    <input type="text" id="galCategory" placeholder="Category (e.g. Beaches)" list="galCategoryList">
-                    <datalist id="galCategoryList">
-                        <option value="Beaches">
-                        <option value="Islands">
-                        <option value="Activities">
-                        <option value="Resorts">
-                        <option value="Sunsets">
-                    </datalist>
-                    <input type="date" id="galDate" title="Date the photo was taken">
-                    <input type="text" id="galPlace" placeholder="Place (e.g. Havelock Island)" list="galPlaceList">
-                    <datalist id="galPlaceList">
-                        <option value="Port Blair">
-                        <option value="Havelock Island">
-                        <option value="Neil Island">
-                        <option value="Ross Island">
-                        <option value="Baratang">
-                        <option value="Diglipur">
-                        <option value="Radhanagar Beach">
-                    </datalist>
-                    <input type="text" id="galPackage" placeholder="Package (e.g. Honeymoon)" list="galPackageList">
-                    <datalist id="galPackageList">
-                        <option value="Budget">
-                        <option value="Standard">
-                        <option value="Luxury">
-                        <option value="Honeymoon">
-                        <option value="Family">
-                        <option value="Adventure">
-                    </datalist>
-                    <input type="number" id="galOrder" placeholder="Order" min="0" step="1" style="text-align:center;">
-                    <button class="admin-gallery-upload-btn" id="galUploadBtn" disabled>
-                        <i class="fas fa-upload"></i> Upload
-                    </button>
+                <div class="admin-gallery-fields">
+                    <div class="agf-section">
+                        <h4 class="agf-title"><i class="fas fa-tag"></i> Photo details</h4>
+                        <div class="agf-grid">
+                            <label class="agf-field">
+                                <span>Title</span>
+                                <input type="text" id="galTitle" placeholder="e.g. Radhanagar Beach">
+                            </label>
+                            <label class="agf-field">
+                                <span>Caption (optional)</span>
+                                <input type="text" id="galCaption" placeholder="Short caption">
+                            </label>
+                            <label class="agf-field">
+                                <span>Category</span>
+                                <input type="text" id="galCategory" placeholder="e.g. Beaches" list="galCategoryList">
+                                <datalist id="galCategoryList">
+                                    <option value="Beaches">
+                                    <option value="Islands">
+                                    <option value="Activities">
+                                    <option value="Resorts">
+                                    <option value="Sunsets">
+                                </datalist>
+                            </label>
+                            <label class="agf-field" style="max-width:120px;">
+                                <span>Order</span>
+                                <input type="number" id="galOrder" placeholder="0" min="0" step="1" style="text-align:center;">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="agf-section agf-section-trip">
+                        <h4 class="agf-title"><i class="fas fa-map-marked-alt"></i> Trip tags &mdash; used for grouping on the public gallery</h4>
+                        <div class="agf-grid">
+                            <label class="agf-field">
+                                <span><i class="fas fa-calendar-day"></i> Date (when the photo was taken — used for Year / Month grouping)</span>
+                                <input type="date" id="galDate">
+                            </label>
+                            <label class="agf-field">
+                                <span><i class="fas fa-map-marker-alt"></i> Place</span>
+                                <input type="text" id="galPlace" placeholder="e.g. Havelock Island" list="galPlaceList">
+                                <datalist id="galPlaceList">
+                                    <option value="Port Blair">
+                                    <option value="Havelock Island">
+                                    <option value="Neil Island">
+                                    <option value="Ross Island">
+                                    <option value="Baratang">
+                                    <option value="Diglipur">
+                                    <option value="Radhanagar Beach">
+                                    <option value="Elephant Beach">
+                                    <option value="Cellular Jail">
+                                </datalist>
+                            </label>
+                            <label class="agf-field">
+                                <span><i class="fas fa-suitcase"></i> Package</span>
+                                <input type="text" id="galPackage" placeholder="e.g. Honeymoon" list="galPackageList">
+                                <datalist id="galPackageList">
+                                    <option value="Budget">
+                                    <option value="Standard">
+                                    <option value="Luxury">
+                                    <option value="Honeymoon">
+                                    <option value="Family">
+                                    <option value="Adventure">
+                                </datalist>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="agf-actions">
+                        <button class="admin-gallery-upload-btn" id="galUploadBtn" disabled>
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
+                    </div>
                 </div>
 
                 <div class="admin-gallery-progress" id="galProgress">
