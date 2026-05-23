@@ -8,7 +8,9 @@ body{font-family:'Poppins',sans-serif;color:var(--dark-gray);background:#fff;lin
 .topbar-logo{display:flex;align-items:center;gap:.55rem;font-weight:700;color:var(--mmt-text);font-size:1rem;flex-shrink:0;min-width:0}
 .topbar-logo img{height:38px;width:auto;object-fit:contain}
 .topbar-logo span{white-space:nowrap}
-.topbar-phone,.topbar-email{color:var(--primary-teal);font-weight:600;text-decoration:none;font-size:.92rem;display:flex;align-items:center;gap:.4rem;flex-shrink:0;margin-left:.5rem}
+.topbar-contact{display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex-shrink:0;margin-left:.5rem;line-height:1.15}
+.topbar-phone,.topbar-email{color:var(--primary-teal);font-weight:600;text-decoration:none;font-size:.86rem;display:inline-flex;align-items:center;gap:.4rem;flex-shrink:0;white-space:nowrap}
+.topbar-phone i,.topbar-email i{width:14px;font-size:.85rem;text-align:center}
 .topbar-phone:hover,.topbar-email:hover{color:#0a5a68}
 .topbar .hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;background:transparent;border:none;cursor:pointer;padding:.4rem;flex-shrink:0}
 .topbar .hamburger span{display:block;width:22px;height:2px;background:var(--mmt-text);border-radius:2px;transition:.2s}
