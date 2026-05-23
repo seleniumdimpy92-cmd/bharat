@@ -118,27 +118,31 @@
         function refreshMenu() {
             const u = readCurrentUser();
             const initials = getInitials(u);
+            // Initials live in BOTH wrap (avatar btn) and drop (header avatar)
             wrap.querySelectorAll('.um-initials').forEach(e => e.textContent = initials);
-            const nameEl  = wrap.querySelector('.um-name');
-            const emailEl = wrap.querySelector('.um-email');
+            drop.querySelectorAll('.um-initials').forEach(e => e.textContent = initials);
+            // The remaining elements (name/email + show/hide flags) are all
+            // inside the dropdown which now lives on <body>, NOT inside wrap.
+            const nameEl  = drop.querySelector('.um-name');
+            const emailEl = drop.querySelector('.um-email');
             if (u) {
                 btn.classList.add('um-online');
                 if (nameEl)  nameEl.textContent  = u.fullName || u.username || 'Account';
                 if (emailEl) emailEl.textContent = u.email || '';
-                wrap.querySelectorAll('.um-login-only').forEach(e => e.style.display = 'none');
-                wrap.querySelectorAll('.um-logout-only').forEach(e => e.style.display = '');
+                drop.querySelectorAll('.um-login-only').forEach(e => e.style.display = 'none');
+                drop.querySelectorAll('.um-logout-only').forEach(e => e.style.display = '');
                 if (isAdmin(u)) {
-                    wrap.querySelectorAll('.um-admin-only').forEach(e => e.style.display = '');
+                    drop.querySelectorAll('.um-admin-only').forEach(e => e.style.display = '');
                 } else {
-                    wrap.querySelectorAll('.um-admin-only').forEach(e => e.style.display = 'none');
+                    drop.querySelectorAll('.um-admin-only').forEach(e => e.style.display = 'none');
                 }
             } else {
                 btn.classList.remove('um-online');
                 if (nameEl)  nameEl.textContent  = 'Guest';
                 if (emailEl) emailEl.textContent = 'Not signed in';
-                wrap.querySelectorAll('.um-login-only').forEach(e => e.style.display = '');
-                wrap.querySelectorAll('.um-logout-only').forEach(e => e.style.display = 'none');
-                wrap.querySelectorAll('.um-admin-only').forEach(e => e.style.display = 'none');
+                drop.querySelectorAll('.um-login-only').forEach(e => e.style.display = '');
+                drop.querySelectorAll('.um-logout-only').forEach(e => e.style.display = 'none');
+                drop.querySelectorAll('.um-admin-only').forEach(e => e.style.display = 'none');
             }
         }
         refreshMenu();
