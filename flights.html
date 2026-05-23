@@ -80,11 +80,11 @@
                 <form class="flight-search" id="flightSearchForm" autocomplete="off">
                     <div class="flight-search-field">
                         <label for="flFrom">From</label>
-                        <input id="flFrom" type="text" placeholder="Bangalore (BLR)" required>
+                        <select id="flFrom" required data-flight-cities data-default="Bangalore (BLR)"></select>
                     </div>
                     <div class="flight-search-field">
                         <label for="flTo">To</label>
-                        <input id="flTo" type="text" value="Port Blair (IXZ)" required>
+                        <input id="flTo" type="text" value="Port Blair (IXZ)" readonly required>
                     </div>
                     <div class="flight-search-field">
                         <label for="flDate">Departure</label>
@@ -169,10 +169,37 @@
         var retEl    = document.getElementById('flReturn');
         var tripType = 'oneway';
 
-        // Default departure date = today + 14 days
+        // ── Indian airport cities (IATA) ──
+        var INDIAN_AIRPORTS = [
+            'Bangalore (BLR)','Mumbai (BOM)','Delhi (DEL)','Chennai (MAA)','Kolkata (CCU)',
+            'Hyderabad (HYD)','Pune (PNQ)','Ahmedabad (AMD)','Goa (GOI)','Goa-Mopa (GOX)',
+            'Kochi (COK)','Thiruvananthapuram (TRV)','Calicut (CCJ)','Mangaluru (IXE)',
+            'Coimbatore (CJB)','Madurai (IXM)','Tiruchirappalli (TRZ)',
+            'Jaipur (JAI)','Lucknow (LKO)','Chandigarh (IXC)','Amritsar (ATQ)','Srinagar (SXR)',
+            'Jammu (IXJ)','Leh (IXL)','Dehradun (DED)','Varanasi (VNS)','Indore (IDR)',
+            'Bhopal (BHO)','Nagpur (NAG)','Raipur (RPR)','Ranchi (IXR)','Patna (PAT)',
+            'Bhubaneswar (BBI)','Visakhapatnam (VTZ)','Tirupati (TIR)','Vijayawada (VGA)',
+            'Guwahati (GAU)','Imphal (IMF)','Agartala (IXA)','Dibrugarh (DIB)','Silchar (IXS)',
+            'Bagdogra (IXB)','Surat (STV)','Vadodara (BDQ)','Rajkot (RAJ)','Bhuj (BHJ)',
+            'Udaipur (UDR)','Jodhpur (JDH)','Aurangabad (IXU)','Nashik (ISK)','Kolhapur (KLH)',
+            'Hubli (HBX)','Mysuru (MYQ)','Belagavi (IXG)','Port Blair (IXZ)'
+        ];
+
+        // Populate the From dropdown
+        var defaultCity = (fromEl.dataset.default && INDIAN_AIRPORTS.indexOf(fromEl.dataset.default) >= 0)
+            ? fromEl.dataset.default : 'Bangalore (BLR)';
+        var fromHtml = '';
+        INDIAN_AIRPORTS.forEach(function (c) {
+            fromHtml += '<option value="' + c + '"' + (c === defaultCity ? ' selected' : '') + '>' + c + '</option>';
+        });
+        fromEl.innerHTML = fromHtml;
+
+        // Default departure date = today
         var d = new Date();
-        d.setDate(d.getDate() + 14);
         dateEl.value = d.toISOString().split('T')[0];
+        // Don't allow picking past dates
+        dateEl.min = dateEl.value;
+        retEl.min = dateEl.value;
 
         // Restore last search from sessionStorage if available
         try {
@@ -208,28 +235,51 @@
             if (tripType === 'oneway') retEl.value = '';
         });
 
+        // Defensive fallback if js/flights.js failed to load (404, blocked, etc)
+        var FALLBACK_PARTNERS = [
+            { id:'makemytrip', name:'MakeMyTrip', tagline:"India's #1 travel site", color:'#eb2026', features:['Pay later','Free cancellation','EMI options'] },
+            { id:'easemytrip', name:'EaseMyTrip', tagline:'Lowest fares guaranteed', color:'#0a4d9d', features:['Zero convenience fee','Best for domestic'] },
+            { id:'cleartrip',  name:'Cleartrip',  tagline:'Hassle-free booking',     color:'#f57c00', features:['Express checkout','Trusted by millions'] },
+            { id:'skyscanner', name:'Skyscanner', tagline:'Compare 100s of airlines',color:'#0770e3', features:['Best for international','Price alerts'] }
+        ];
+        function getPartners() {
+            try { if (window.FlightSearch && Array.isArray(window.FlightSearch.PARTNERS) && window.FlightSearch.PARTNERS.length) return window.FlightSearch.PARTNERS; } catch (e) {}
+            return FALLBACK_PARTNERS;
+        }
+        function openPartnerSafe(id, params) {
+            try { if (window.FlightSearch && typeof window.FlightSearch.openPartner === 'function') { window.FlightSearch.openPartner(id, params); return; } } catch (e) {}
+            // Last-resort: just open the partner home page so user isn't stuck
+            var fallback = {
+                makemytrip: 'https://www.makemytrip.com/flights/',
+                easemytrip: 'https://flight.easemytrip.com/',
+                cleartrip:  'https://www.cleartrip.com/flights',
+                skyscanner: 'https://www.skyscanner.co.in/'
+            };
+            window.open(fallback[id] || 'https://www.google.com/flights', '_blank', 'noopener');
+        }
+
         function renderPartners(params) {
             ctaStub.style.display = 'none';
             partners.innerHTML = '';
-            window.FlightSearch.PARTNERS.forEach(function (p) {
+            getPartners().forEach(function (p) {
                 var card = document.createElement('div');
                 card.className = 'flight-partner-card';
                 card.innerHTML =
                     '<div class="accent-bar" style="background:' + p.color + ';"></div>' +
                     '<h3 class="flight-partner-name">' + p.name + '</h3>' +
                     '<p class="flight-partner-tagline">' + p.tagline + '</p>' +
-                    '                    '<ul class="flight-partner-features">' +
+                    '<ul class="flight-partner-features">' +
                         p.features.map(function (f) { return '<li>' + f + '</li>'; }).join('') +
                     '</ul>' +
                     '<button class="flight-partner-cta" type="button" style="background:' + p.color + ';">' +
                         '<i class="fas fa-external-link-alt"></i> Search on ' + p.name +
                     '</button>';
                 card.querySelector('.flight-partner-cta').addEventListener('click', function () {
-                    window.FlightSearch.openPartner(p.id, params);
+                    openPartnerSafe(p.id, params);
                 });
                 card.addEventListener('click', function (e) {
                     if (e.target.closest('.flight-partner-cta')) return;
-                    window.FlightSearch.openPartner(p.id, params);
+                    openPartnerSafe(p.id, params);
                 });
                 partners.appendChild(card);
             });
