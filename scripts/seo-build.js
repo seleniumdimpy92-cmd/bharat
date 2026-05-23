@@ -30,6 +30,7 @@ const today = new Date().toISOString().split('T')[0];
 // crawl priority + change frequency.
 const STATIC_URLS = [
     { loc: '/',             priority: '1.0', changefreq: 'weekly',  image: 'images/beach1.jpg', imageTitle: 'Andaman Holiday Packages' },
+    { loc: '/flights.html', priority: '0.9', changefreq: 'weekly',  image: 'images/neil2.jpg',  imageTitle: 'Flights to Andaman' },
     { loc: '/gallery.html', priority: '0.8', changefreq: 'weekly',  image: 'images/beach2.jpg', imageTitle: 'Andaman Photo Gallery' },
     { loc: '/about.html',   priority: '0.6', changefreq: 'monthly', image: 'images/logo.png',   imageTitle: 'About Bharat Tours and Travels' },
     { loc: '/privacy.html', priority: '0.3', changefreq: 'yearly' },
