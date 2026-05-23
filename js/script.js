@@ -656,6 +656,30 @@ document.addEventListener('DOMContentLoaded', function() {
         apply();
         window.addEventListener('scroll', apply, { passive: true });
     })();
+
+    // Wrap every letter of the brand name in <span class="bl"> so we can
+    // animate them one-by-one on hover (sequential wave + tilt + colour).
+    (function wrapBrandLetters() {
+        document.querySelectorAll('.brand-line1, .brand-line2').forEach(line => {
+            const text = line.textContent;
+            line.innerHTML = '';
+            for (const ch of text) {
+                if (ch === ' ') {
+                    // Preserve normal spacing — empty span won't animate but keeps gap
+                    const sp = document.createElement('span');
+                    sp.className = 'bl';
+                    sp.style.width = '.35em';
+                    sp.innerHTML = '&nbsp;';
+                    line.appendChild(sp);
+                } else {
+                    const sp = document.createElement('span');
+                    sp.className = 'bl';
+                    sp.textContent = ch;
+                    line.appendChild(sp);
+                }
+            }
+        });
+    })();
     document.addEventListener('click', (e) => {
         if (!document.body.classList.contains('nav-open')) return;
         const topnav = document.getElementById('topnav');
