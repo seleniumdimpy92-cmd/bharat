@@ -232,6 +232,8 @@
             '</div>' +
 
             '<button class="btn-pay" id="payBtn"><i class="fas fa-lock"></i> Pay ' + R + fmt(advance) + ' Advance &amp; Confirm</button>' +
+            // Embedded Razorpay container — checkout renders inline here (no popup)
+            '<div id="rzp-embed-container" class="rzp-embed-container" style="display:none;"></div>' +
             '<a href="index.html#packages" style="text-decoration:none;"><button class="btn-secondary" type="button"><i class="fas fa-arrow-left"></i> Continue Browsing</button></a>' +
 
             // Cancellation policy summary
@@ -381,7 +383,15 @@
         var payBtnLabel = '<i class="fas fa-lock"></i> Pay ' + R + fmt(advance) + ' Advance &amp; Confirm';
         if (payBtn) { payBtn.disabled = true; payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening payment...'; }
 
-        var rzp = new Razorpay({
+        // Show the embedded payment container (replaces the pay button + scrolls into view)
+        var embedHost = document.getElementById('rzp-embed-container');
+        if (embedHost) {
+            embedHost.innerHTML = '<div class="rzp-embed-loading"><i class="fas fa-spinner fa-spin"></i> Loading secure payment form…</div>';
+            embedHost.style.display = 'block';
+            try { embedHost.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+        }
+
+        var rzpOptions = {
             key: RAZORPAY_KEY,
             amount: advance * 100,            // ← charge only the 5% advance
             currency: 'INR',
@@ -408,13 +418,22 @@
             modal: {
                 ondismiss: function () {
                     if (payBtn) { payBtn.disabled = false; payBtn.innerHTML = payBtnLabel; }
+                    if (embedHost) { embedHost.style.display = 'none'; embedHost.innerHTML = ''; }
                     window.Toast.info('Payment cancelled.');
                 }
             }
-        });
+        };
+        // Razorpay's parent_id option embeds the checkout inline inside the
+        // given container instead of opening it as a floating modal popup.
+        // If unsupported by the loaded SDK, Razorpay silently falls back to
+        // the popup, so this is safe to set.
+        if (embedHost) rzpOptions.parent_id = 'rzp-embed-container';
+
+        var rzp = new Razorpay(rzpOptions);
 
         rzp.on('payment.failed', function (r) {
             if (payBtn) { payBtn.disabled = false; payBtn.innerHTML = payBtnLabel; }
+            if (embedHost) { embedHost.style.display = 'none'; embedHost.innerHTML = ''; }
             window.Toast.error('Payment failed: ' + ((r && r.error && r.error.description) || 'Unknown error'), { duration: 8000 });
             try { window.Analytics && window.Analytics.track('payment_failed', { value: advance, currency: 'INR' }); } catch (e) {}
         });
