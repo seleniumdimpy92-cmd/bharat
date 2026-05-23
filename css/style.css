@@ -20,11 +20,12 @@ body{font-family:'Poppins',sans-serif;color:var(--dark-gray);background:#fff;lin
 .brand-text{display:inline-flex;flex-direction:column;align-items:flex-start;gap:0;line-height:1;position:relative;top:.4rem;pointer-events:auto;z-index:91}
 /* Darker, more saturated gradient + black contour shadow keeps the cursive
    readable on both the white topbar and the hero photo it overlaps. */
-.brand-line1,.brand-line2{display:block;white-space:nowrap;font-family:'Pacifico',cursive;font-weight:400;letter-spacing:.3px;background:linear-gradient(135deg,#075461 0%,#0d6b4f 35%,#a86207 75%,#7a3e00 100%);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:0 1px 0 rgba(0,0,0,.05);filter:drop-shadow(0 1px 2px rgba(0,0,0,.18)) drop-shadow(0 2px 6px rgba(255,255,255,.55));transition:filter .35s ease,letter-spacing .35s ease}
+.brand-line1,.brand-line2{display:block;white-space:nowrap;font-family:'Pacifico',cursive;font-weight:400;letter-spacing:.3px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.18)) drop-shadow(0 2px 6px rgba(255,255,255,.55));transition:filter .35s ease,letter-spacing .35s ease}
 .brand-line1{font-size:2.1rem;line-height:1.05}
 .brand-line2{font-size:1.7rem;line-height:1;margin-top:.05rem;margin-left:1.6rem;opacity:1}
-/* Each letter is wrapped by JS in <span class="bl"></span> so we can wave them */
-.brand-line1 .bl,.brand-line2 .bl{display:inline-block;transform-origin:50% 80%;transition:transform .25s cubic-bezier(.34,1.56,.64,1),color .25s ease}
+/* Apply the gradient to EACH letter so the mask survives any transform
+   (rotate/scale) without flashing white between keyframes.            */
+.brand-line1 .bl,.brand-line2 .bl{display:inline-block;transform-origin:50% 80%;background:linear-gradient(135deg,#075461 0%,#0d6b4f 35%,#a86207 75%,#7a3e00 100%);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
 
 /* ── CRAZY HOVER ANIMATION ─────────────────────────────────
    On hover of the .topbar-logo:
@@ -58,21 +59,28 @@ body{font-family:'Poppins',sans-serif;color:var(--dark-gray);background:#fff;lin
 .topbar-logo:hover .brand-line2 .bl:nth-child(7){animation-delay:.68s}
 .topbar-logo:hover .brand-line2 .bl:nth-child(8){animation-delay:.72s}
 .topbar-logo:hover .brand-line2 .bl:nth-child(9){animation-delay:.76s}
+/* No colour change — gradient stays intact through the whole pop */
 @keyframes letterPop{
-    0%{transform:translateY(0) rotate(0) scale(1)}
-    35%{transform:translateY(-12px) rotate(-9deg) scale(1.18);color:#f39c12}
-    65%{transform:translateY(-4px) rotate(5deg) scale(1.05)}
-    100%{transform:translateY(0) rotate(0) scale(1)}
+    0%   {transform:translateY(0)    rotate(0)    scale(1)}
+    35%  {transform:translateY(-12px) rotate(-9deg) scale(1.18)}
+    65%  {transform:translateY(-4px)  rotate(5deg)  scale(1.05)}
+    100% {transform:translateY(0)    rotate(0)    scale(1)}
 }
 @keyframes brandShimmer{
     0%   {background-position:0% 50%}
     50%  {background-position:100% 50%}
     100% {background-position:0% 50%}
 }
-.topbar-contact{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex-shrink:0;margin-left:.5rem;line-height:1.1}
-.topbar-phone,.topbar-email{color:var(--primary-teal);font-weight:600;text-decoration:none;font-size:.72rem;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0;white-space:nowrap}
-.topbar-phone i,.topbar-email i{width:12px;font-size:.7rem;text-align:center}
-.topbar-phone:hover,.topbar-email:hover{color:#0a5a68}
+/* Phone / email block — DO NOT show inside the topbar anymore.
+   JS moves it below the hero search bar (or just under the topbar on other
+   pages). Selectors below style its detached form. */
+.topbar > .topbar-contact{display:none !important}
+.topbar-contact{display:inline-flex;flex-wrap:wrap;align-items:center;gap:.55rem;justify-content:center;line-height:1.1}
+.topbar-phone,.topbar-email{color:#0d7a8a;font-weight:600;text-decoration:none;font-size:.78rem;display:inline-flex;align-items:center;gap:.35rem;white-space:nowrap;background:rgba(255,255,255,.92);padding:.3rem .65rem;border-radius:999px;box-shadow:0 2px 8px rgba(10,31,68,.12);transition:background .15s,color .15s,transform .15s}
+.topbar-phone i,.topbar-email i{width:12px;font-size:.78rem;text-align:center}
+.topbar-phone:hover,.topbar-email:hover{color:#0a5a68;background:#fff;transform:translateY(-1px)}
+/* Position relative to the hero search bar — JS injects this wrapper */
+.contact-strip-floating{display:flex;justify-content:center;margin-top:.6rem;flex-wrap:wrap;gap:.5rem}
 .topbar .hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;background:transparent;border:none;cursor:pointer;padding:.4rem;flex-shrink:0}
 .topbar .hamburger span{display:block;width:22px;height:2px;background:var(--mmt-text);border-radius:2px;transition:.2s}
 
@@ -330,3 +338,87 @@ footer{background:var(--primary-dark);color:#fff;padding:2rem;text-align:center}
 .payments-disabled-banner i{margin-right:.4rem;color:#d68910}
 .payments-disabled-banner a{color:#0d7a8a;font-weight:700;text-decoration:none}
 .payments-disabled-banner a:hover{text-decoration:underline}
+
+/* ── User menu dropdown (right side of topnav) ─────────────────── */
+.user-menu-wrap{position:relative;flex-shrink:0}
+.user-menu-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,#0d7a8a 0%,#16a085 100%);
+    color:#fff;border:2px solid #fff;cursor:pointer;
+    font-size:1.05rem;font-weight:700;
+    box-shadow:0 4px 12px rgba(13,122,138,.35);
+    transition:transform .2s,box-shadow .2s;
+    position:relative;
+}
+.user-menu-btn:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 6px 18px rgba(13,122,138,.5)}
+.user-menu-btn .um-dot{
+    position:absolute;top:2px;right:2px;
+    width:10px;height:10px;border-radius:50%;
+    background:#27ae60;border:2px solid #fff;
+    display:none;
+}
+.user-menu-btn.um-online .um-dot{display:block}
+
+.user-menu-dropdown{
+    position:absolute;top:calc(100% + 12px);right:0;
+    min-width:240px;
+    background:#fff;border-radius:14px;
+    box-shadow:0 16px 40px rgba(10,31,68,.22),0 2px 6px rgba(10,31,68,.08);
+    border:1px solid rgba(13,122,138,.12);
+    padding:.5rem;
+    opacity:0;visibility:hidden;transform:translateY(-8px) scale(.96);
+    transform-origin:top right;
+    transition:opacity .2s ease,transform .2s ease,visibility 0s linear .2s;
+    z-index:120;
+}
+.user-menu-wrap.open .user-menu-dropdown{
+    opacity:1;visibility:visible;transform:translateY(0) scale(1);
+    transition:opacity .2s ease,transform .2s ease,visibility 0s linear 0s;
+}
+.user-menu-dropdown::before{
+    content:'';position:absolute;top:-7px;right:14px;
+    width:14px;height:14px;background:#fff;
+    border-left:1px solid rgba(13,122,138,.12);
+    border-top:1px solid rgba(13,122,138,.12);
+    transform:rotate(45deg);
+}
+.um-header{
+    display:flex;align-items:center;gap:.7rem;padding:.7rem .8rem;
+    border-bottom:1px solid #eef2f7;margin-bottom:.4rem;
+}
+.um-header .um-avatar{
+    width:38px;height:38px;border-radius:50%;
+    background:linear-gradient(135deg,#0d7a8a 0%,#16a085 100%);
+    color:#fff;display:inline-flex;align-items:center;justify-content:center;
+    font-size:.95rem;font-weight:700;flex-shrink:0;
+}
+.um-header .um-name{
+    font-size:.92rem;font-weight:700;color:#1c2b48;line-height:1.2;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.um-header .um-email{
+    font-size:.78rem;color:#6b7a99;line-height:1.2;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.um-item{
+    display:flex;align-items:center;gap:.7rem;
+    padding:.55rem .8rem;text-decoration:none;color:#1c2b48;
+    border-radius:8px;font-size:.88rem;font-weight:500;
+    transition:background .15s,color .15s;cursor:pointer;
+}
+.um-item i{
+    width:18px;color:#6b7a99;font-size:.92rem;text-align:center;
+    transition:color .15s;
+}
+.um-item:hover{background:#f0fbfb;color:#0d7a8a}
+.um-item:hover i{color:#0d7a8a}
+.um-item.um-danger{color:#c0392b}
+.um-item.um-danger i{color:#c0392b}
+.um-item.um-danger:hover{background:#fdedec}
+.um-divider{height:1px;background:#eef2f7;margin:.35rem 0}
+
+@media (max-width:768px){
+    .user-menu-btn{width:38px;height:38px;font-size:.9rem}
+    .user-menu-dropdown{min-width:220px;right:-.4rem}
+}
