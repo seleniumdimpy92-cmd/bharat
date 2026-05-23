@@ -18,9 +18,11 @@ body{font-family:'Poppins',sans-serif;color:var(--dark-gray);background:#fff;lin
 /* The brand text floats down so its second line spills BELOW the topbar
    card edge — making it look like the words drape into the hero section. */
 .brand-text{display:inline-flex;flex-direction:column;align-items:flex-start;gap:0;line-height:1;position:relative;top:.4rem;pointer-events:auto;z-index:91}
-.brand-line1,.brand-line2{display:block;white-space:nowrap;font-family:'Pacifico',cursive;font-weight:400;letter-spacing:.5px;background:linear-gradient(135deg,#0d7a8a 0%,#16a085 45%,#f39c12 100%);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;filter:drop-shadow(0 2px 6px rgba(255,255,255,.95)) drop-shadow(0 1px 0 rgba(255,255,255,.6));transition:filter .35s ease,letter-spacing .35s ease}
+/* Darker, more saturated gradient + black contour shadow keeps the cursive
+   readable on both the white topbar and the hero photo it overlaps. */
+.brand-line1,.brand-line2{display:block;white-space:nowrap;font-family:'Pacifico',cursive;font-weight:400;letter-spacing:.3px;background:linear-gradient(135deg,#075461 0%,#0d6b4f 35%,#a86207 75%,#7a3e00 100%);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:0 1px 0 rgba(0,0,0,.05);filter:drop-shadow(0 1px 2px rgba(0,0,0,.18)) drop-shadow(0 2px 6px rgba(255,255,255,.55));transition:filter .35s ease,letter-spacing .35s ease}
 .brand-line1{font-size:2.1rem;line-height:1.05}
-.brand-line2{font-size:1.7rem;line-height:1;margin-top:.05rem;margin-left:1.6rem;opacity:.95}
+.brand-line2{font-size:1.7rem;line-height:1;margin-top:.05rem;margin-left:1.6rem;opacity:1}
 /* Each letter is wrapped by JS in <span class="bl"></span> so we can wave them */
 .brand-line1 .bl,.brand-line2 .bl{display:inline-block;transform-origin:50% 80%;transition:transform .25s cubic-bezier(.34,1.56,.64,1),color .25s ease}
 
@@ -67,9 +69,9 @@ body{font-family:'Poppins',sans-serif;color:var(--dark-gray);background:#fff;lin
     50%  {background-position:100% 50%}
     100% {background-position:0% 50%}
 }
-.topbar-contact{display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex-shrink:0;margin-left:.5rem;line-height:1.15}
-.topbar-phone,.topbar-email{color:var(--primary-teal);font-weight:600;text-decoration:none;font-size:.86rem;display:inline-flex;align-items:center;gap:.4rem;flex-shrink:0;white-space:nowrap}
-.topbar-phone i,.topbar-email i{width:14px;font-size:.85rem;text-align:center}
+.topbar-contact{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex-shrink:0;margin-left:.5rem;line-height:1.1}
+.topbar-phone,.topbar-email{color:var(--primary-teal);font-weight:600;text-decoration:none;font-size:.72rem;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0;white-space:nowrap}
+.topbar-phone i,.topbar-email i{width:12px;font-size:.7rem;text-align:center}
 .topbar-phone:hover,.topbar-email:hover{color:#0a5a68}
 .topbar .hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;background:transparent;border:none;cursor:pointer;padding:.4rem;flex-shrink:0}
 .topbar .hamburger span{display:block;width:22px;height:2px;background:var(--mmt-text);border-radius:2px;transition:.2s}
