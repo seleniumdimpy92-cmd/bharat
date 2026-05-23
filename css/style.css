@@ -3,15 +3,20 @@
 html{scroll-behavior:smooth}
 body{font-family:'Poppins',sans-serif;color:var(--dark-gray);background:#fff;line-height:1.6}
 /* ── Layout: Single-row Top Bar (brand + icon nav + phone) ─────── */
-:root{--tb-h:74px}
-.topbar{position:fixed;top:0;left:0;right:0;height:var(--tb-h);background:rgba(255,255,255,.78);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid rgba(13,122,138,.18);box-shadow:0 4px 24px rgba(10,31,68,.10);display:flex;align-items:center;gap:1rem;padding:0 1.25rem;z-index:90;transition:background .25s ease,box-shadow .25s ease,border-color .25s ease}
-.topbar.scrolled{background:rgba(255,255,255,.96);box-shadow:0 4px 18px rgba(10,31,68,.12)}
-.topbar-logo{display:flex;align-items:center;gap:.65rem;flex-shrink:0;min-width:0;text-decoration:none;transition:transform .2s ease}
+:root{--tb-h:90px}
+/* Floating top bar — sits with a small margin all around so it visually
+   "floats" over the section below, with a deep soft shadow for depth. */
+.topbar{position:fixed;top:.6rem;left:.6rem;right:.6rem;height:calc(var(--tb-h) - 1.2rem);background:#fff;border:1px solid rgba(13,122,138,.12);border-radius:18px;box-shadow:0 12px 36px rgba(10,31,68,.18),0 2px 6px rgba(10,31,68,.08);display:flex;align-items:center;gap:1rem;padding:0 1.25rem;z-index:90;transition:background .25s ease,box-shadow .25s ease,border-color .25s ease,top .25s ease}
+.topbar.scrolled{box-shadow:0 14px 40px rgba(10,31,68,.22),0 2px 6px rgba(10,31,68,.10)}
+.topbar-logo{display:flex;align-items:center;gap:.85rem;flex-shrink:0;min-width:0;text-decoration:none;transition:transform .2s ease}
 .topbar-logo:hover{transform:translateY(-1px)}
-.topbar-logo img{height:50px;width:auto;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(13,122,138,.32));transition:transform .4s cubic-bezier(.4,0,.2,1)}
-.topbar-logo:hover img{transform:rotate(-7deg) scale(1.08)}
-.topbar-logo span{white-space:nowrap;font-family:'Pacifico',cursive;font-weight:400;font-size:1.55rem;line-height:1;letter-spacing:.5px;background:linear-gradient(135deg,#0d7a8a 0%,#16a085 40%,#f39c12 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:0 1px 0 rgba(255,255,255,.4);transition:filter .2s ease}
-.topbar-logo:hover span{filter:brightness(1.1) saturate(1.15)}
+.topbar-logo img{height:62px;width:auto;object-fit:contain;border-radius:14px;filter:drop-shadow(0 4px 8px rgba(13,122,138,.22));transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.topbar-logo:hover img{transform:rotate(-5deg) scale(1.06)}
+.brand-text{display:inline-flex;flex-direction:column;align-items:flex-start;gap:0;line-height:1}
+.brand-line1,.brand-line2{display:block;white-space:nowrap;font-family:'Pacifico',cursive;font-weight:400;letter-spacing:.5px;background:linear-gradient(135deg,#0d7a8a 0%,#16a085 45%,#f39c12 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:0 1px 0 rgba(255,255,255,.5);transition:filter .2s ease}
+.brand-line1{font-size:1.85rem;line-height:1.05}
+.brand-line2{font-size:1.5rem;line-height:1;margin-top:-.15rem;margin-left:1rem;opacity:.92}
+.topbar-logo:hover .brand-line1,.topbar-logo:hover .brand-line2{filter:brightness(1.1) saturate(1.15)}
 .topbar-contact{display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex-shrink:0;margin-left:.5rem;line-height:1.15}
 .topbar-phone,.topbar-email{color:var(--primary-teal);font-weight:600;text-decoration:none;font-size:.86rem;display:inline-flex;align-items:center;gap:.4rem;flex-shrink:0;white-space:nowrap}
 .topbar-phone i,.topbar-email i{width:14px;font-size:.85rem;text-align:center}
@@ -35,27 +40,38 @@ body{font-family:'Poppins',sans-serif;color:var(--dark-gray);background:#fff;lin
 .topnav-cta:hover i{transform:none}
 .topnav-cta::after{display:none !important}
 
-.main-content{padding-top:var(--tb-h);min-height:100vh}
-/* On pages with a hero (index, gallery, about) the hero should slide UNDER
-   the translucent topbar so it visually "floats" over the imagery.
-   Add class `hero-page` to <body> on such pages. */
+/* The floating bar reserves slightly more space so its drop-shadow doesn't
+   overlap the first content row. */
+.main-content{padding-top:calc(var(--tb-h) + .4rem);min-height:100vh}
+/* On pages with a hero (index, gallery, about) the hero photo should
+   bleed UNDER the floating topbar so the bar visibly floats *over* it. */
 body.hero-page .main-content{padding-top:0}
-body.hero-page .hero,body.hero-page .gallery-hero,body.hero-page .about-hero{padding-top:calc(var(--tb-h) + .8rem)}
+body.hero-page .hero,body.hero-page .gallery-hero,body.hero-page .about-hero{padding-top:calc(var(--tb-h) + 1rem)}
 
 @media (max-width:1100px){
-  .topbar-logo span{display:none}
+  .brand-line2{font-size:1.25rem}
+  .brand-line1{font-size:1.55rem}
   .topnav-item{padding:.3rem .55rem;min-width:56px}
 }
 @media (max-width:768px){
-  :root{--tb-h:60px}
-  .topbar{padding:0 .8rem;gap:.4rem}
+  :root{--tb-h:78px}
+  .topbar{top:.4rem;left:.4rem;right:.4rem;height:calc(var(--tb-h) - .8rem);padding:0 .8rem;gap:.4rem;border-radius:14px}
+  .topbar-logo img{height:50px;border-radius:11px}
+  .brand-line1{font-size:1.4rem}
+  .brand-line2{font-size:1.15rem;margin-left:.7rem}
   .topbar-phone,.topbar-email{display:none}
   .topbar .hamburger{display:flex;margin-left:auto}
-  .topnav{position:fixed;top:var(--tb-h);left:0;right:0;background:#fff;border-bottom:1px solid var(--mmt-line);box-shadow:0 4px 10px rgba(10,31,68,.08);height:auto;padding:.4rem;display:flex;flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;z-index:88;transform:translateY(-110%);transition:transform .25s ease}
+  .topnav{position:fixed;top:var(--tb-h);left:.4rem;right:.4rem;background:#fff;border:1px solid var(--mmt-line);border-radius:14px;box-shadow:0 8px 24px rgba(10,31,68,.18);height:auto;padding:.5rem;display:flex;flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;z-index:88;transform:translateY(-115%);transition:transform .25s ease}
   body.nav-open .topnav{transform:translateY(0)}
   .topnav-item{height:auto;font-size:.7rem}
   .topnav-item i{font-size:1.1rem}
   .topnav-item.active::after{bottom:-2px}
+}
+@media (max-width:480px){
+  /* On very small screens stack to one line so the bar stays compact */
+  .brand-text{flex-direction:row;gap:.3rem;align-items:baseline}
+  .brand-line1{font-size:1.25rem}
+  .brand-line2{font-size:1rem;margin-left:0;margin-top:0}
 }
 
 /* Legacy: keep .logo selector usable for in-content references */
