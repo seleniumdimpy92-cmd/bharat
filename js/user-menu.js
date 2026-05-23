@@ -1,0 +1,184 @@
+/* ── user-menu.js ────────────────────────────────────────────────
+   Adds a circular gradient "AD" avatar button at the right end of the
+   topbar's #topnav element, with a dropdown action-sheet menu:
+     • My Bookings
+     • Profile
+     • Dashboard / Settings  (admin-only)
+     • Database Mirror       (admin-only)
+     • Contact / Help / Terms
+     • Login / Logout
+
+   Works on every page that has <nav id="topnav"> and <header class="topbar">.
+   No other dependencies beyond firebase-config.js (for ADMIN_EMAILS).
+
+   Auto-hides any legacy ".topbar-user" element so we never show two avatars.
+   ──────────────────────────────────────────────────────────────── */
+
+(function () {
+    'use strict';
+
+    function readCurrentUser() {
+        try {
+            return JSON.parse(localStorage.getItem('currentUser') || 'null') || null;
+        } catch (e) { return null; }
+    }
+    function getInitials(u) {
+        if (!u) return '?';
+        const n = (u.fullName || u.username || u.email || '').trim();
+        if (!n) return '?';
+        const parts = n.split(/[\s@.]+/).filter(Boolean);
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return parts[0].slice(0, 2).toUpperCase();
+    }
+    function isAdmin(u) {
+        if (!u) return false;
+        const adminEmails = (Array.isArray(window.ADMIN_EMAILS) && window.ADMIN_EMAILS.length)
+            ? window.ADMIN_EMAILS.map(e => String(e).toLowerCase())
+            : ['deb@andamanvoyages.in'];
+        const email = String(u.email || '').toLowerCase();
+        return u.role === 'admin' || adminEmails.includes(email)
+            || (u.username || '').toLowerCase() === 'deb';
+    }
+
+    function build() {
+        // Hide any old text "Admin" badge in the dashboard topbar
+        document.querySelectorAll('.topbar-user').forEach(el => {
+            el.style.display = 'none';
+        });
+
+        const topnav = document.getElementById('topnav');
+        if (!topnav) return;
+        if (topnav.querySelector('.user-menu-wrap')) return;   // already built
+
+        const wrap = document.createElement('div');
+        wrap.className = 'user-menu-wrap';
+        wrap.innerHTML =
+            '<button type="button" class="user-menu-btn" id="userMenuBtn" '+
+                'aria-haspopup="true" aria-expanded="false" title="Account">' +
+                '<span class="um-initials">?</span>' +
+                '<span class="um-dot"></span>' +
+            '</button>' +
+            '<div class="user-menu-dropdown" id="userMenuDropdown" role="menu">' +
+                '<div class="um-header">' +
+                    '<span class="um-avatar um-initials">?</span>' +
+                    '<div style="min-width:0;">' +
+                        '<div class="um-name">Guest</div>' +
+                        '<div class="um-email">Not signed in</div>' +
+                    '</div>' +
+                '</div>' +
+                '<a class="um-item" href="/bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>' +
+                '<a class="um-item" href="javascript:void(0)" data-um-act="profile"><i class="fas fa-user"></i> Profile</a>' +
+                '<a class="um-item um-admin-only" href="/dashboard" style="display:none;"><i class="fas fa-th-large"></i> Dashboard</a>' +
+                '<a class="um-item um-admin-only" href="/dashboard#section-settings" style="display:none;"><i class="fas fa-cog"></i> Settings</a>' +
+                '<a class="um-item um-admin-only" href="/migrate" target="_blank" rel="noopener" style="display:none;"><i class="fas fa-clone"></i> Database Mirror</a>' +
+                '<div class="um-divider"></div>' +
+                '<a class="um-item" href="/about#contact"><i class="fas fa-headset"></i> Contact</a>' +
+                '<a class="um-item" href="javascript:void(0)" data-um-act="help"><i class="fas fa-question-circle"></i> Help</a>' +
+                '<a class="um-item" href="/terms"><i class="fas fa-file-alt"></i> Terms</a>' +
+                '<div class="um-divider"></div>' +
+                '<a class="um-item um-login-only" href="javascript:void(0)" data-um-act="login"><i class="fas fa-sign-in-alt"></i> Login / Sign Up</a>' +
+                '<a class="um-item um-danger um-logout-only" href="javascript:void(0)" data-um-act="logout" style="display:none;"><i class="fas fa-sign-out-alt"></i> Logout</a>' +
+            '</div>';
+        topnav.appendChild(wrap);
+
+        const btn  = wrap.querySelector('.user-menu-btn');
+        const drop = wrap.querySelector('.user-menu-dropdown');
+
+        function refreshMenu() {
+            const u = readCurrentUser();
+            const initials = getInitials(u);
+            wrap.querySelectorAll('.um-initials').forEach(e => e.textContent = initials);
+            const nameEl  = wrap.querySelector('.um-name');
+            const emailEl = wrap.querySelector('.um-email');
+            if (u) {
+                btn.classList.add('um-online');
+                if (nameEl)  nameEl.textContent  = u.fullName || u.username || 'Account';
+                if (emailEl) emailEl.textContent = u.email || '';
+                wrap.querySelectorAll('.um-login-only').forEach(e => e.style.display = 'none');
+                wrap.querySelectorAll('.um-logout-only').forEach(e => e.style.display = '');
+                if (isAdmin(u)) {
+                    wrap.querySelectorAll('.um-admin-only').forEach(e => e.style.display = '');
+                } else {
+                    wrap.querySelectorAll('.um-admin-only').forEach(e => e.style.display = 'none');
+                }
+            } else {
+                btn.classList.remove('um-online');
+                if (nameEl)  nameEl.textContent  = 'Guest';
+                if (emailEl) emailEl.textContent = 'Not signed in';
+                wrap.querySelectorAll('.um-login-only').forEach(e => e.style.display = '');
+                wrap.querySelectorAll('.um-logout-only').forEach(e => e.style.display = 'none');
+                wrap.querySelectorAll('.um-admin-only').forEach(e => e.style.display = 'none');
+            }
+        }
+        refreshMenu();
+        document.addEventListener('auth:changed', refreshMenu);
+        window.addEventListener('storage', refreshMenu);
+
+        // Toggle behaviour
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const willOpen = !wrap.classList.contains('open');
+            document.querySelectorAll('.user-menu-wrap.open').forEach(w => {
+                if (w !== wrap) w.classList.remove('open');
+            });
+            wrap.classList.toggle('open', willOpen);
+            btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        });
+        document.addEventListener('click', (e) => {
+            if (!wrap.contains(e.target)) {
+                wrap.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                wrap.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        drop.addEventListener('click', (e) => {
+            const item = e.target.closest('[data-um-act]');
+            if (!item) return;
+            const act = item.dataset.umAct;
+            wrap.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+            if (act === 'profile') {
+                if (typeof window.openProfile === 'function') window.openProfile();
+                else if (!readCurrentUser() && typeof window.openLogin === 'function') window.openLogin();
+                else window.location.href = '/dashboard';
+            } else if (act === 'login') {
+                if (typeof window.openLogin === 'function') window.openLogin();
+                else window.location.href = '/#login';
+            } else if (act === 'logout') {
+                if (typeof window.logout === 'function') {
+                    window.logout();
+                } else {
+                    try {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('currentUser');
+                    } catch (_) {}
+                    window.location.href = '/';
+                }
+            } else if (act === 'help') {
+                alert(
+                    'Need help?\n\n' +
+                    '📞 Call: +91 88801 95191 / +91 94341 25698\n' +
+                    '📧 Email: booking@andamanvoyages.in\n\n' +
+                    'We reply within 1–2 hours during 9 AM – 9 PM IST.'
+                );
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', build);
+    } else {
+        build();
+    }
+    // Expose for callers that re-render the topnav
+    window.UserMenu = { build, refresh: function () {
+        document.querySelectorAll('.user-menu-wrap').forEach(w => w.remove());
+        build();
+    }};
+})();
