@@ -700,6 +700,56 @@
                     <span id="consoleLockInfo" style="color:#666;font-size:.9rem;"></span>
                 </div>
             </div>
+
+            <!-- Database backup & mirror -->
+            <div class="settings-card" style="margin-top:1.5rem;">
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <h3><i class="fas fa-clone"></i> Database Backup &amp; Mirror</h3>
+                        <p>
+                            Mirror all Firestore data (packages, users, bookings, gallery, settings)
+                            from the <strong>primary</strong> Firebase project to the <strong>secondary</strong>
+                            backup project — and vice-versa. Run this whenever you've made significant
+                            changes (e.g. once a week) so the backup stays fresh. If the primary's free
+                            quota gets exhausted, you can flip <code style="background:#eef3f5;padding:.1rem .35rem;border-radius:4px;">window.FIREBASE_USE</code>
+                            to <code style="background:#eef3f5;padding:.1rem .35rem;border-radius:4px;">'secondary'</code>
+                            in <code style="background:#eef3f5;padding:.1rem .35rem;border-radius:4px;">js/firebase-config.js</code>
+                            and the live site instantly switches to the backup.
+                        </p>
+                    </div>
+                </div>
+                <div id="dbMirrorStatus" style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.85rem;font-size:.88rem;color:#5a6877;">
+                    <span>
+                        <i class="fas fa-server" style="color:#0d7a8a;"></i>
+                        Primary:&nbsp;<code id="dbPriPid" style="background:#e8f8f5;padding:.1rem .4rem;border-radius:4px;color:#0d7a8a;font-weight:600;">…</code>
+                    </span>
+                    <span>
+                        <i class="fas fa-database" style="color:#3498db;"></i>
+                        Secondary:&nbsp;<code id="dbSecPid" style="background:#eaf2f8;padding:.1rem .4rem;border-radius:4px;color:#3498db;font-weight:600;">…</code>
+                    </span>
+                    <span>
+                        <i class="fas fa-bolt" style="color:#16a085;"></i>
+                        Active now:&nbsp;<code id="dbActiveSlot" style="background:#d4edda;padding:.1rem .4rem;border-radius:4px;color:#155724;font-weight:600;">primary</code>
+                    </span>
+                </div>
+                <div class="settings-actions" style="margin-top:1.2rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+                    <a class="btn-save-packages" href="/migrate" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;">
+                        <i class="fas fa-clone"></i> Open Mirror Tool
+                    </a>
+                    <a class="btn-add-package" href="https://console.firebase.google.com/project/andaman-b886d/firestore/usage" target="_blank" rel="noopener" style="background:#3498db;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;">
+                        <i class="fas fa-chart-line"></i> Primary Quota Usage
+                    </a>
+                    <a class="btn-add-package" href="https://console.firebase.google.com/project/andaman-c85f0/firestore/usage" target="_blank" rel="noopener" style="background:#16a085;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;">
+                        <i class="fas fa-chart-line"></i> Secondary Quota Usage
+                    </a>
+                </div>
+                <div id="dbMirrorHint" style="margin-top:.9rem;font-size:.84rem;color:#6b7a99;line-height:1.55;">
+                    <strong style="color:#1c2b48;">Tip:</strong> Free Firestore quota = 50 K reads / 20 K writes
+                    per day per project. The Quota Usage links above let you watch consumption in real time.
+                    When the primary nears its limit, run a final mirror, switch <code>FIREBASE_USE</code> to
+                    <code>'secondary'</code>, push, and the next day's quota becomes available again on the backup.
+                </div>
+            </div>
         </section>
     </main>
 
@@ -1019,6 +1069,26 @@
                 });
             });
         }
+    })();
+    </script>
+
+    <!-- ── DB Mirror status (Settings) ───────────────────────── -->
+    <script>
+    (function () {
+        try {
+            const pri = (window.FIREBASE_PROJECTS && window.FIREBASE_PROJECTS.primary)   || {};
+            const sec = (window.FIREBASE_PROJECTS && window.FIREBASE_PROJECTS.secondary) || {};
+            const priEl = document.getElementById('dbPriPid');
+            const secEl = document.getElementById('dbSecPid');
+            const actEl = document.getElementById('dbActiveSlot');
+            if (priEl) priEl.textContent = pri.projectId || '(not configured)';
+            if (secEl) secEl.textContent = sec.projectId || '(not configured)';
+            if (actEl) {
+                const slot = window.FIREBASE_USE === 'secondary' ? 'secondary' : 'primary';
+                actEl.textContent = slot + ' \u2192 ' +
+                    (slot === 'primary' ? (pri.projectId || '?') : (sec.projectId || '?'));
+            }
+        } catch (e) {}
     })();
     </script>
 
