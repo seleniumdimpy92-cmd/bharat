@@ -285,6 +285,62 @@
    Rendered by js/flight-results.js after a search.
    ───────────────────────────────────────────────────────────── */
 
+/* Live-fare aggregator bar — legal real-time alternative to scraping */
+.fr-live-bar {
+    background: linear-gradient(135deg, #fff7e6 0%, #fff3d6 100%);
+    border: 1px solid #f6c065;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin: 0 0 1rem;
+    text-align: center;
+}
+.fr-live-bar-title {
+    font-weight: 700;
+    color: #8a4d00;
+    font-size: 1rem;
+    margin-bottom: .65rem;
+}
+.fr-live-bar-title i { color: #f39c12; margin-right: .35rem; }
+.fr-live-bar-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
+}
+.fr-live-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .55rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #cfdce4;
+    background: #fff;
+    color: #0d2c3a;
+    font-family: inherit;
+    font-size: .85rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform .1s, border-color .12s, box-shadow .12s;
+}
+.fr-live-btn:hover {
+    transform: translateY(-1px);
+    border-color: #0d7a8a;
+    box-shadow: 0 4px 12px rgba(13,122,138,.15);
+}
+.fr-live-google { color: #0770e3; border-color: #0770e3; }
+.fr-live-google:hover { background: #f0f7ff; }
+.fr-live-sky    { color: #0770e3; border-color: #0770e3; }
+.fr-live-mmt    { color: #eb2026; border-color: #eb2026; }
+.fr-live-emt    { color: #0a4d9d; border-color: #0a4d9d; }
+.fr-live-ct     { color: #f57c00; border-color: #f57c00; }
+.fr-live-bar-note {
+    font-size: .78rem;
+    color: #8a4d00;
+    margin-top: .3rem;
+}
+
 .fr-loading,
 .fr-error,
 .fr-empty {

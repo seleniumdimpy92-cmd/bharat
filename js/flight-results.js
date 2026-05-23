@@ -127,14 +127,85 @@
             });
     }
 
+    /* ─────────────────────────────────────────────────────────
+       Live external search links (legal alternatives to scraping):
+         • Google Flights — deep-link in new tab (X-Frame-Options
+           SAMEORIGIN means we can't iframe it, but we can pre-fill).
+         • Skyscanner widget — embedded via Travelpayouts script.
+       ───────────────────────────────────────────────────────── */
+    function googleFlightsUrl(p) {
+        var fr = (p.from || '').match(/\(([A-Z]{3})\)/) ? p.from.match(/\(([A-Z]{3})\)/)[1] : (p.from || '').toUpperCase().slice(0,3);
+        var to = (p.to   || 'IXZ').match(/\(([A-Z]{3})\)/) ? p.to.match(/\(([A-Z]{3})\)/)[1] : 'IXZ';
+        var d  = p.date || '';
+        var ad = p.adults || 1;
+        var ch = p.children || 0;
+        // Google Flights URL spec: /travel/flights?q=Flights%20to%20IXZ%20from%20BLR%20on%20YYYY-MM-DD
+        var q = 'Flights to ' + to + ' from ' + fr + ' on ' + d +
+                (ch ? ' for ' + ad + ' adults ' + ch + ' children' : (ad>1 ? ' for ' + ad + ' adults' : ''));
+        return 'https://www.google.com/travel/flights?q=' + encodeURIComponent(q) + '&hl=en&curr=INR';
+    }
+
+    function renderLiveBar(containerEl, params) {
+        var bar = document.createElement('div');
+        bar.className = 'fr-live-bar';
+        bar.innerHTML =
+            '<div class="fr-live-bar-title">' +
+              '<i class="fas fa-bolt"></i> Get the live fare from these aggregators' +
+            '</div>' +
+            '<div class="fr-live-bar-buttons">' +
+              '<a class="fr-live-btn fr-live-google" target="_blank" rel="noopener nofollow">' +
+                '<i class="fab fa-google"></i> Google Flights' +
+              '</a>' +
+              '<button class="fr-live-btn fr-live-sky" type="button" data-partner="skyscanner">' +
+                '<i class="fas fa-search"></i> Skyscanner' +
+              '</button>' +
+              '<button class="fr-live-btn fr-live-mmt" type="button" data-partner="makemytrip">' +
+                'MakeMyTrip' +
+              '</button>' +
+              '<button class="fr-live-btn fr-live-emt" type="button" data-partner="easemytrip">' +
+                'EaseMyTrip' +
+              '</button>' +
+              '<button class="fr-live-btn fr-live-ct" type="button" data-partner="cleartrip">' +
+                'Cleartrip' +
+              '</button>' +
+            '</div>' +
+            '<div class="fr-live-bar-note">' +
+              'Each opens with your search pre-filled in a new tab — you see and pay the real live fare on their site.' +
+            '</div>';
+        // Wire Google link
+        bar.querySelector('.fr-live-google').href = googleFlightsUrl(params);
+        // Wire partner buttons
+        bar.querySelectorAll('button[data-partner]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (btn.dataset.partner === 'skyscanner' && window.SkyscannerWidget && typeof window.SkyscannerWidget.open === 'function') {
+                    window.SkyscannerWidget.open(params);
+                    return;
+                }
+                if (typeof window.__flightOpenFn === 'function') {
+                    window.__flightOpenFn(btn.dataset.partner, params);
+                }
+            });
+        });
+        containerEl.appendChild(bar);
+    }
+
     function render(containerEl, params, openFn) {
         if (!containerEl) return;
+        // Stash the openFn so the live bar can use it
+        window.__flightOpenFn = openFn;
+
         renderLoading(containerEl);
 
         fetchFlights(params).then(function (data) {
             containerEl.innerHTML = '';
+            // Top: live-fare aggregator buttons (legal real-time options)
+            renderLiveBar(containerEl, params);
+
             if (!data || !data.flights || !data.flights.length) {
-                renderError(containerEl, 'No flights found for this route. Try a different date.');
+                var noResults = document.createElement('div');
+                noResults.className = 'fr-empty';
+                noResults.innerHTML = '<i class="fas fa-info-circle"></i> No sample itineraries found. Use the buttons above for live results.';
+                containerEl.appendChild(noResults);
                 return;
             }
             renderHeader(containerEl, data, params);
@@ -143,16 +214,22 @@
             });
             renderFooter(containerEl, data);
 
-            // Smooth scroll into view
             try { containerEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
         }).catch(function (err) {
             console.error('FlightResults fetch failed:', err);
-            renderError(containerEl, 'Could not load live flights. Please try again or click a partner below to search directly.');
+            // Even on error, show the live bar so users aren't stuck
+            containerEl.innerHTML = '';
+            renderLiveBar(containerEl, params);
+            var msg = document.createElement('div');
+            msg.className = 'fr-error';
+            msg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Sample fares unavailable right now. Use the buttons above to compare live prices on the major aggregators.';
+            containerEl.appendChild(msg);
         });
     }
 
     window.FlightResults = {
         render: render,
-        fetchFlights: fetchFlights
+        fetchFlights: fetchFlights,
+        googleFlightsUrl: googleFlightsUrl
     };
 })();
