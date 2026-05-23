@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>(function(){try{var p=location.pathname;if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Project Mirror — Bharat Tours Admin</title>
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <link rel="icon" type="image/png" href="images/logo-white.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/migrate.css?v=1">
+    <script src="js/firebase-config.js?v=18"></script>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="topbar-mini">
+        <img src="images/logo-white.png" alt="logo">
+        <strong>Firebase Project Mirror</strong>
+        <span class="badge">Admin only</span>
+        <a class="home" href="/dashboard"><i class="fas fa-arrow-left"></i> Back to dashboard</a>
+    </div>
+
+    <h1><i class="fas fa-clone"></i> Mirror Firestore Data Between Projects</h1>
+    <p class="lead">
+        Keep your <strong>secondary</strong> Firebase project (<code id="leadSecId">andaman-c85f0</code>)
+        as a hot backup of <strong>primary</strong> (<code id="leadPriId">andaman-b886d</code>).
+        Run this whenever you've made significant changes. If the primary's free quota gets
+        exhausted, flip <code>window.FIREBASE_USE</code> to <code>'secondary'</code> in
+        <code>js/firebase-config.js</code> and your site is instantly live again on the backup
+        with the latest mirrored data.
+    </p>
+
+    <div class="alert alert-warn">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+            <strong>You must be logged in as admin in BOTH projects.</strong> Each Firebase
+            project has its own Auth — your existing login in <code>andaman-b886d</code>
+            does NOT carry over to <code>andaman-c85f0</code>. Use the buttons below to sign in.
+        </div>
+    </div>
+
+    <!-- Auth status & sign-in panel -->
+    <div class="card" id="authCard">
+        <h2><i class="fas fa-user-shield"></i> Admin sign-in</h2>
+        <div class="auth-row">
+            <div class="auth-side">
+                <div class="auth-side-head">
+                    <span class="auth-pid" id="authPidPri">andaman-b886d</span>
+                    <span class="auth-status" id="authStPri">checking…</span>
+                </div>
+                <div class="auth-form">
+                    <input type="email"    id="authEmailPri" placeholder="admin email">
+                    <input type="password" id="authPwdPri"   placeholder="password">
+                    <button class="primary" id="authBtnPri"><i class="fas fa-sign-in-alt"></i> Sign in</button>
+                </div>
+            </div>
+            <div class="auth-side">
+                <div class="auth-side-head">
+                    <span class="auth-pid" id="authPidSec">andaman-c85f0</span>
+                    <span class="auth-status" id="authStSec">checking…</span>
+                </div>
+                <div class="auth-form">
+                    <input type="email"    id="authEmailSec" placeholder="admin email">
+                    <input type="password" id="authPwdSec"   placeholder="password">
+                    <button class="primary" id="authBtnSec"><i class="fas fa-sign-in-alt"></i> Sign in</button>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info" style="margin-top:.6rem;">
+            <i class="fas fa-info-circle"></i>
+            <div>
+                Tip: use the <strong>same email + password</strong> for both projects so it's easy
+                to remember. If the secondary doesn't have your account yet, register it in the
+                <a href="https://console.firebase.google.com/project/andaman-c85f0/authentication/users" target="_blank">Firebase Console</a> first
+                (Add user → same email/password as primary).
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects -->
+    <div class="card">
+        <h2><i class="fas fa-database"></i> Source &amp; Destination</h2>
+        <div class="projects">
+            <div class="project-card">
+                <div class="label" id="labelPri">Primary (source)</div>
+                <div class="pid"   id="pidPri">–</div>
+                <div class="stats">
+                    <span><b id="docsPri">–</b>docs total</span>
+                </div>
+            </div>
+            <div class="arrow" id="arrowEl"><i class="fas fa-arrow-right"></i></div>
+            <div class="project-card">
+                <div class="label" id="labelSec">Secondary (destination)</div>
+                <div class="pid"   id="pidSec">–</div>
+                <div class="stats">
+                    <span><b id="docsSec">–</b>docs total</span>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <label class="dir-lbl">
+                Direction:
+                <select id="directionSel">
+                    <option value="p2s" selected>Primary → Secondary  (back up)</option>
+                    <option value="s2p">Secondary → Primary  (restore)</option>
+                </select>
+            </label>
+            <button id="scanBtn"><i class="fas fa-search"></i> Scan both projects</button>
+        </div>
+    </div>
+
+    <!-- Collections to copy -->
+    <div class="card">
+        <h2><i class="fas fa-folder-tree"></i> Collections to copy</h2>
+        <p style="font-size:.86rem;color:var(--muted);margin-bottom:.7rem;">
+            Tick the collections you want included. Existing docs in the destination with the same
+            ID will be <strong>overwritten</strong>; docs not present in the source are left alone
+            (they're never deleted automatically — use the danger button if you really want a clean
+            mirror).
+        </p>
+        <div class="collections" id="collectionsBox">
+            <!-- populated by migrate.js -->
+        </div>
+        <div class="controls">
+            <button class="primary" id="mirrorBtn" disabled>
+                <i class="fas fa-clone"></i> Mirror selected collections
+            </button>
+            <button class="danger"  id="purgeBtn" disabled title="Delete from destination first, then copy. Use rarely.">
+                <i class="fas fa-broom"></i> Purge &amp; Mirror
+            </button>
+        </div>
+        <div class="progress"><div class="progress-bar" id="progBar"></div></div>
+    </div>
+
+    <!-- Live log -->
+    <div class="card">
+        <h2><i class="fas fa-terminal"></i> Activity log</h2>
+        <div class="log" id="logBox">Ready. Sign in to both projects, scan, then click "Mirror".</div>
+    </div>
+
+</div>
+
+<script type="module" src="js/migrate.js?v=1"></script>
+</body>
+</html>

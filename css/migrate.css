@@ -1,0 +1,86 @@
+:root{--teal:#0d7a8a;--green:#27ae60;--red:#c0392b;--amber:#f39c12;--bg:#f6f8fb;--line:#e3e8ef;--text:#1c2b48;--muted:#6b7a99}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:1.5rem}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:1.5rem;font-weight:700;display:flex;align-items:center;gap:.6rem;margin-bottom:.3rem}
+h1 i{color:var(--teal)}
+.lead{color:var(--muted);font-size:.95rem;margin-bottom:1.5rem;max-width:780px;line-height:1.55}
+.lead code{background:#eef3f5;padding:.1rem .35rem;border-radius:4px;font-size:.88em;color:var(--teal)}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.25rem 1.4rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(10,31,68,.05)}
+.card h2{font-size:1.05rem;font-weight:700;margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem;color:var(--teal)}
+
+.projects{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;margin-bottom:1rem}
+.project-card{background:#fbfdfe;border:2px solid var(--line);border-radius:12px;padding:1rem 1.1rem;text-align:center}
+.project-card .pid{font-family:ui-monospace,monospace;font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.3rem;word-break:break-all}
+.project-card .label{display:inline-block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:.18rem .55rem;border-radius:999px;background:#eaf2f8;color:#2980b9;margin-bottom:.4rem}
+.project-card .label.active{background:#d4edda;color:#155724}
+.project-card .stats{display:flex;justify-content:space-around;margin-top:.7rem;font-size:.85rem;color:var(--muted)}
+.project-card .stats b{display:block;font-size:1.1rem;font-weight:700;color:var(--text)}
+.arrow{font-size:1.6rem;color:var(--teal);text-align:center}
+.arrow.flipped i{transform:scaleX(-1);display:inline-block}
+
+.controls{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.4rem;align-items:center}
+.dir-lbl{display:inline-flex;align-items:center;gap:.5rem;font-size:.9rem;color:var(--muted)}
+button{font-family:inherit;font-size:.92rem;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--text);padding:.6rem 1.1rem;border-radius:8px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:.4rem}
+button:hover{background:#f0fbfb;border-color:var(--teal);color:var(--teal)}
+button.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+button.primary:hover{background:#0a5a68;color:#fff}
+button.danger{background:var(--red);color:#fff;border-color:var(--red)}
+button.danger:hover{background:#922b21;color:#fff}
+button:disabled{opacity:.55;cursor:not-allowed}
+select,input{font-family:inherit;font-size:.92rem;padding:.55rem .8rem;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text);cursor:pointer}
+input{cursor:text}
+input:focus,select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,122,138,.18)}
+
+.collections{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.5rem;margin-bottom:1rem}
+.col-row{display:flex;align-items:center;gap:.55rem;background:#f9fbfc;border:1px solid var(--line);border-radius:8px;padding:.55rem .8rem;font-size:.88rem;cursor:pointer}
+.col-row:hover{border-color:var(--teal);background:#f0fbfb}
+.col-row input{cursor:pointer;width:auto}
+.col-row code{font-family:ui-monospace,monospace;color:var(--teal);font-weight:600}
+.col-row .ccount{margin-left:auto;font-size:.78rem;color:var(--muted)}
+
+.log{font-family:ui-monospace,monospace;font-size:.82rem;line-height:1.55;background:#0d1117;color:#dce0e6;padding:1rem 1.2rem;border-radius:10px;max-height:380px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+.log .ok{color:#7ee787}
+.log .warn{color:#f0c674}
+.log .err{color:#ff7b72}
+.log .info{color:#79c0ff}
+.log .dim{color:#8b949e}
+
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:.18rem .55rem;border-radius:999px;background:var(--bg);color:var(--muted);margin-left:.4rem}
+.progress{height:6px;background:#eef2f7;border-radius:999px;overflow:hidden;margin:.5rem 0}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--green));width:0%;transition:width .25s}
+
+.alert{padding:.85rem 1rem;border-radius:10px;margin:.75rem 0;font-size:.9rem;display:flex;align-items:flex-start;gap:.55rem;line-height:1.5}
+.alert i{flex-shrink:0;margin-top:.15rem}
+.alert-info{background:#e1f0fa;color:#15598c;border-left:4px solid #2980b9}
+.alert-info a{color:#15598c;font-weight:600}
+.alert-warn{background:#fff8e7;color:#7d5d00;border-left:4px solid var(--amber)}
+.alert-warn a{color:#7d5d00;font-weight:600}
+.alert-err{background:#fdedec;color:#922b21;border-left:4px solid var(--red)}
+
+.topbar-mini{display:flex;align-items:center;gap:.6rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.topbar-mini img{height:36px;border-radius:8px;border:1px solid var(--line);background:#fff}
+.topbar-mini strong{font-size:1rem;color:var(--text)}
+.topbar-mini .home{margin-left:auto;font-size:.85rem;color:var(--muted);text-decoration:none}
+.topbar-mini .home:hover{color:var(--teal)}
+
+/* Auth row */
+.auth-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.auth-side{background:#fbfdfe;border:1px solid var(--line);border-radius:10px;padding:.85rem 1rem}
+.auth-side-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+.auth-pid{font-family:ui-monospace,monospace;font-size:.88rem;font-weight:700;color:var(--text)}
+.auth-status{font-size:.78rem;font-weight:600;padding:.15rem .55rem;border-radius:999px;background:#eef2f7;color:var(--muted)}
+.auth-status.ok{background:#d4edda;color:#155724}
+.auth-status.err{background:#fdedec;color:#922b21}
+.auth-form{display:grid;grid-template-columns:1fr 1fr auto;gap:.4rem}
+.auth-form input{padding:.5rem .65rem;font-size:.85rem}
+.auth-form button{padding:.5rem .85rem;font-size:.85rem}
+
+@media (max-width:768px){
+    .projects{grid-template-columns:1fr;text-align:center}
+    .arrow{transform:rotate(90deg);margin:.4rem 0}
+    .arrow.flipped{transform:rotate(-90deg)}
+    .auth-row{grid-template-columns:1fr}
+    .auth-form{grid-template-columns:1fr}
+    .auth-form button{width:100%}
+}
