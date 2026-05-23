@@ -130,6 +130,35 @@ body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; bac
     color:#0a5a68; font-size:.85rem; margin-top:.85rem; line-height:1.5;
 }
 
+/* ── Embedded Razorpay container ────────────────────────────── */
+.rzp-embed-container {
+    background:#fff;
+    border:1px solid #cfdce4;
+    border-radius:12px;
+    margin-top:.85rem;
+    min-height:520px;
+    overflow:hidden;
+    box-shadow:0 4px 18px rgba(13,122,138,.08);
+    position:relative;
+}
+.rzp-embed-container iframe {
+    width:100% !important;
+    min-height:520px;
+    border:0;
+    display:block;
+}
+.rzp-embed-loading {
+    text-align:center;
+    padding:3rem 1rem;
+    color:#5a6877;
+    font-size:.95rem;
+}
+.rzp-embed-loading i {
+    color:var(--teal);
+    margin-right:.4rem;
+    font-size:1.2rem;
+}
+
 .co-footer { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:.85rem; background:#1a1a1a; color:rgba(255,255,255,.6); }
 .co-footer a { color:var(--teal); }
 
