@@ -145,6 +145,26 @@
         document.addEventListener('auth:changed', refreshMenu);
         window.addEventListener('storage', refreshMenu);
 
+        // Subscribe to the data-layer's auth listener if available — this is
+        // the most reliable signal because dataStore.cacheProfile() runs
+        // INSIDE the same tab, and a same-tab localStorage.setItem does NOT
+        // fire the 'storage' event. UsersStore exposes onAuthChange via the
+        // _authListeners array in js/dataStore.js.
+        if (window.UsersStore && typeof window.UsersStore.onAuthChange === 'function') {
+            window.UsersStore.onAuthChange(function () { refreshMenu(); });
+        }
+
+        // Cheap safety net: poll every 1 s for the first 30 s after page
+        // load so the avatar reflects login status promptly even if neither
+        // auth:changed nor onAuthChange fired (e.g. on dashboard.html where
+        // js/auth.js is not loaded but dataStore.js writes localStorage on
+        // its own).
+        let _polls = 0;
+        const _t = setInterval(() => {
+            refreshMenu();
+            if (++_polls > 30) clearInterval(_t);
+        }, 1000);
+
         function closeMenu() {
             wrap.classList.remove('open');
             drop.classList.remove('open');
