@@ -6,11 +6,12 @@ body{font-family:'Poppins',sans-serif;color:var(--dark-gray);background:#fff;lin
 :root{--tb-h:74px}
 .topbar{position:fixed;top:0;left:0;right:0;height:var(--tb-h);background:rgba(255,255,255,.78);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid rgba(13,122,138,.18);box-shadow:0 4px 24px rgba(10,31,68,.10);display:flex;align-items:center;gap:1rem;padding:0 1.25rem;z-index:90;transition:background .25s ease,box-shadow .25s ease,border-color .25s ease}
 .topbar.scrolled{background:rgba(255,255,255,.96);box-shadow:0 4px 18px rgba(10,31,68,.12)}
-.topbar-logo{display:flex;align-items:center;gap:.7rem;font-weight:800;font-size:1.18rem;flex-shrink:0;min-width:0;letter-spacing:.2px;text-decoration:none;background:linear-gradient(135deg,#0d7a8a 0%,#16a085 45%,#f39c12 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;transition:transform .2s ease,filter .2s ease}
-.topbar-logo:hover{transform:translateY(-1px);filter:brightness(1.08)}
-.topbar-logo img{height:46px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(13,122,138,.28));transition:transform .35s cubic-bezier(.4,0,.2,1)}
-.topbar-logo:hover img{transform:rotate(-6deg) scale(1.07)}
-.topbar-logo span{white-space:nowrap;background:inherit;-webkit-background-clip:inherit;background-clip:inherit;-webkit-text-fill-color:inherit;color:inherit}
+.topbar-logo{display:flex;align-items:center;gap:.65rem;flex-shrink:0;min-width:0;text-decoration:none;transition:transform .2s ease}
+.topbar-logo:hover{transform:translateY(-1px)}
+.topbar-logo img{height:50px;width:auto;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(13,122,138,.32));transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.topbar-logo:hover img{transform:rotate(-7deg) scale(1.08)}
+.topbar-logo span{white-space:nowrap;font-family:'Pacifico',cursive;font-weight:400;font-size:1.55rem;line-height:1;letter-spacing:.5px;background:linear-gradient(135deg,#0d7a8a 0%,#16a085 40%,#f39c12 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;text-shadow:0 1px 0 rgba(255,255,255,.4);transition:filter .2s ease}
+.topbar-logo:hover span{filter:brightness(1.1) saturate(1.15)}
 .topbar-contact{display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex-shrink:0;margin-left:.5rem;line-height:1.15}
 .topbar-phone,.topbar-email{color:var(--primary-teal);font-weight:600;text-decoration:none;font-size:.86rem;display:inline-flex;align-items:center;gap:.4rem;flex-shrink:0;white-space:nowrap}
 .topbar-phone i,.topbar-email i{width:14px;font-size:.85rem;text-align:center}
