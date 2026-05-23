@@ -860,6 +860,7 @@
     <script src="js/script.js?v=29"></script>
     <script src="js/chat.js?v=13"></script>
     <script src="js/flights.js?v=1"></script>
+    <script src="js/flight-results.js?v=1"></script>
     <script src="js/security.js?v=2"></script>
 
     <!-- ── Homepage flight search wiring ───────────────────── -->
@@ -997,9 +998,16 @@
             };
             if (!params.from || !params.date) return;
             try { sessionStorage.setItem('flightLastSearch', JSON.stringify(params)); } catch (e) {}
-            renderPartners(params);
-            // Smooth scroll partner grid into view
-            partners.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            ctaStub.style.display = 'none';
+
+            // Prefer the new live flight-results renderer (calls /.netlify/functions/flight-search).
+            // Falls back to partner cards if FlightResults didn't load.
+            if (window.FlightResults && typeof window.FlightResults.render === 'function') {
+                window.FlightResults.render(partners, params, openPartnerSafe);
+            } else {
+                renderPartners(params);
+                partners.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         });
     })();
     </script>
