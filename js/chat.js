@@ -392,25 +392,15 @@
         showTyping();
         history.push({ role: 'user', text });
 
-        try {
-            const res = await fetch('/.netlify/functions/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text, history: history.slice(-10) })
-            });
-            if (!res.ok) throw new Error('status ' + res.status);
-            const data = await res.json();
-            removeTyping();
-            const reply = (data && data.reply) ? data.reply : clientFallback(text);
-            addBot(reply);
-            history.push({ role: 'bot', text: reply });
-        } catch {
-            removeTyping();
-            // Use client-side fallback when function unavailable
-            const reply = clientFallback(text);
-            addBot(reply);
-            history.push({ role: 'bot', text: reply });
-        }
+        // No server-side chat endpoint on GitHub Pages — use the
+        // built-in keyword/regex client fallback for every message.
+        // (Previously this called a Netlify Function, which we removed
+        // when migrating off Netlify.)
+        await new Promise(function (r) { setTimeout(r, 250); });   // tiny "thinking" pause
+        removeTyping();
+        const reply = clientFallback(text);
+        addBot(reply);
+        history.push({ role: 'bot', text: reply });
 
         isBusy = false;
         sendBtn.disabled = false;

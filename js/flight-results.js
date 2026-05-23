@@ -1,14 +1,16 @@
-/* flight-results.js — Fetches live flight prices from /.netlify/functions/flight-search
- * (which itself proxies Skyscanner via RapidAPI / Amadeus / falls back to estimates),
- * then renders cards with airline, time, duration, stops, price, and 4 partner deep-links.
+/* flight-results.js — Renders the flight-search results page.
+ *
+ * The site is hosted on GitHub Pages (static hosting), so there is no
+ * server-side flight-search proxy. Instead, the page shows a live-fare
+ * aggregator bar that deep-links visitors out to Google Flights,
+ * Skyscanner, MakeMyTrip, etc. — those are the legal, real-time price
+ * sources. Sample itinerary cards are no longer rendered.
  *
  * Public API:
  *   window.FlightResults.render(containerEl, params, partnerOpenFn)
  */
 (function () {
     'use strict';
-
-    var API_URL = '/.netlify/functions/flight-search';
 
     function esc(s) {
         return String(s).replace(/[&<>"']/g, function (c) {
@@ -110,21 +112,16 @@
             '</div>';
     }
 
+    // No server-side flight search on GitHub Pages — return an empty
+    // result-set so the render() path falls through to the live-fare
+    // aggregator bar (Google Flights, Skyscanner, MMT, EMT, Cleartrip).
     function fetchFlights(params) {
-        var qs = new URLSearchParams({
-            from:       params.from || '',
-            to:         params.to || 'IXZ',
-            date:       params.date || '',
-            returnDate: params.returnDate || '',
-            adults:     String(params.adults || 1),
-            children:   String(params.children || 0),
-            cabin:      params.cabin || 'economy'
-        }).toString();
-        return fetch(API_URL + '?' + qs, { headers: { 'Accept': 'application/json' } })
-            .then(function (r) {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.json();
-            });
+        return Promise.resolve({
+            flights: [],
+            source:  'estimate',
+            params:  params || {},
+            disclaimer: 'Bharat Tours redirects to trusted partners. We may earn a small affiliate commission at no extra cost to you.'
+        });
     }
 
     /* ─────────────────────────────────────────────────────────
