@@ -422,3 +422,16 @@ footer{background:var(--primary-dark);color:#fff;padding:2rem;text-align:center}
     .user-menu-btn{width:38px;height:38px;font-size:.9rem}
     .user-menu-dropdown{min-width:220px;right:-.4rem}
 }
+
+/* User-menu dropdown when appended to <body> (avoids overflow:auto clipping
+   from the topnav). Position is set inline by JS via getBoundingClientRect. */
+.user-menu-dropdown-floating{
+    position:fixed !important;
+    top:auto;            /* JS sets exact pixel value */
+    right:auto;          /* JS sets exact pixel value */
+    z-index:1200;
+}
+.user-menu-dropdown-floating::before{
+    /* Move the arrow to point at the avatar regardless of body anchoring */
+    right:14px;
+}

@@ -45,11 +45,20 @@
         document.querySelectorAll('.topbar-user').forEach(el => {
             el.style.display = 'none';
         });
+        // Hide the legacy Login + Sign Up buttons in the public topnav
+        // (their functionality is now in this AD avatar menu)
+        ['authLink', 'signUpNavLink'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
 
         const topnav = document.getElementById('topnav');
         if (!topnav) return;
         if (topnav.querySelector('.user-menu-wrap')) return;   // already built
 
+        // The button stays in the topnav but the DROPDOWN is appended to
+        // <body> so it can never be clipped by an overflow:auto / hidden
+        // parent (the topnav scrolls horizontally on small screens).
         const wrap = document.createElement('div');
         wrap.className = 'user-menu-wrap';
         wrap.innerHTML =
@@ -57,32 +66,45 @@
                 'aria-haspopup="true" aria-expanded="false" title="Account">' +
                 '<span class="um-initials">?</span>' +
                 '<span class="um-dot"></span>' +
-            '</button>' +
-            '<div class="user-menu-dropdown" id="userMenuDropdown" role="menu">' +
-                '<div class="um-header">' +
-                    '<span class="um-avatar um-initials">?</span>' +
-                    '<div style="min-width:0;">' +
-                        '<div class="um-name">Guest</div>' +
-                        '<div class="um-email">Not signed in</div>' +
-                    '</div>' +
-                '</div>' +
-                '<a class="um-item" href="/bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>' +
-                '<a class="um-item" href="javascript:void(0)" data-um-act="profile"><i class="fas fa-user"></i> Profile</a>' +
-                '<a class="um-item um-admin-only" href="/dashboard" style="display:none;"><i class="fas fa-th-large"></i> Dashboard</a>' +
-                '<a class="um-item um-admin-only" href="/dashboard#section-settings" style="display:none;"><i class="fas fa-cog"></i> Settings</a>' +
-                '<a class="um-item um-admin-only" href="/migrate" target="_blank" rel="noopener" style="display:none;"><i class="fas fa-clone"></i> Database Mirror</a>' +
-                '<div class="um-divider"></div>' +
-                '<a class="um-item" href="/about#contact"><i class="fas fa-headset"></i> Contact</a>' +
-                '<a class="um-item" href="javascript:void(0)" data-um-act="help"><i class="fas fa-question-circle"></i> Help</a>' +
-                '<a class="um-item" href="/terms"><i class="fas fa-file-alt"></i> Terms</a>' +
-                '<div class="um-divider"></div>' +
-                '<a class="um-item um-login-only" href="javascript:void(0)" data-um-act="login"><i class="fas fa-sign-in-alt"></i> Login / Sign Up</a>' +
-                '<a class="um-item um-danger um-logout-only" href="javascript:void(0)" data-um-act="logout" style="display:none;"><i class="fas fa-sign-out-alt"></i> Logout</a>' +
-            '</div>';
+            '</button>';
         topnav.appendChild(wrap);
 
-        const btn  = wrap.querySelector('.user-menu-btn');
-        const drop = wrap.querySelector('.user-menu-dropdown');
+        const drop = document.createElement('div');
+        drop.className = 'user-menu-dropdown user-menu-dropdown-floating';
+        drop.id = 'userMenuDropdown';
+        drop.setAttribute('role', 'menu');
+        drop.innerHTML =
+            '<div class="um-header">' +
+                '<span class="um-avatar um-initials">?</span>' +
+                '<div style="min-width:0;">' +
+                    '<div class="um-name">Guest</div>' +
+                    '<div class="um-email">Not signed in</div>' +
+                '</div>' +
+            '</div>' +
+            '<a class="um-item" href="/bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>' +
+            '<a class="um-item" href="javascript:void(0)" data-um-act="profile"><i class="fas fa-user"></i> Profile</a>' +
+            '<a class="um-item um-admin-only" href="/dashboard" style="display:none;"><i class="fas fa-th-large"></i> Dashboard</a>' +
+            '<a class="um-item um-admin-only" href="/dashboard#section-settings" style="display:none;"><i class="fas fa-cog"></i> Settings</a>' +
+            '<a class="um-item um-admin-only" href="/migrate" target="_blank" rel="noopener" style="display:none;"><i class="fas fa-clone"></i> Database Mirror</a>' +
+            '<div class="um-divider"></div>' +
+            '<a class="um-item" href="/about#contact"><i class="fas fa-headset"></i> Contact</a>' +
+            '<a class="um-item" href="javascript:void(0)" data-um-act="help"><i class="fas fa-question-circle"></i> Help</a>' +
+            '<a class="um-item" href="/terms"><i class="fas fa-file-alt"></i> Terms</a>' +
+            '<div class="um-divider"></div>' +
+            '<a class="um-item um-login-only" href="javascript:void(0)" data-um-act="login"><i class="fas fa-sign-in-alt"></i> Login / Sign Up</a>' +
+            '<a class="um-item um-danger um-logout-only" href="javascript:void(0)" data-um-act="logout" style="display:none;"><i class="fas fa-sign-out-alt"></i> Logout</a>';
+        document.body.appendChild(drop);
+
+        const btn = wrap.querySelector('.user-menu-btn');
+
+        function positionDropdown() {
+            const rect = btn.getBoundingClientRect();
+            // Anchor the top-right of the dropdown to the bottom-right of the button,
+            // shifted down by 12 px (matches the previous arrow tail).
+            const dropRight = window.innerWidth - rect.right;
+            drop.style.top   = (rect.bottom + 12) + 'px';
+            drop.style.right = Math.max(8, dropRight) + 'px';
+        }
 
         function refreshMenu() {
             const u = readCurrentUser();
@@ -114,35 +136,50 @@
         document.addEventListener('auth:changed', refreshMenu);
         window.addEventListener('storage', refreshMenu);
 
-        // Toggle behaviour
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const willOpen = !wrap.classList.contains('open');
+        function closeMenu() {
+            wrap.classList.remove('open');
+            drop.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+        function openMenu() {
+            // Close any other open menus first
             document.querySelectorAll('.user-menu-wrap.open').forEach(w => {
                 if (w !== wrap) w.classList.remove('open');
             });
-            wrap.classList.toggle('open', willOpen);
-            btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            document.querySelectorAll('.user-menu-dropdown.open').forEach(d => {
+                if (d !== drop) d.classList.remove('open');
+            });
+            positionDropdown();
+            wrap.classList.add('open');
+            drop.classList.add('open');
+            btn.setAttribute('aria-expanded', 'true');
+        }
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (wrap.classList.contains('open')) closeMenu();
+            else                                 openMenu();
         });
         document.addEventListener('click', (e) => {
-            if (!wrap.contains(e.target)) {
-                wrap.classList.remove('open');
-                btn.setAttribute('aria-expanded', 'false');
+            if (!wrap.contains(e.target) && !drop.contains(e.target)) {
+                closeMenu();
             }
         });
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                wrap.classList.remove('open');
-                btn.setAttribute('aria-expanded', 'false');
-            }
+            if (e.key === 'Escape') closeMenu();
         });
+        window.addEventListener('resize', () => {
+            if (wrap.classList.contains('open')) positionDropdown();
+        });
+        window.addEventListener('scroll', () => {
+            if (wrap.classList.contains('open')) positionDropdown();
+        }, { passive: true });
 
         drop.addEventListener('click', (e) => {
             const item = e.target.closest('[data-um-act]');
             if (!item) return;
             const act = item.dataset.umAct;
-            wrap.classList.remove('open');
-            btn.setAttribute('aria-expanded', 'false');
+            closeMenu();
             if (act === 'profile') {
                 if (typeof window.openProfile === 'function') window.openProfile();
                 else if (!readCurrentUser() && typeof window.openLogin === 'function') window.openLogin();
