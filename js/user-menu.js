@@ -52,13 +52,15 @@
             if (el) el.style.display = 'none';
         });
 
+        const topbar = document.querySelector('.topbar');
         const topnav = document.getElementById('topnav');
-        if (!topnav) return;
-        if (topnav.querySelector('.user-menu-wrap')) return;   // already built
+        if (!topbar) return;
+        if (topbar.querySelector('.user-menu-wrap')) return;   // already built
 
-        // The button stays in the topnav but the DROPDOWN is appended to
-        // <body> so it can never be clipped by an overflow:auto / hidden
-        // parent (the topnav scrolls horizontally on small screens).
+        // Place the avatar DIRECTLY in the .topbar (not inside #topnav)
+        // so it stays visible even when the mobile drawer is collapsed.
+        // The dropdown is appended to <body> so it can never be clipped
+        // by an overflow:auto / hidden parent.
         const wrap = document.createElement('div');
         wrap.className = 'user-menu-wrap';
         wrap.innerHTML =
@@ -67,7 +69,14 @@
                 '<span class="um-initials">?</span>' +
                 '<span class="um-dot"></span>' +
             '</button>';
-        topnav.appendChild(wrap);
+        // Insert the avatar just before the hamburger if there is one,
+        // otherwise as the last child of the topbar.
+        const hamburger = topbar.querySelector('.hamburger');
+        if (hamburger) {
+            topbar.insertBefore(wrap, hamburger);
+        } else {
+            topbar.appendChild(wrap);
+        }
 
         const drop = document.createElement('div');
         drop.className = 'user-menu-dropdown user-menu-dropdown-floating';
