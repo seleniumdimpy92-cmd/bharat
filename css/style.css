@@ -372,7 +372,8 @@ footer{background:var(--primary-dark);color:#fff;padding:2rem;text-align:center}
     transition:opacity .2s ease,transform .2s ease,visibility 0s linear .2s;
     z-index:120;
 }
-.user-menu-wrap.open .user-menu-dropdown{
+.user-menu-wrap.open .user-menu-dropdown,
+.user-menu-dropdown.open{
     opacity:1;visibility:visible;transform:translateY(0) scale(1);
     transition:opacity .2s ease,transform .2s ease,visibility 0s linear 0s;
 }
