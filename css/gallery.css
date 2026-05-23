@@ -299,3 +299,233 @@
         grid-column: 1 / -1;
     }
 }
+/* ── Group + Sort controls (public gallery page) ────────── */
+.gallery-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    padding: .9rem 1rem;
+    margin: 0 0 1.25rem;
+    background: #f6fafb;
+    border: 1px solid #e3e8ef;
+    border-radius: 12px;
+}
+.gallery-control {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    min-width: 180px;
+    flex: 1 1 200px;
+}
+.gallery-control label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: #5a6877;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+}
+.gallery-control select {
+    padding: .55rem .75rem;
+    border: 1px solid #cfd9df;
+    border-radius: 8px;
+    background: #fff;
+    color: #2c3e50;
+    font-family: inherit;
+    font-size: .9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+}
+.gallery-control select:focus {
+    outline: none;
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13,122,138,.18);
+}
+
+/* ── Group headers ──────────────────────────────────────── */
+.gallery-group-header {
+    grid-column: 1 / -1;
+    margin: 1.25rem 0 .35rem;
+    padding-bottom: .5rem;
+    border-bottom: 2px solid #e3e8ef;
+}
+.gallery-group-header:first-child { margin-top: 0; }
+.gallery-group-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0d7a8a;
+    display: flex;
+    align-items: baseline;
+    gap: .65rem;
+    flex-wrap: wrap;
+}
+.ggh-key {
+    background: linear-gradient(135deg, #0d7a8a 0%, #16a085 100%);
+    color: #fff;
+    padding: .2rem .85rem;
+    border-radius: 999px;
+    font-size: .95rem;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(13,122,138,.25);
+}
+.ggh-count {
+    color: #95a5a6;
+    font-size: .82rem;
+    font-weight: 500;
+}
+.gallery-group-grid {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: .5rem;
+}
+
+/* ── Lightbox meta line ────────────────────────────────── */
+.lb-caption .lb-meta {
+    display: block;
+    margin-top: .35rem;
+    font-size: .85rem;
+    color: #b8c4cc;
+    font-weight: 500;
+}
+
+/* ── Admin: edit modal (multi-field photo editor) ───────── */
+.gal-edit-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 32, 39, 0.72);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+.gal-edit-modal.open { display: flex; }
+.gal-edit-card {
+    width: 100%;
+    max-width: 540px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+.gal-edit-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e3e8ef;
+    background: linear-gradient(135deg, #0d7a8a 0%, #16a085 100%);
+    color: #fff;
+}
+.gal-edit-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.gal-edit-close {
+    background: rgba(255,255,255,.18);
+    border: 0;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: .95rem;
+    transition: background .15s;
+}
+.gal-edit-close:hover { background: rgba(255,255,255,.32); }
+
+.gal-edit-body {
+    padding: 1.1rem 1.25rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+.gal-edit-body label {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #5a6877;
+}
+.gal-edit-body input {
+    padding: .55rem .75rem;
+    border: 1px solid #cfd9df;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: .92rem;
+    color: #2c3e50;
+    transition: border-color .15s, box-shadow .15s;
+}
+.gal-edit-body input:focus {
+    outline: none;
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13,122,138,.18);
+}
+.gal-edit-row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+}
+
+.gal-edit-foot {
+    padding: .85rem 1.25rem;
+    border-top: 1px solid #e3e8ef;
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    background: #f9fbfc;
+}
+.gal-edit-foot button {
+    padding: .55rem 1.1rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: filter .15s, transform .1s;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+}
+.gal-edit-foot .gal-edit-cancel {
+    background: #fff;
+    color: #5a6877;
+    border-color: #cfd9df;
+}
+.gal-edit-foot .gal-edit-cancel:hover { background: #f0f3f5; }
+.gal-edit-foot .gal-edit-save {
+    background: linear-gradient(135deg, #0d7a8a 0%, #16a085 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(13,122,138,.25);
+}
+.gal-edit-foot .gal-edit-save:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.gal-edit-foot .gal-edit-save:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+/* ── Admin upload row: accommodate the extra fields ─────── */
+@media (min-width: 721px) {
+    .admin-gallery-form-row {
+        grid-template-columns: repeat(4, 1fr) auto;
+    }
+    .admin-gallery-form-row .admin-gallery-upload-btn {
+        grid-column: span 1;
+    }
+}
+@media (max-width: 720px) {
+    .gal-edit-row2 { grid-template-columns: 1fr; }
+}

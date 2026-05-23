@@ -21,7 +21,7 @@
 
     <link rel="stylesheet" href="css/style.css?v=27">
     <link rel="stylesheet" href="css/dashboard.css?v=3">
-    <link rel="stylesheet" href="css/gallery.css?v=1">
+    <link rel="stylesheet" href="css/gallery.css?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="js/firebase-config.js?v=17"></script>
@@ -304,6 +304,26 @@
                         <option value="Activities">
                         <option value="Resorts">
                         <option value="Sunsets">
+                    </datalist>
+                    <input type="date" id="galDate" title="Date the photo was taken">
+                    <input type="text" id="galPlace" placeholder="Place (e.g. Havelock Island)" list="galPlaceList">
+                    <datalist id="galPlaceList">
+                        <option value="Port Blair">
+                        <option value="Havelock Island">
+                        <option value="Neil Island">
+                        <option value="Ross Island">
+                        <option value="Baratang">
+                        <option value="Diglipur">
+                        <option value="Radhanagar Beach">
+                    </datalist>
+                    <input type="text" id="galPackage" placeholder="Package (e.g. Honeymoon)" list="galPackageList">
+                    <datalist id="galPackageList">
+                        <option value="Budget">
+                        <option value="Standard">
+                        <option value="Luxury">
+                        <option value="Honeymoon">
+                        <option value="Family">
+                        <option value="Adventure">
                     </datalist>
                     <input type="number" id="galOrder" placeholder="Order" min="0" step="1" style="text-align:center;">
                     <button class="admin-gallery-upload-btn" id="galUploadBtn" disabled>
@@ -669,7 +689,7 @@
     <script src="js/dataStore.js?v=17"></script>
     <script src="js/toast.js?v=1"></script>
     <script src="js/dashboard.js?v=19"></script>
-    <script src="js/gallery.js?v=2"></script>
+    <script src="js/gallery.js?v=3"></script>
     <script src="js/security.js?v=2"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
@@ -684,6 +704,9 @@
         const titleEl    = document.getElementById('galTitle');
         const captionEl  = document.getElementById('galCaption');
         const categoryEl = document.getElementById('galCategory');
+        const dateEl     = document.getElementById('galDate');
+        const placeEl    = document.getElementById('galPlace');
+        const packageEl  = document.getElementById('galPackage');
         const orderEl    = document.getElementById('galOrder');
         const uploadBtn  = document.getElementById('galUploadBtn');
         const progress   = document.getElementById('galProgress');
@@ -738,10 +761,13 @@
             uploadBtn.disabled = true;
 
             const meta = {
-                title:    titleEl.value.trim(),
-                caption:  captionEl.value.trim(),
-                category: categoryEl.value.trim(),
-                order:    orderEl.value !== '' ? parseInt(orderEl.value, 10) : 9999
+                title:      titleEl.value.trim(),
+                caption:    captionEl.value.trim(),
+                category:   categoryEl.value.trim(),
+                date:       (dateEl.value || '').trim(),
+                place:      placeEl.value.trim(),
+                packageRef: packageEl.value.trim(),
+                order:      orderEl.value !== '' ? parseInt(orderEl.value, 10) : 9999
             };
 
             try {
@@ -752,10 +778,13 @@
                     showProgress(0);
                     await window.GalleryStore.uploadGalleryImage(file, {
                         // If multiple files, append index to title (or leave blank for "")
-                        title: pendingFiles.length > 1 && meta.title ? `${meta.title} (${i})` : meta.title,
-                        caption:  meta.caption,
-                        category: meta.category,
-                        order:    meta.order
+                        title:      pendingFiles.length > 1 && meta.title ? `${meta.title} (${i})` : meta.title,
+                        caption:    meta.caption,
+                        category:   meta.category,
+                        date:       meta.date,
+                        place:      meta.place,
+                        packageRef: meta.packageRef,
+                        order:      meta.order
                     }, (pct) => showProgress(pct));
                 }
                 setStatus(`✓ Uploaded ${pendingFiles.length} image(s) successfully.`);
@@ -763,6 +792,7 @@
                 pendingFiles = [];
                 fileInput.value = '';
                 titleEl.value = ''; captionEl.value = ''; orderEl.value = '';
+                // Keep date/place/package between uploads — common batches share these
                 await refresh();
             } catch (err) {
                 console.error('Gallery upload error:', err);
@@ -783,12 +813,18 @@
             allItems.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'admin-gallery-card';
+                const metaParts = [];
+                if (item.category)   metaParts.push(`📂 ${escapeHtml(item.category)}`);
+                if (item.date)       metaParts.push(`📅 ${escapeHtml(item.date)}`);
+                if (item.place)      metaParts.push(`📍 ${escapeHtml(item.place)}`);
+                if (item.packageRef) metaParts.push(`🎫 ${escapeHtml(item.packageRef)}`);
+                metaParts.push(`order: ${item.order}`);
                 card.innerHTML = `
                     <div class="admin-gallery-card-img" style="background-image:url('${escapeHtml(item.thumbUrl || item.url)}');"></div>
                     <div class="admin-gallery-card-body">
                         <h4 class="admin-gallery-card-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title) || '<em style="color:#9aa7b1;">(no title)</em>'}</h4>
                         <div class="admin-gallery-card-meta">
-                            ${item.category ? `<span>📂 ${escapeHtml(item.category)}</span> · ` : ''}<span>order: ${item.order}</span>
+                            ${metaParts.map(p => `<span>${p}</span>`).join(' · ')}
                         </div>
                         <div class="admin-gallery-card-actions">
                             <button class="btn-edit"  data-id="${item.id}">Edit</button>
@@ -821,28 +857,97 @@
                 const id = b.dataset.id;
                 const item = allItems.find(it => it.id === id);
                 if (!item) return;
-                const newTitle    = prompt('Title:',    item.title    || '');
-                if (newTitle === null) return;
-                const newCaption  = prompt('Caption:',  item.caption  || '');
-                if (newCaption === null) return;
-                const newCategory = prompt('Category:', item.category || '');
-                if (newCategory === null) return;
-                const newOrderStr = prompt('Order (number, lower = first):', String(item.order || 9999));
-                if (newOrderStr === null) return;
-                const newOrder = parseInt(newOrderStr, 10);
+                openEditModal(item);
+            }));
+        }
+
+        // ── Edit modal — multi-field editor (replaces stacked prompts) ──
+        function openEditModal(item) {
+            // Lazy-create the modal once
+            let modal = document.getElementById('galEditModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'galEditModal';
+                modal.className = 'gal-edit-modal';
+                modal.innerHTML = `
+                    <div class="gal-edit-card">
+                        <div class="gal-edit-head">
+                            <h3><i class="fas fa-edit"></i> Edit Photo</h3>
+                            <button type="button" class="gal-edit-close" aria-label="Close"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="gal-edit-body">
+                            <label>Title<input type="text" data-f="title"></label>
+                            <label>Caption<input type="text" data-f="caption"></label>
+                            <label>Category<input type="text" data-f="category" list="galCategoryList"></label>
+                            <div class="gal-edit-row2">
+                                <label>Date<input type="date" data-f="date"></label>
+                                <label>Order<input type="number" data-f="order" min="0" step="1"></label>
+                            </div>
+                            <label>Place<input type="text" data-f="place" list="galPlaceList"></label>
+                            <label>Package<input type="text" data-f="packageRef" list="galPackageList"></label>
+                        </div>
+                        <div class="gal-edit-foot">
+                            <button type="button" class="gal-edit-cancel">Cancel</button>
+                            <button type="button" class="gal-edit-save"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.remove('open');
+                });
+                modal.querySelector('.gal-edit-close').addEventListener('click', () => modal.classList.remove('open'));
+                modal.querySelector('.gal-edit-cancel').addEventListener('click', () => modal.classList.remove('open'));
+            }
+
+            // Populate fields
+            const setVal = (f, v) => {
+                const el = modal.querySelector('[data-f="' + f + '"]');
+                if (el) el.value = (v == null ? '' : v);
+            };
+            setVal('title',      item.title);
+            setVal('caption',    item.caption);
+            setVal('category',   item.category);
+            setVal('date',       item.date);
+            setVal('place',      item.place);
+            setVal('packageRef', item.packageRef);
+            setVal('order',      (item.order != null ? item.order : 9999));
+
+            // Save handler (rebind each open so it captures current item)
+            const saveBtn = modal.querySelector('.gal-edit-save');
+            const newSaveBtn = saveBtn.cloneNode(true);
+            saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+            newSaveBtn.addEventListener('click', async () => {
+                const getVal = (f) => {
+                    const el = modal.querySelector('[data-f="' + f + '"]');
+                    return el ? el.value.trim() : '';
+                };
+                const orderRaw = getVal('order');
+                const orderNum = parseInt(orderRaw, 10);
+                newSaveBtn.disabled = true;
+                newSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
                 try {
-                    await window.GalleryStore.updateGalleryItem(id, {
-                        title: newTitle.trim(),
-                        caption: newCaption.trim(),
-                        category: newCategory.trim(),
-                        order: isNaN(newOrder) ? 9999 : newOrder
+                    await window.GalleryStore.updateGalleryItem(item.id, {
+                        title:      getVal('title'),
+                        caption:    getVal('caption'),
+                        category:   getVal('category'),
+                        date:       getVal('date'),
+                        place:      getVal('place'),
+                        packageRef: getVal('packageRef'),
+                        order:      isNaN(orderNum) ? 9999 : orderNum
                     });
                     setStatus('✓ Updated.');
+                    modal.classList.remove('open');
                     await refresh();
                 } catch (err) {
                     setStatus('Update failed: ' + (err && err.message ? err.message : err), true);
+                } finally {
+                    newSaveBtn.disabled = false;
+                    newSaveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
                 }
-            }));
+            });
+
+            modal.classList.add('open');
         }
 
         async function refresh() {

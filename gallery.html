@@ -49,7 +49,7 @@
     </script>
 
     <link rel="stylesheet" href="css/style.css?v=27">
-    <link rel="stylesheet" href="css/gallery.css?v=1">
+    <link rel="stylesheet" href="css/gallery.css?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -90,6 +90,32 @@
                 <button class="gallery-chip active" data-cat="all">All</button>
             </div>
 
+            <!-- Group + Sort controls -->
+            <div class="gallery-controls" id="galleryControls">
+                <div class="gallery-control">
+                    <label for="groupBy"><i class="fas fa-layer-group"></i> Group by</label>
+                    <select id="groupBy">
+                        <option value="none">None</option>
+                        <option value="year">Year</option>
+                        <option value="month">Month</option>
+                        <option value="place">Place</option>
+                        <option value="package">Package</option>
+                        <option value="category">Category</option>
+                    </select>
+                </div>
+                <div class="gallery-control">
+                    <label for="sortBy"><i class="fas fa-sort"></i> Sort by</label>
+                    <select id="sortBy">
+                        <option value="date_desc">Newest first (date)</option>
+                        <option value="date_asc">Oldest first (date)</option>
+                        <option value="title_asc">Title (A → Z)</option>
+                        <option value="title_desc">Title (Z → A)</option>
+                        <option value="place_asc">Place (A → Z)</option>
+                        <option value="order_asc">Custom order</option>
+                    </select>
+                </div>
+            </div>
+
             <div id="galleryStatus" class="gallery-empty" style="display:none;">
                 <i class="fas fa-spinner fa-spin"></i>
                 <p>Loading gallery…</p>
@@ -109,136 +135,8 @@
     </div>
 
     <script src="js/dataStore.js?v=17"></script>
-    <script src="js/gallery.js?v=2"></script>
+    <script src="js/gallery.js?v=3"></script>
     <script src="js/script.js?v=26"></script>
-    <script>
-        (function () {
-            const grid       = document.getElementById('galleryGrid');
-            const filtersEl  = document.getElementById('galleryFilters');
-            const statusEl   = document.getElementById('galleryStatus');
-            const lightbox   = document.getElementById('galleryLightbox');
-            const lbImage    = document.getElementById('lbImage');
-            const lbCaption  = document.getElementById('lbCaption');
-            const lbClose    = document.getElementById('lbClose');
-            const lbPrev     = document.getElementById('lbPrev');
-            const lbNext     = document.getElementById('lbNext');
-
-            let allItems = [];
-            let visibleItems = [];
-            let lbIndex = 0;
-
-            function renderFilters(cats) {
-                // Keep "All" + dynamic categories
-                filtersEl.innerHTML = '';
-                const allChip = document.createElement('button');
-                allChip.className = 'gallery-chip active';
-                allChip.dataset.cat = 'all';
-                allChip.textContent = 'All';
-                filtersEl.appendChild(allChip);
-                cats.forEach(cat => {
-                    const chip = document.createElement('button');
-                    chip.className = 'gallery-chip';
-                    chip.dataset.cat = cat;
-                    chip.textContent = cat;
-                    filtersEl.appendChild(chip);
-                });
-                filtersEl.addEventListener('click', (e) => {
-                    const chip = e.target.closest('.gallery-chip');
-                    if (!chip) return;
-                    filtersEl.querySelectorAll('.gallery-chip').forEach(c => c.classList.remove('active'));
-                    chip.classList.add('active');
-                    const cat = chip.dataset.cat;
-                    visibleItems = (cat === 'all')
-                        ? allItems.slice()
-                        : allItems.filter(it => (it.category || '').toLowerCase() === cat.toLowerCase());
-                    renderGrid();
-                }, { once: false });
-            }
-
-            function renderGrid() {
-                grid.innerHTML = '';
-                if (!visibleItems.length) {
-                    grid.innerHTML = `
-                        <div class="gallery-empty" style="grid-column:1/-1;">
-                            <i class="fas fa-image"></i>
-                            <h3>No photos yet</h3>
-                            <p>Check back soon — we’re adding new shots from recent tours.</p>
-                        </div>`;
-                    return;
-                }
-                visibleItems.forEach((item, idx) => {
-                    const tile = document.createElement('div');
-                    tile.className = 'gallery-tile';
-                    tile.innerHTML = `
-                        <img loading="lazy" src="${item.thumbUrl || item.url}" alt="${(item.title || 'Andaman photo').replace(/"/g, '&quot;')}">
-                        ${item.title ? `<div class="gallery-tile-caption">${escapeHtml(item.title)}</div>` : ''}
-                    `;
-                    tile.addEventListener('click', () => openLightbox(idx));
-                    grid.appendChild(tile);
-                });
-            }
-
-            function openLightbox(idx) {
-                lbIndex = idx;
-                showLightboxImage();
-                lightbox.classList.add('open');
-                document.body.style.overflow = 'hidden';
-            }
-            function closeLightbox() {
-                lightbox.classList.remove('open');
-                document.body.style.overflow = '';
-            }
-            function showLightboxImage() {
-                const item = visibleItems[lbIndex];
-                if (!item) return;
-                lbImage.src = item.url;
-                if (item.title || item.caption) {
-                    lbCaption.textContent = item.title ? (item.caption ? `${item.title} — ${item.caption}` : item.title) : item.caption;
-                    lbCaption.style.display = '';
-                } else {
-                    lbCaption.style.display = 'none';
-                }
-            }
-            function nextImg() { lbIndex = (lbIndex + 1) % visibleItems.length; showLightboxImage(); }
-            function prevImg() { lbIndex = (lbIndex - 1 + visibleItems.length) % visibleItems.length; showLightboxImage(); }
-
-            lbClose.addEventListener('click', closeLightbox);
-            lbNext.addEventListener('click', nextImg);
-            lbPrev.addEventListener('click', prevImg);
-            lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
-            document.addEventListener('keydown', (e) => {
-                if (!lightbox.classList.contains('open')) return;
-                if (e.key === 'Escape')      closeLightbox();
-                if (e.key === 'ArrowRight')  nextImg();
-                if (e.key === 'ArrowLeft')   prevImg();
-            });
-
-            function escapeHtml(s) {
-                return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            }
-
-            async function init() {
-                statusEl.style.display = '';
-                try {
-                    allItems = await window.GalleryStore.loadGalleryItems();
-                    visibleItems = allItems.slice();
-                    const cats = Array.from(new Set(allItems.map(i => (i.category || '').trim()).filter(Boolean))).sort();
-                    renderFilters(cats);
-                    renderGrid();
-                } catch (err) {
-                    console.error('Gallery load failed:', err);
-                    grid.innerHTML = `
-                        <div class="gallery-empty" style="grid-column:1/-1;">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>Couldn’t load gallery</h3>
-                            <p>${escapeHtml(err.message || 'Please try again later.')}</p>
-                        </div>`;
-                } finally {
-                    statusEl.style.display = 'none';
-                }
-            }
-            init();
-        })();
-    </script>
+    <script src="js/gallery-page.js?v=1"></script>
 </body>
 </html>
