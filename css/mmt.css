@@ -234,7 +234,7 @@ select.mmt-field-value option {
 }
 .mmt-listing-container {
   max-width: 1280px;
-  margin: -3.5rem auto 0;  /* overlap bottom of hero carousel */
+  margin: -1rem auto 0;  /* slight overlap into hero */
   padding: 0 1.5rem;
   position: relative;
   z-index: 5;
