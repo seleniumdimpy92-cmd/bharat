@@ -47,18 +47,20 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // User profiles — each user owns their doc (doc id = auth uid)
+    // User profiles — each user owns their doc (doc id = auth uid).
+    // Admins additionally have unrestricted access so they can run the
+    // /migrate mirror tool, manage customers from the dashboard, etc.
     match /users/{uid} {
-      allow read: if isSelf(uid) || isAdmin();
-      allow create: if isSelf(uid);
+      allow read:   if isSelf(uid) || isAdmin();
+      allow create: if isSelf(uid) || isAdmin();
       allow update, delete: if isSelf(uid) || isAdmin();
     }
 
     // Username → uid/email lookup (used for "login by username" flow)
     match /usernames/{username} {
       allow read: if true;
-      allow create: if request.auth != null
-        && request.resource.data.uid == request.auth.uid;
+      allow create: if isAdmin() || (request.auth != null
+        && request.resource.data.uid == request.auth.uid);
       // Admin can also clean up usernames when deleting users
       allow update, delete: if isAdmin() || (
         request.auth != null
@@ -66,12 +68,14 @@ service cloud.firestore {
       );
     }
 
-    // Bookings — each booking has a userId field
+    // Bookings — each booking has a userId field. Admins have full access
+    // so they can mirror, refund, cancel and inspect bookings from the
+    // dashboard / migrate tool.
     match /bookings/{bookingId} {
-      allow read: if request.auth != null
+      allow read:   if request.auth != null
         && (isAdmin() || resource.data.userId == request.auth.uid);
-      allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid;
+      allow create: if isAdmin() || (request.auth != null
+        && request.resource.data.userId == request.auth.uid);
       allow update, delete: if request.auth != null
         && (isAdmin() || resource.data.userId == request.auth.uid);
     }
