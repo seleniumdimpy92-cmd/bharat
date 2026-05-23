@@ -33,7 +33,7 @@
     </script>
 
     <link rel="stylesheet" href="css/style.css?v=26">
-    <link rel="stylesheet" href="css/flights.css?v=2">
+    <link rel="stylesheet" href="css/flights.css?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -70,8 +70,32 @@
             <p>Compare cheapest fares to Port Blair (IXZ) across India's top flight booking sites.</p>
         </section>
 
+        <!-- ── Live flight prices via Travelpayouts (Aviasales / Skyscanner) ── -->
+        <section class="tp-section">
+            <div class="tp-wrap">
+                <div class="tp-header">
+                    <h2><i class="fas fa-bolt"></i> Live Flight Prices</h2>
+                    <p>Real-time fares from 700+ airlines including IndiGo, Air India, Vistara, SpiceJet &amp; Akasa. Search, compare and book instantly.</p>
+                </div>
+                <div class="tp-widget" id="tpFlightWidget">
+                    <!-- Travelpayouts flight search widget — partner ID 532016 -->
+                    <script async src="https://tpembd.com/content?currency=inr&trs=532016&shmarker=731461&locale=en&stops=any&show_hotels=true&powered_by=true&border_radius=0&plain=true&color_button=%230d7a8a&color_button_text=%23ffffff&promo_id=3414&campaign_id=111" charset="utf-8"></script>
+                </div>
+                <p class="tp-disclaimer">
+                    <i class="fas fa-shield-alt" style="color:#16a085;"></i>
+                    Powered by Aviasales / Skyscanner. Bookings happen on the partner site.
+                    Bharat Tours and Travels earns a small commission at no extra cost to you.
+                </p>
+            </div>
+        </section>
+
+        <!-- ── Manual deep-link search (fallback / alternative) ─────────── -->
         <section class="flights-section">
             <div class="flights-wrap">
+                <div class="flights-header" style="margin-bottom:1.5rem;">
+                    <h2 style="font-size:1.4rem;"><i class="fas fa-search"></i> Or compare on each booking site</h2>
+                    <p>Enter your details and we'll open the search on MakeMyTrip, EaseMyTrip, Cleartrip and Skyscanner so you can pick the cheapest.</p>
+                </div>
 
                 <div class="flight-trip-toggle" id="tripToggle">
                     <button type="button" class="active" data-trip="oneway">One way</button>
