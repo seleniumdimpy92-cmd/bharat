@@ -151,6 +151,20 @@ function refreshActionAvailability() {
     const ok = bothSignedIn();
     $('mirrorBtn').disabled = !ok;
     $('purgeBtn').disabled  = !ok;
+    // Hide/show the sign-in card depending on auth state
+    const card = $('authCard');
+    const priOk = !!(APPS && APPS.PRI.auth.currentUser);
+    const secOk = !!(APPS && APPS.SEC.auth.currentUser);
+    if (card) {
+        // Collapse cleanly when both are already signed-in (persisted session)
+        card.style.display = (priOk && secOk) ? 'none' : '';
+        // Hide individual sides that are already authenticated, leave the
+        // unsigned side visible so the user can complete the missing one.
+        const priSide = card.querySelector('.auth-side:nth-child(1)');
+        const secSide = card.querySelector('.auth-side:nth-child(2)');
+        if (priSide) priSide.style.opacity = priOk ? '.55' : '1';
+        if (secSide) secSide.style.opacity = secOk ? '.55' : '1';
+    }
     if (!ok) return;
     // Once both signed in, auto-scan if we haven't yet
     if (!window.__scanned) doScan();
@@ -343,10 +357,26 @@ function wire() {
     $('mirrorBtn').addEventListener('click', () => mirror({ purgeFirst: false }));
     $('purgeBtn').addEventListener('click',  () => mirror({ purgeFirst: true }));
 
-    // Try to lazy-init both apps now so onAuthStateChanged hooks fire
+    // Initialise both Firebase apps. browserLocalPersistence (set in
+    // initBothApps) means a session signed in once on this browser is
+    // restored automatically — no password retyping. We just wait for
+    // both onAuthStateChanged callbacks to fire at least once so we
+    // know the persisted state.
     ensureApps().then(() => {
         logLine('info', 'Both Firebase apps initialised.');
         logLine('dim', 'PRI = ' + APPS.PRI.cfg.projectId + '  SEC = ' + APPS.SEC.cfg.projectId);
+        // Wait briefly for persisted-auth to resolve, then attempt to scan.
+        // If both are already signed in (typical 2nd+ visit), the user
+        // never sees the sign-in form.
+        setTimeout(() => {
+            if (bothSignedIn()) {
+                logLine('ok', 'Persisted sessions detected — no password needed.');
+                refreshActionAvailability();
+            } else {
+                logLine('warn', 'One or both projects need a one-time sign-in below. ' +
+                    'After this first time, the session is remembered on this browser forever.');
+            }
+        }, 800);
     }).catch(err => {
         logLine('err', 'Init failed: ' + err.message);
     });
