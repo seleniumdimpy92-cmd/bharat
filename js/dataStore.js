@@ -210,7 +210,11 @@
         paymentsDisabledMessage: '',
         // When true, security.js blocks DevTools shortcuts/right-click for normal
         // visitors. Admins are always allowed to use DevTools regardless.
-        consoleLockEnabled: true
+        consoleLockEnabled: true,
+        // Default % of total trip cost charged as advance to confirm a booking.
+        // Stored as a percentage number (e.g. 5 means 5%, 10 means 10%).
+        // Can be overridden per-user via users/{uid}.advanceRate.
+        advanceRate: 5
     };
 
     function getCachedSettings() {
@@ -616,6 +620,48 @@
         return email;
     }
 
+    // Admin-only: set or clear a per-user advance-rate override (percentage).
+    // Pass a number 0–100 to override; pass null/undefined to clear and fall
+    // back to the global SettingsStore advanceRate.
+    async function adminSetUserAdvanceRate(uid, ratePercentOrNull) {
+        ensureAdmin();
+        if (!uid) throw new Error('uid is required.');
+        const { db, firestore } = await window.__firebaseReady;
+
+        let payload;
+        if (ratePercentOrNull === null || ratePercentOrNull === undefined || ratePercentOrNull === '') {
+            // deleteField clears the override so checkout falls back to global.
+            payload = { advanceRate: firestore.deleteField() };
+        } else {
+            const n = Number(ratePercentOrNull);
+            if (!isFinite(n) || n < 0 || n > 100) {
+                throw new Error('Advance rate must be a number between 0 and 100.');
+            }
+            payload = { advanceRate: n };
+        }
+        await firestore.setDoc(firestore.doc(db, 'users', uid), payload, { merge: true });
+    }
+
+    // Returns the advance rate (in percent) that should apply to a given
+    // user. Logic:
+    //   1. If the user's profile has a numeric advanceRate, use that.
+    //   2. Otherwise use the site-wide SettingsStore advanceRate.
+    //   3. Fallback to 5 if neither is configured.
+    async function getEffectiveAdvanceRate(profile) {
+        // per-user override?
+        if (profile && typeof profile.advanceRate === 'number' && isFinite(profile.advanceRate)) {
+            return profile.advanceRate;
+        }
+        // global default
+        try {
+            const s = await window.SettingsStore.load();
+            if (s && typeof s.advanceRate === 'number' && isFinite(s.advanceRate)) {
+                return s.advanceRate;
+            }
+        } catch (_) {}
+        return 5;
+    }
+
     window.UsersStore = {
         login:                    loginUser,
         register:                 registerUser,
@@ -633,6 +679,12 @@
         listAllUsers:             listAllUsers,
         setUserDisabled:          setUserDisabled,
         deleteUserProfile:        deleteUserProfile,
-        adminSendPasswordReset:   adminSendPasswordReset
+        adminSendPasswordReset:   adminSendPasswordReset,
+        adminSetUserAdvanceRate:  adminSetUserAdvanceRate,
+        getEffectiveAdvanceRate:  getEffectiveAdvanceRate,
+        // expose so checkout.js can grab the latest profile (incl. advanceRate)
+        fetchUserDoc: async function (uid) {
+            return fetchUserDoc(uid);
+        }
     };
 })();
