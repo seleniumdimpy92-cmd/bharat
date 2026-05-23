@@ -189,6 +189,7 @@
     </script>
     <link rel="stylesheet" href="css/style.css?v=26">
     <link rel="stylesheet" href="css/mmt.css?v=26">
+    <link rel="stylesheet" href="css/flights.css?v=1">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Razorpay Payment Gateway -->
@@ -207,6 +208,9 @@
         </a>
         <a href="#packages" class="topnav-item active">
             <i class="fas fa-suitcase-rolling"></i><span>Packages</span>
+        </a>
+        <a href="/flights.html" class="topnav-item">
+            <i class="fas fa-plane"></i><span>Flights</span>
         </a>
         <a href="/gallery.html" class="topnav-item">
             <i class="fas fa-images"></i><span>Gallery</span>
@@ -441,6 +445,86 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- ── Flight Search (affiliate-based, opens partner sites) ── -->
+    <section id="flights" class="flights-section">
+        <div class="flights-wrap">
+            <div class="flights-header">
+                <h2><i class="fas fa-plane-departure"></i> Compare Flights to Andaman</h2>
+                <p>Find the lowest fare to Port Blair (IXZ) across MakeMyTrip, EaseMyTrip, Cleartrip &amp; Skyscanner.</p>
+            </div>
+
+            <div class="flight-trip-toggle" id="homeTripToggle">
+                <button type="button" class="active" data-trip="oneway">One way</button>
+                <button type="button" data-trip="roundtrip">Round trip</button>
+            </div>
+
+            <form class="flight-search" id="homeFlightSearchForm" autocomplete="off">
+                <div class="flight-search-field">
+                    <label for="homeFlFrom">From</label>
+                    <input id="homeFlFrom" type="text" placeholder="Bangalore (BLR)" required>
+                </div>
+                <div class="flight-search-field">
+                    <label for="homeFlTo">To</label>
+                    <input id="homeFlTo" type="text" value="Port Blair (IXZ)" required>
+                </div>
+                <div class="flight-search-field">
+                    <label for="homeFlDate">Departure</label>
+                    <input id="homeFlDate" type="date" required>
+                </div>
+                <div class="flight-search-field" id="homeFlReturnWrap" style="display:none;">
+                    <label for="homeFlReturn">Return</label>
+                    <input id="homeFlReturn" type="date">
+                </div>
+                <div class="flight-search-field">
+                    <label for="homeFlAdults">Adults</label>
+                    <select id="homeFlAdults">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+                <div class="flight-search-field">
+                    <label for="homeFlChildren">Children</label>
+                    <select id="homeFlChildren">
+                        <option value="0" selected>0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+                <div class="flight-search-field">
+                    <label for="homeFlCabin">Cabin</label>
+                    <select id="homeFlCabin">
+                        <option value="economy" selected>Economy</option>
+                        <option value="premium-economy">Premium Economy</option>
+                        <option value="business">Business</option>
+                        <option value="first">First</option>
+                    </select>
+                </div>
+                <button type="submit" class="flight-search-btn">
+                    <i class="fas fa-search"></i> Compare Prices
+                </button>
+            </form>
+
+            <p class="flight-cta-stub" id="homeFlightCtaStub">
+                <i class="fas fa-info-circle" style="color:#0d7a8a;"></i>
+                Fill the form above and click <strong>Compare Prices</strong> — pick the partner with the lowest fare.
+                <a href="/flights.html" style="color:#0d7a8a;font-weight:600;">Open the full flight search page →</a>
+            </p>
+
+            <div class="flight-partners" id="homeFlightPartners"></div>
+
+            <p class="flight-disclaimer">
+                <i class="fas fa-shield-alt" style="color:#16a085;"></i>
+                We don't sell flights directly — we redirect to trusted booking partners (MakeMyTrip, EaseMyTrip, Cleartrip, Skyscanner). Bharat Tours and Travels may earn a small affiliate commission on confirmed bookings at no extra cost to you.
+            </p>
         </div>
     </section>
 
@@ -775,6 +859,102 @@
     <script src="js/cities.js?v=18"></script>
     <script src="js/script.js?v=29"></script>
     <script src="js/chat.js?v=13"></script>
+    <script src="js/flights.js?v=1"></script>
     <script src="js/security.js?v=2"></script>
+
+    <!-- ── Homepage flight search wiring ───────────────────── -->
+    <script>
+    (function () {
+        var form    = document.getElementById('homeFlightSearchForm');
+        if (!form) return;
+        var partners = document.getElementById('homeFlightPartners');
+        var ctaStub  = document.getElementById('homeFlightCtaStub');
+        var toggle   = document.getElementById('homeTripToggle');
+        var retWrap  = document.getElementById('homeFlReturnWrap');
+        var fromEl   = document.getElementById('homeFlFrom');
+        var dateEl   = document.getElementById('homeFlDate');
+        var retEl    = document.getElementById('homeFlReturn');
+        var tripType = 'oneway';
+
+        // Default departure date = today + 14 days
+        var d = new Date(); d.setDate(d.getDate() + 14);
+        dateEl.value = d.toISOString().split('T')[0];
+
+        // Restore last search
+        try {
+            var last = JSON.parse(sessionStorage.getItem('flightLastSearch') || 'null');
+            if (last) {
+                if (last.from) fromEl.value = last.from;
+                if (last.date) dateEl.value = last.date;
+                if (last.adults)   document.getElementById('homeFlAdults').value = last.adults;
+                if (last.children) document.getElementById('homeFlChildren').value = last.children;
+                if (last.cabin)    document.getElementById('homeFlCabin').value = last.cabin;
+                if (last.returnDate) {
+                    tripType = 'roundtrip';
+                    retEl.value = last.returnDate;
+                }
+            }
+        } catch (e) {}
+
+        if (tripType === 'roundtrip') {
+            toggle.querySelectorAll('button').forEach(function (b) {
+                b.classList.toggle('active', b.dataset.trip === 'roundtrip');
+            });
+            retWrap.style.display = '';
+        }
+
+        toggle.addEventListener('click', function (e) {
+            var btn = e.target.closest('button[data-trip]');
+            if (!btn) return;
+            tripType = btn.dataset.trip;
+            toggle.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            retWrap.style.display = (tripType === 'roundtrip') ? '' : 'none';
+            if (tripType === 'oneway') retEl.value = '';
+        });
+
+        function renderPartners(params) {
+            ctaStub.style.display = 'none';
+            partners.innerHTML = '';
+            window.FlightSearch.PARTNERS.forEach(function (p) {
+                var card = document.createElement('div');
+                card.className = 'flight-partner-card';
+                card.innerHTML =
+                    '<div class="accent-bar" style="background:' + p.color + ';"></div>' +
+                    '<h3 class="flight-partner-name">' + p.name + '</h3>' +
+                    '<p class="flight-partner-tagline">' + p.tagline + '</p>' +
+                    '<ul class="flight-partner-features">' +
+                        p.features.map(function (f) { return '<li>' + f + '</li>'; }).join('') +
+                    '</ul>' +
+                    '<button class="flight-partner-cta" type="button" style="background:' + p.color + ';">' +
+                        '<i class="fas fa-external-link-alt"></i> Search on ' + p.name +
+                    '</button>';
+                card.querySelector('.flight-partner-cta').addEventListener('click', function () {
+                    window.FlightSearch.openPartner(p.id, params);
+                });
+                partners.appendChild(card);
+            });
+        }
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var params = {
+                from:       fromEl.value.trim(),
+                to:         document.getElementById('homeFlTo').value.trim() || 'IXZ',
+                date:       dateEl.value,
+                returnDate: tripType === 'roundtrip' ? retEl.value : '',
+                adults:     parseInt(document.getElementById('homeFlAdults').value, 10) || 1,
+                children:   parseInt(document.getElementById('homeFlChildren').value, 10) || 0,
+                infants:    0,
+                cabin:      document.getElementById('homeFlCabin').value
+            };
+            if (!params.from || !params.date) return;
+            try { sessionStorage.setItem('flightLastSearch', JSON.stringify(params)); } catch (e) {}
+            renderPartners(params);
+            // Smooth scroll partner grid into view
+            partners.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    })();
+    </script>
 </body>
 </html>

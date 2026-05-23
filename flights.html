@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheap Flights to Andaman (Port Blair) | Bharat Tours &amp; Travels</title>
+
+    <meta name="description" content="Compare flights to Port Blair (IXZ), Andaman from MakeMyTrip, EaseMyTrip, Cleartrip and Skyscanner. One search, four trusted partners, lowest fares.">
+    <meta name="keywords" content="flights to Andaman, flights Port Blair, IXZ flights, cheap Andaman flights, MakeMyTrip Andaman, EaseMyTrip Port Blair">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#0d7a8a">
+    <link rel="canonical" href="https://andamanvoyages.in/flights.html">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Compare Flights to Andaman (Port Blair) | Bharat Tours &amp; Travels">
+    <meta property="og:description" content="Find the cheapest flights to Port Blair (IXZ) — search MakeMyTrip, EaseMyTrip, Cleartrip and Skyscanner side by side.">
+    <meta property="og:url" content="https://andamanvoyages.in/flights.html">
+    <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg">
+
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/logo.png">
+
+    <!-- Schema.org: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://andamanvoyages.in/" },
+            { "@type": "ListItem", "position": 2, "name": "Flights to Andaman", "item": "https://andamanvoyages.in/flights.html" }
+        ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="css/style.css?v=26">
+    <link rel="stylesheet" href="css/flights.css?v=1">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="js/firebase-config.js?v=17"></script>
+    <script src="js/analytics.js?v=1"></script>
+</head>
+<body>
+    <!-- ── Top Brand Bar ───────────────────────────────────── -->
+    <header class="topbar">
+        <a href="/" class="topbar-logo">
+            <img src="images/logo.png" alt="Bharat Tours and Travels logo">
+            <span>Bharat Tours &amp; Travels</span>
+        </a>
+        <nav class="topnav" id="topnav">
+            <a href="/" class="topnav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="/#packages" class="topnav-item"><i class="fas fa-suitcase-rolling"></i><span>Packages</span></a>
+            <a href="/flights.html" class="topnav-item active"><i class="fas fa-plane"></i><span>Flights</span></a>
+            <a href="/gallery.html" class="topnav-item"><i class="fas fa-images"></i><span>Gallery</span></a>
+            <a href="/about" class="topnav-item"><i class="fas fa-info-circle"></i><span>About</span></a>
+            <a href="/#contact" class="topnav-item"><i class="fas fa-phone-alt"></i><span>Contact</span></a>
+        </nav>
+        <a href="tel:+918880195191" class="topbar-phone"><i class="fas fa-phone-alt"></i> <span>+91 88801 95191</span></a>
+        <a href="mailto:booking@andamanvoyages.in" class="topbar-email" title="Email us to book"><i class="fas fa-envelope"></i> <span>booking@andamanvoyages.in</span></a>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
+
+    <main class="main-content">
+
+        <section class="flights-hero">
+            <h1><i class="fas fa-plane-departure"></i> Flights to Andaman</h1>
+            <p>Compare cheapest fares to Port Blair (IXZ) across India's top flight booking sites.</p>
+        </section>
+
+        <section class="flights-section">
+            <div class="flights-wrap">
+
+                <div class="flight-trip-toggle" id="tripToggle">
+                    <button type="button" class="active" data-trip="oneway">One way</button>
+                    <button type="button" data-trip="roundtrip">Round trip</button>
+                </div>
+
+                <form class="flight-search" id="flightSearchForm" autocomplete="off">
+                    <div class="flight-search-field">
+                        <label for="flFrom">From</label>
+                        <input id="flFrom" type="text" placeholder="Bangalore (BLR)" required>
+                    </div>
+                    <div class="flight-search-field">
+                        <label for="flTo">To</label>
+                        <input id="flTo" type="text" value="Port Blair (IXZ)" required>
+                    </div>
+                    <div class="flight-search-field">
+                        <label for="flDate">Departure</label>
+                        <input id="flDate" type="date" required>
+                    </div>
+                    <div class="flight-search-field" id="flReturnWrap" style="display:none;">
+                        <label for="flReturn">Return</label>
+                        <input id="flReturn" type="date">
+                    </div>
+                    <div class="flight-search-field">
+                        <label for="flAdults">Adults</label>
+                        <select id="flAdults">
+                            <option value="1">1</option>
+                            <option value="2" selected>2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div class="flight-search-field">
+                        <label for="flChildren">Children</label>
+                        <select id="flChildren">
+                            <option value="0" selected>0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                    <div class="flight-search-field">
+                        <label for="flCabin">Cabin</label>
+                        <select id="flCabin">
+                            <option value="economy" selected>Economy</option>
+                            <option value="premium-economy">Premium Economy</option>
+                            <option value="business">Business</option>
+                            <option value="first">First</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="flight-search-btn">
+                        <i class="fas fa-search"></i> Compare Prices
+                    </button>
+                </form>
+
+                <p class="flight-cta-stub" id="flightCtaStub">
+                    <i class="fas fa-info-circle" style="color:#0d7a8a;"></i>
+                    Fill the form above and click <strong>Compare Prices</strong>. We'll open all 4 partners in new tabs so you can pick the lowest fare.
+                </p>
+
+                <div class="flight-partners" id="flightPartners"></div>
+
+                <p class="flight-disclaimer">
+                    <i class="fas fa-shield-alt" style="color:#16a085;"></i>
+                    We don't sell flights directly — we send you to trusted booking partners (MakeMyTrip, EaseMyTrip, Cleartrip, Skyscanner) where the actual booking and payment happens with them. Bharat Tours and Travels may earn a small commission on confirmed bookings at no extra cost to you.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Bharat Tours and Travels. All rights reserved.</p>
+            <p style="margin-top:0.5rem;font-size:0.88rem;">
+                <a href="/privacy" style="color:rgba(255,255,255,0.85);text-decoration:none;">Privacy Policy</a>
+                &nbsp;·&nbsp;
+                <a href="/terms" style="color:rgba(255,255,255,0.85);text-decoration:none;">Terms &amp; Conditions</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="js/flights.js?v=1"></script>
+    <script>
+    (function () {
+        var form     = document.getElementById('flightSearchForm');
+        var partners = document.getElementById('flightPartners');
+        var ctaStub  = document.getElementById('flightCtaStub');
+        var toggle   = document.getElementById('tripToggle');
+        var retWrap  = document.getElementById('flReturnWrap');
+        var fromEl   = document.getElementById('flFrom');
+        var dateEl   = document.getElementById('flDate');
+        var retEl    = document.getElementById('flReturn');
+        var tripType = 'oneway';
+
+        // Default departure date = today + 14 days
+        var d = new Date();
+        d.setDate(d.getDate() + 14);
+        dateEl.value = d.toISOString().split('T')[0];
+
+        // Restore last search from sessionStorage if available
+        try {
+            var last = JSON.parse(sessionStorage.getItem('flightLastSearch') || 'null');
+            if (last) {
+                if (last.from) fromEl.value = last.from;
+                if (last.date) dateEl.value = last.date;
+                if (last.adults)   document.getElementById('flAdults').value = last.adults;
+                if (last.children) document.getElementById('flChildren').value = last.children;
+                if (last.cabin)    document.getElementById('flCabin').value = last.cabin;
+                if (last.returnDate) {
+                    tripType = 'roundtrip';
+                    retEl.value = last.returnDate;
+                }
+            }
+        } catch (e) {}
+
+        // Reflect saved trip type
+        if (tripType === 'roundtrip') {
+            toggle.querySelectorAll('button').forEach(function (b) {
+                b.classList.toggle('active', b.dataset.trip === 'roundtrip');
+            });
+            retWrap.style.display = '';
+        }
+
+        toggle.addEventListener('click', function (e) {
+            var btn = e.target.closest('button[data-trip]');
+            if (!btn) return;
+            tripType = btn.dataset.trip;
+            toggle.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            retWrap.style.display = (tripType === 'roundtrip') ? '' : 'none';
+            if (tripType === 'oneway') retEl.value = '';
+        });
+
+        function renderPartners(params) {
+            ctaStub.style.display = 'none';
+            partners.innerHTML = '';
+            window.FlightSearch.PARTNERS.forEach(function (p) {
+                var card = document.createElement('div');
+                card.className = 'flight-partner-card';
+                card.innerHTML =
+                    '<div class="accent-bar" style="background:' + p.color + ';"></div>' +
+                    '<h3 class="flight-partner-name">' + p.name + '</h3>' +
+                    '<p class="flight-partner-tagline">' + p.tagline + '</p>' +
+                    '                    '<ul class="flight-partner-features">' +
+                        p.features.map(function (f) { return '<li>' + f + '</li>'; }).join('') +
+                    '</ul>' +
+                    '<button class="flight-partner-cta" type="button" style="background:' + p.color + ';">' +
+                        '<i class="fas fa-external-link-alt"></i> Search on ' + p.name +
+                    '</button>';
+                card.querySelector('.flight-partner-cta').addEventListener('click', function () {
+                    window.FlightSearch.openPartner(p.id, params);
+                });
+                card.addEventListener('click', function (e) {
+                    if (e.target.closest('.flight-partner-cta')) return;
+                    window.FlightSearch.openPartner(p.id, params);
+                });
+                partners.appendChild(card);
+            });
+        }
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var params = {
+                from:       fromEl.value.trim(),
+                to:         document.getElementById('flTo').value.trim() || 'IXZ',
+                date:       dateEl.value,
+                returnDate: tripType === 'roundtrip' ? retEl.value : '',
+                adults:     parseInt(document.getElementById('flAdults').value, 10) || 1,
+                children:   parseInt(document.getElementById('flChildren').value, 10) || 0,
+                infants:    0,
+                cabin:      document.getElementById('flCabin').value
+            };
+            if (!params.from || !params.date) return;
+            try { sessionStorage.setItem('flightLastSearch', JSON.stringify(params)); } catch (e) {}
+            renderPartners(params);
+        });
+
+        // Mobile hamburger
+        var hamburgerBtn = document.getElementById('hamburgerBtn');
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', function () {
+            document.body.classList.toggle('nav-open');
+        });
+    })();
+    </script>
+</body>
+</html>

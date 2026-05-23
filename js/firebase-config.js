@@ -59,3 +59,25 @@ window.GA4_CONFIG = {
     // realtime iframe widget in the admin dashboard.
     streamId:      "14922182432"
 };
+
+// ── Flight affiliate program IDs ──────────────────────────────
+// These plug into the partner search URLs in js/flights.js. Until you
+// have an approved affiliate ID, leave the placeholder — the partner
+// links still work, you just won't earn commission.
+//
+// How to apply (free, ~1 week to approval per partner):
+//   • Skyscanner   → https://skyscanner.business
+//   • MakeMyTrip   → https://affiliate.makemytrip.com
+//   • EaseMyTrip   → https://www.easemytrip.com/affiliate.html
+//   • Cleartrip    → https://www.cleartrip.com/affiliate
+//   • Travelpayouts→ https://www.travelpayouts.com (aggregator — fastest,
+//                    1-day approval, single dashboard for many airlines)
+//
+// See flights_setup.md in the repo for step-by-step instructions.
+window.FLIGHT_AFFILIATES = {
+    skyscanner:    { tag: "AFFID-SKYSCANNER",   subId: "andamanvoyages" },
+    makemytrip:    { tag: "AFFID-MMT",          subId: "andamanvoyages" },
+    easemytrip:    { tag: "AFFID-EMT",          subId: "andamanvoyages" },
+    cleartrip:     { tag: "AFFID-CLEARTRIP",    subId: "andamanvoyages" },
+    travelpayouts: { tag: "",                   marker: "" }   // optional widget
+};
