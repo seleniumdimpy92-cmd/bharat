@@ -873,6 +873,17 @@ document.addEventListener('DOMContentLoaded', function () {
             const safeEmail = String(u.email || '').replace(/'/g, "\\'");
             const safeUsername = String(u.username || '').replace(/'/g, "\\'");
 
+            // Per-user advance rate override badge (if set)
+            const hasAdvOverride = (typeof u.advanceRate === 'number' && isFinite(u.advanceRate));
+            const advBtnLabel = hasAdvOverride ? (u.advanceRate + '%') : 'default';
+            const advBtnTitle = hasAdvOverride
+                ? 'This user pays ' + u.advanceRate + '% advance (override). Click to change or clear.'
+                : 'Set a per-user advance % override for this customer.';
+            const advBtnStyle = hasAdvOverride
+                ? 'background:#e8f8f5;color:#0d7a8a;border:1px solid #b7dcd0;'
+                : '';
+            const advCurrentVal = hasAdvOverride ? u.advanceRate : '';
+
             return `
                 <tr>
                     <td title="${u.uid}">#${String(u.uid || '').slice(-6)}</td>
@@ -886,6 +897,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         <button class="action-btn" title="Send password reset email"
                                 onclick="window._adminResetPassword('${safeEmail}')">
                             <i class="fas fa-key"></i> Reset
+                        </button>
+                        <button class="action-btn"
+                                style="${advBtnStyle}"
+                                title="${advBtnTitle}"
+                                onclick="window._adminPromptAdvanceRate('${u.uid}', '${advCurrentVal}')">
+                            <i class="fas fa-percent"></i> Adv: ${advBtnLabel}
                         </button>
                         <button class="action-btn ${isDisabled ? 'action-btn-cancel' : ''}"
                                 title="${isDisabled ? 'Re-enable account' : 'Disable login for this account'}"
@@ -1088,6 +1105,17 @@ document.addEventListener('DOMContentLoaded', function () {
             const s = await window.SettingsStore.load();
             if (settingsToggle) settingsToggle.checked = s.paymentsEnabled !== false;
             if (settingsMessage) settingsMessage.value = s.paymentsDisabledMessage || '';
+            // Advance / commission rate
+            const advRateInput = document.getElementById('advanceRateInput');
+            const advRateInfo  = document.getElementById('advanceRateInfo');
+            if (advRateInput) {
+                const rate = (typeof s.advanceRate === 'number' && isFinite(s.advanceRate)) ? s.advanceRate : 5;
+                advRateInput.value = rate;
+                if (advRateInfo) {
+                    advRateInfo.textContent = 'Current global rate: ' + rate + '%';
+                    advRateInfo.style.color = '#0a5a68';
+                }
+            }
             if (settingsCurrentInfo) {
                 settingsCurrentInfo.textContent = s.paymentsEnabled === false
                     ? '⚠️ Online payments are currently DISABLED on the live site.'
@@ -1139,6 +1167,82 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // ── Save Advance Rate (global %) ────────────────────────────
+    const saveAdvanceRateBtn = document.getElementById('saveAdvanceRateBtn');
+    if (saveAdvanceRateBtn) {
+        saveAdvanceRateBtn.addEventListener('click', async () => {
+            const input = document.getElementById('advanceRateInput');
+            const info  = document.getElementById('advanceRateInfo');
+            if (!window.SettingsStore || !input) {
+                alert('Settings store not loaded. Refresh the page.');
+                return;
+            }
+            const n = Number(input.value);
+            if (!isFinite(n) || n < 0 || n > 100) {
+                if (info) {
+                    info.textContent = '❌ Enter a number between 0 and 100.';
+                    info.style.color = '#c0392b';
+                }
+                return;
+            }
+            saveAdvanceRateBtn.disabled = true;
+            saveAdvanceRateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+            try {
+                await window.SettingsStore.save({ advanceRate: n });
+                if (info) {
+                    info.textContent = '✅ Saved. New global advance rate: ' + n + '%';
+                    info.style.color = '#0a5a68';
+                }
+                if (window.Toast) window.Toast.success('Advance rate updated to ' + n + '%');
+            } catch (err) {
+                if (info) {
+                    info.textContent = '❌ ' + (err.message || 'Failed to save.');
+                    info.style.color = '#c0392b';
+                }
+            } finally {
+                setTimeout(() => {
+                    saveAdvanceRateBtn.disabled = false;
+                    saveAdvanceRateBtn.innerHTML = '<i class="fas fa-save"></i> Save Advance Rate';
+                }, 1500);
+            }
+        });
+    }
+
+    // ── Per-user advance rate override (Customers tab) ──────────
+    window._adminPromptAdvanceRate = async function (uid, currentValue) {
+        if (!uid) return;
+        const cur = (currentValue !== undefined && currentValue !== null && currentValue !== '')
+            ? String(currentValue) : '';
+        const input = prompt(
+            'Set advance rate (%) for this user.\n\n' +
+            '• Enter a number between 0 and 100 to override the global rate.\n' +
+            '• Leave blank or enter "default" to clear the override and fall back to the global rate.',
+            cur
+        );
+        if (input === null) return; // cancelled
+        const trimmed = String(input).trim();
+        let valueToSave = null;
+        if (trimmed !== '' && trimmed.toLowerCase() !== 'default') {
+            const n = Number(trimmed);
+            if (!isFinite(n) || n < 0 || n > 100) {
+                alert('❌ Please enter a number between 0 and 100, or leave blank for default.');
+                return;
+            }
+            valueToSave = n;
+        }
+        try {
+            await window.UsersStore.adminSetUserAdvanceRate(uid, valueToSave);
+            if (window.Toast) {
+                window.Toast.success(valueToSave === null
+                    ? 'Override cleared — user now uses global advance rate.'
+                    : 'Per-user advance rate set to ' + valueToSave + '%.');
+            }
+            await refreshCustomers();
+        } catch (err) {
+            alert('❌ ' + (err.message || 'Failed to update advance rate.'));
+        }
+    };
 
     // ── Developer Console Lock toggle (Firestore-backed) ─────────
     const consoleLockToggle = document.getElementById('consoleLockToggle');

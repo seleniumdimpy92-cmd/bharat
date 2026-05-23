@@ -4,7 +4,17 @@
 
     var RAZORPAY_KEY = 'rzp_live_SLfG8nnKN3tXPC';
     var GST_RATE = 0.05;
-    var ADVANCE_RATE = 0.05;   // 5% advance to confirm booking; balance due after travel
+    // ADVANCE_RATE is dynamic — loaded from SettingsStore (global) and may be
+    // overridden per-user. Defaults to 5% until the async settings load.
+    var ADVANCE_RATE = 0.05;
+    var ADVANCE_PCT  = 5;       // human-readable (used for "5% advance" labels)
+
+    // Format the advance percentage for display: "5%" or "7.5%"
+    function fmtPct(p) {
+        if (typeof p !== 'number' || !isFinite(p)) p = 5;
+        // strip trailing .0 if it's a whole number
+        return (Number.isInteger(p) ? String(p) : (Math.round(p * 10) / 10)) + '%';
+    }
     var COUPONS = {
         'WELCOME500':  { type: 'flat',    value: 500,  label: 'Rs.500 off',  min: 5000  },
         'ANDAMAN10':   { type: 'percent', value: 10,   label: '10% off',     min: 10000, cap: 3000 },
@@ -227,7 +237,7 @@
 
             // Advance / balance split — the headline of this booking model
             '<div class="advance-split">' +
-                '<div class="row"><span><i class="fas fa-credit-card"></i> Pay now <small>(5% advance)</small></span><span class="adv-amt">' + R + fmt(advance) + '</span></div>' +
+                '<div class="row"><span><i class="fas fa-credit-card"></i> Pay now <small>(' + fmtPct(ADVANCE_PCT) + ' advance)</small></span><span class="adv-amt">' + R + fmt(advance) + '</span></div>' +
                 '<div class="row" style="color:#5a6877;font-size:.9rem;"><span><i class="fas fa-handshake"></i> Balance after travel</span><span>' + R + fmt(balance) + '</span></div>' +
             '</div>' +
 
@@ -396,7 +406,7 @@
             amount: advance * 100,            // ← charge only the 5% advance
             currency: 'INR',
             name: 'Bharat Tours & Travels',
-            description: '5% advance for ' + state.cart.name + ' (Ref ' + ref + ')',
+            description: fmtPct(ADVANCE_PCT) + ' advance for ' + state.cart.name + ' (Ref ' + ref + ')',
             image: 'https://andamanvoyages.in/images/logo.png',
             prefill: { name: name, email: email, contact: phone },
             notes: {
@@ -517,13 +527,13 @@
             '<div class="co-card" style="grid-column:1/-1;text-align:center;padding:3rem 1.5rem;">' +
                 '<div style="width:80px;height:80px;border-radius:50%;background:#e8f8f5;color:#0a5a68;display:inline-flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:1rem;"><i class="fas fa-check-circle"></i></div>' +
                 '<h2 style="color:#0a5a68;margin:0 0 .5rem;font-size:1.6rem;">Booking Confirmed!</h2>' +
-                '<p style="color:#5a6877;margin:0 0 1.5rem;font-size:1rem;">Your 5% advance payment was successful and your seat is reserved. We\'ve emailed your confirmation to <strong>' + esc(email) + '</strong>.</p>' +
+                '<p style="color:#5a6877;margin:0 0 1.5rem;font-size:1rem;">Your ' + fmtPct(ADVANCE_PCT) + ' advance payment was successful and your seat is reserved. We\'ve emailed your confirmation to <strong>' + esc(email) + '</strong>.</p>' +
                 '<div style="display:inline-block;background:#f8fafb;padding:1.1rem 1.5rem;border-radius:10px;text-align:left;font-size:.92rem;color:#2c3e50;border:1px dashed #cfd9df;">' +
                     '<div style="margin-bottom:.45rem;"><span style="color:#7f8c8d;">Booking Ref:</span> <strong>' + esc(ref) + '</strong></div>' +
                     '<div style="margin-bottom:.45rem;"><span style="color:#7f8c8d;">Payment ID:</span> <strong>' + esc(paymentId) + '</strong></div>' +
                     '<hr style="border:none;border-top:1px dashed #cfd9df;margin:.6rem 0;">' +
                     '<div style="margin-bottom:.4rem;"><span style="color:#7f8c8d;">Total Trip Cost:</span> <strong>' + R + fmt(total) + '</strong></div>' +
-                    '<div style="margin-bottom:.4rem;color:#0a5a68;"><span>Advance Paid (5%):</span> <strong>' + R + fmt(advance) + '</strong></div>' +
+                    '<div style="margin-bottom:.4rem;color:#0a5a68;"><span>Advance Paid (' + fmtPct(ADVANCE_PCT) + '):</span> <strong>' + R + fmt(advance) + '</strong></div>' +
                     '<div style="color:#a04000;"><span>Balance Due After Travel:</span> <strong>' + R + fmt(balance) + '</strong></div>' +
                 '</div>' +
 
@@ -541,9 +551,66 @@
         window.Toast.success('Booking confirmed! Advance ' + R + fmt(advance) + ' paid. Ref: ' + ref, { duration: 8000 });
     }
 
+    // ── Resolve effective advance rate (global setting + per-user override) ──
+    // Reads /settings/site.advanceRate, then checks the current user's profile
+    // for an `advanceRate` field that overrides the global value.
+    function resolveAdvanceRate() {
+        try {
+            // 1. global default from SettingsStore (cached or fresh)
+            var globalP = (window.SettingsStore && window.SettingsStore.load)
+                ? window.SettingsStore.load()
+                : Promise.resolve(null);
+
+            // 2. resolve current user, then their advanceRate override (if any)
+            var userP = (window.__firebaseReady && window.__firebaseReady.then)
+                ? window.__firebaseReady.then(function (fb) {
+                    var u = fb.auth && fb.auth.currentUser;
+                    if (!u) return null;
+                    if (window.UsersStore && window.UsersStore.fetchUserDoc) {
+                        return window.UsersStore.fetchUserDoc(u.uid).catch(function () { return null; });
+                    }
+                    return null;
+                  }).catch(function () { return null; })
+                : Promise.resolve(null);
+
+            return Promise.all([globalP, userP]).then(function (results) {
+                var globalSettings = results[0] || {};
+                var userDoc        = results[1] || {};
+
+                var rate = 5; // ultimate fallback
+                if (typeof globalSettings.advanceRate === 'number' && isFinite(globalSettings.advanceRate)) {
+                    rate = globalSettings.advanceRate;
+                }
+                if (userDoc && typeof userDoc.advanceRate === 'number' && isFinite(userDoc.advanceRate)) {
+                    rate = userDoc.advanceRate;
+                }
+                ADVANCE_PCT  = rate;
+                ADVANCE_RATE = rate / 100;
+                return rate;
+            });
+        } catch (e) {
+            return Promise.resolve(5);
+        }
+    }
+
     // ── Init ──
     document.addEventListener('DOMContentLoaded', function () {
         state.cart = loadCart();
+        // Render immediately with the default 5% so the page paints fast,
+        // then re-render once we've read the live rate from Firestore (and
+        // checked for a per-user override). Auth may resolve a moment later,
+        // so we also re-resolve when the auth state changes.
         render();
+        resolveAdvanceRate().then(function () { render(); });
+        if (window.__firebaseReady && window.__firebaseReady.then) {
+            window.__firebaseReady.then(function (fb) {
+                if (fb.firebaseAuth && fb.firebaseAuth.onAuthStateChanged) {
+                    fb.firebaseAuth.onAuthStateChanged(fb.auth, function () {
+                        // Re-fetch user-specific override (if any) and re-render
+                        resolveAdvanceRate().then(function () { render(); });
+                    });
+                }
+            }).catch(function () {});
+        }
     });
 })();
