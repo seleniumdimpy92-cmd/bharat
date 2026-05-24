@@ -98,9 +98,9 @@
                 '</div>' +
             '</div>' +
             '<a class="um-item" href="/bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>' +
-            '<a class="um-item" href="javascript:void(0)" data-um-act="profile"><i class="fas fa-user"></i> Profile</a>' +
-            '<a class="um-item um-admin-only" href="/dashboard" style="display:none;"><i class="fas fa-th-large"></i> Dashboard</a>' +
-            '<a class="um-item um-admin-only" href="/dashboard#section-settings" style="display:none;"><i class="fas fa-cog"></i> Settings</a>' +
+            '<a class="um-item" href="/profile"><i class="fas fa-user"></i> Profile</a>' +
+            '<a class="um-item" href="/settings"><i class="fas fa-cog"></i> Settings</a>' +
+            '<a class="um-item um-admin-only" href="/dashboard" style="display:none;"><i class="fas fa-th-large"></i> Admin Dashboard</a>' +
             '<a class="um-item um-admin-only" href="/migrate" target="_blank" rel="noopener" style="display:none;"><i class="fas fa-clone"></i> Database Mirror</a>' +
             '<div class="um-divider"></div>' +
             '<a class="um-item" href="/about#contact"><i class="fas fa-headset"></i> Contact</a>' +

@@ -532,6 +532,11 @@
         const allowed = {};
         if (typeof updates.fullName === 'string') allowed.fullName = updates.fullName;
         if (typeof updates.phone    === 'string') allowed.phone    = updates.phone;
+        if (typeof updates.address  === 'string') allowed.address  = updates.address;
+        if (typeof updates.city     === 'string') allowed.city     = updates.city;
+        if (typeof updates.state    === 'string') allowed.state    = updates.state;
+        if (typeof updates.zip      === 'string') allowed.zip      = updates.zip;
+        if (typeof updates.country  === 'string') allowed.country  = updates.country;
         if (!Object.keys(allowed).length) return _currentProfile;
         await firestore.setDoc(firestore.doc(db, 'users', user.uid), allowed, { merge: true });
         if (_currentProfile) {
@@ -539,6 +544,94 @@
             cacheProfile(_currentProfile);
         }
         return _currentProfile;
+    }
+
+    // Re-authenticate the current user with their current password.
+    // Required by Firebase before any sensitive op (changePassword,
+    // changeEmail, deleteUser) on a session older than ~5 minutes.
+    async function reauthenticate(currentPassword) {
+        const { auth, firebaseAuth } = await window.__firebaseReady;
+        const user = auth.currentUser;
+        if (!user || !user.email) throw new Error('Not signed in.');
+        if (!currentPassword) throw new Error('Current password required.');
+        if (typeof firebaseAuth.EmailAuthProvider === 'undefined' ||
+            typeof firebaseAuth.reauthenticateWithCredential === 'undefined') {
+            throw new Error('Re-authentication SDK not available.');
+        }
+        const cred = firebaseAuth.EmailAuthProvider.credential(user.email, currentPassword);
+        await firebaseAuth.reauthenticateWithCredential(user, cred);
+        return true;
+    }
+
+    // Change password (requires recent re-auth or pass currentPassword)
+    async function changePassword(currentPassword, newPassword) {
+        if (!newPassword || newPassword.length < 6) {
+            throw new Error('New password must be at least 6 characters.');
+        }
+        const { auth, firebaseAuth } = await window.__firebaseReady;
+        const user = auth.currentUser;
+        if (!user) throw new Error('Not signed in.');
+        if (currentPassword) {
+            try { await reauthenticate(currentPassword); }
+            catch (err) {
+                if (err && err.code === 'auth/wrong-password' ||
+                    err && err.code === 'auth/invalid-credential') {
+                    throw new Error('Current password is incorrect.');
+                }
+                throw err;
+            }
+        }
+        await firebaseAuth.updatePassword(user, newPassword);
+        return true;
+    }
+
+    // Send the standard password-reset email to the current user. Used as
+    // an alternative "change password by email link" UX in the profile page.
+    async function sendPasswordResetEmail() {
+        const { auth, firebaseAuth } = await window.__firebaseReady;
+        const user = auth.currentUser;
+        if (!user || !user.email) throw new Error('Not signed in.');
+        await firebaseAuth.sendPasswordResetEmail(auth, user.email);
+        return user.email;
+    }
+
+    // Delete the CURRENT user's account.
+    // Two-step verification flow:
+    //   1) callerPassword (for password accounts) or recent re-auth
+    //   2) Firestore profile + username doc removed
+    //   3) Firebase Auth user.delete()
+    async function deleteCurrentAccount(currentPassword) {
+        const { db, auth, firebaseAuth, firestore } = await window.__firebaseReady;
+        const user = auth.currentUser;
+        if (!user) throw new Error('Not signed in.');
+        if (currentPassword) {
+            try { await reauthenticate(currentPassword); }
+            catch (err) {
+                if (err && (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential')) {
+                    throw new Error('Current password is incorrect.');
+                }
+                throw err;
+            }
+        }
+        // Try to clean up profile + username docs FIRST while we still have
+        // permission. Best-effort: any error is logged but doesn't stop the
+        // delete (admin can clean up via the dashboard if needed).
+        try {
+            const userDocSnap = await firestore.getDoc(firestore.doc(db, 'users', user.uid));
+            if (userDocSnap.exists()) {
+                const data = userDocSnap.data() || {};
+                if (data.username) {
+                    try { await firestore.deleteDoc(firestore.doc(db, 'usernames', data.username.toLowerCase())); } catch (_) {}
+                }
+            }
+            try { await firestore.deleteDoc(firestore.doc(db, 'users', user.uid)); } catch (_) {}
+        } catch (e) {
+            console.warn('Profile cleanup failed before delete:', e);
+        }
+        // Finally — delete the Firebase Auth account itself.
+        await firebaseAuth.deleteUser(user);
+        cacheProfile(null);
+        return true;
     }
 
     function onAuthChange(cb) {
@@ -670,6 +763,10 @@
         getCurrentUser:           getCurrentUser,
         isAdmin:                  isAdmin,
         updateProfile:            updateProfile,
+        reauthenticate:           reauthenticate,
+        changePassword:           changePassword,
+        sendPasswordResetEmail:   sendPasswordResetEmail,
+        deleteCurrentAccount:     deleteCurrentAccount,
         sendPasswordReset:        sendPasswordReset,
         lookupUsernamesByEmail:   lookupUsernamesByEmail,
         // email-verification:

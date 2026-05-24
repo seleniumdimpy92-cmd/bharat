@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>(function(){try{var p=location.pathname;if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile — Bharat Tours &amp; Travels</title>
+    <meta name="description" content="Manage your personal details, address and password.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0d7a8a">
+    <link rel="icon" type="image/png" href="images/logo-white.png">
+    <link rel="stylesheet" href="css/style.css?v=39">
+    <link rel="stylesheet" href="css/account.css?v=1">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="js/firebase-config.js?v=18"></script>
+</head>
+<body>
+    <!-- Same topbar as the rest of the site so the AD avatar is visible -->
+    <header class="topbar">
+        <a href="/" class="topbar-logo">
+            <img src="images/logo-white.png" alt="Bharat Tours and Travels logo">
+            <span class="brand-text">
+                <span class="brand-line1">Bharat Tours</span>
+                <span class="brand-line2">&amp; Travels</span>
+            </span>
+        </a>
+        <nav class="topnav" id="topnav">
+            <a href="/" class="topnav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="/#packages" class="topnav-item"><i class="fas fa-suitcase-rolling"></i><span>Packages</span></a>
+            <a href="/gallery" class="topnav-item"><i class="fas fa-images"></i><span>Gallery</span></a>
+            <a href="/bookings" class="topnav-item"><i class="fas fa-calendar-check"></i><span>Bookings</span></a>
+            <a href="/profile" class="topnav-item active"><i class="fas fa-user"></i><span>Profile</span></a>
+            <a href="/settings" class="topnav-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </nav>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
+
+    <main class="main-content">
+
+        <section class="account-section">
+            <div class="container account-container">
+                <h1 class="account-title"><i class="fas fa-user-circle"></i> My Profile</h1>
+                <p class="account-lead">Update your personal information, address and password. Changes are saved to your account immediately.</p>
+
+                <!-- Loading / not-signed-in state -->
+                <div id="acctNotSignedIn" class="account-card account-empty" style="display:none;">
+                    <i class="fas fa-lock"></i>
+                    <h3>Please sign in</h3>
+                    <p>You need to be logged in to view or change your profile.</p>
+                    <button class="btn-save" id="goLoginBtn">Sign in</button>
+                </div>
+
+                <div id="acctSignedIn" style="display:none;">
+
+                    <!-- Account summary -->
+                    <div class="account-card">
+                        <div class="account-summary">
+                            <div class="account-avatar" id="profAvatar">?</div>
+                            <div>
+                                <div class="account-name" id="profName">—</div>
+                                <div class="account-meta">
+                                    <span><i class="fas fa-envelope"></i> <span id="profEmail">—</span></span>
+                                    <span><i class="fas fa-id-badge"></i> <span id="profUsername">—</span></span>
+                                    <span class="account-role-badge" id="profRoleBadge" style="display:none;">ADMIN</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal info -->
+                    <div class="account-card">
+                        <h2 class="account-card-title"><i class="fas fa-id-card"></i> Personal information</h2>
+                        <form id="personalForm" class="account-form">
+                            <div class="account-row">
+                                <label>
+                                    <span>Full name</span>
+                                    <input type="text" name="fullName" id="fldFullName" placeholder="e.g. Deb Karmakar">
+                                </label>
+                                <label>
+                                    <span>Phone</span>
+                                    <input type="tel" name="phone" id="fldPhone" placeholder="+91 98765 43210">
+                                </label>
+                            </div>
+                            <div class="account-row">
+                                <label>
+                                    <span>Email</span>
+                                    <input type="email" id="fldEmailRO" disabled placeholder="—">
+                                    <small>Email cannot be changed here. Contact support to migrate to a new email.</small>
+                                </label>
+                                <label>
+                                    <span>Username</span>
+                                    <input type="text" id="fldUsernameRO" disabled placeholder="—">
+                                    <small>Usernames are permanent.</small>
+                                </label>
+                            </div>
+                            <div class="account-actions">
+                                <button class="btn-save" type="submit"><i class="fas fa-save"></i> Save changes</button>
+                                <span id="personalStatus" class="account-status"></span>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="account-card">
+                        <h2 class="account-card-title"><i class="fas fa-map-marker-alt"></i> Address</h2>
+                        <p class="account-card-sub">We use this for booking confirmations &amp; invoices.</p>
+                        <form id="addressForm" class="account-form">
+                            <label>
+                                <span>Street address</span>
+                                <input type="text" name="address" id="fldAddress" placeholder="House / flat no., street, area">
+                            </label>
+                            <div class="account-row">
+                                <label>
+                                    <span>City</span>
+                                    <input type="text" name="city" id="fldCity" placeholder="e.g. Kolkata">
+                                </label>
+                                <label>
+                                    <span>State / Province</span>
+                                    <input type="text" name="state" id="fldState" placeholder="e.g. West Bengal">
+                                </label>
+                            </div>
+                            <div class="account-row">
+                                <label>
+                                    <span>ZIP / PIN code</span>
+                                    <input type="text" name="zip" id="fldZip" placeholder="700001">
+                                </label>
+                                <label>
+                                    <span>Country</span>
+                                    <input type="text" name="country" id="fldCountry" placeholder="India">
+                                </label>
+                            </div>
+                            <div class="account-actions">
+                                <button class="btn-save" type="submit"><i class="fas fa-save"></i> Save address</button>
+                                <span id="addressStatus" class="account-status"></span>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="account-card">
+                        <h2 class="account-card-title"><i class="fas fa-key"></i> Change password</h2>
+                        <p class="account-card-sub">For your security we ask for your current password before setting a new one.</p>
+                        <form id="passwordForm" class="account-form">
+                            <label>
+                                <span>Current password</span>
+                                <input type="password" name="current" id="fldCurrentPwd" autocomplete="current-password" required>
+                            </label>
+                            <div class="account-row">
+                                <label>
+                                    <span>New password</span>
+                                    <input type="password" name="new" id="fldNewPwd" autocomplete="new-password" minlength="6" required>
+                                </label>
+                                <label>
+                                    <span>Confirm new password</span>
+                                    <input type="password" name="confirm" id="fldConfirmPwd" autocomplete="new-password" minlength="6" required>
+                                </label>
+                            </div>
+                            <div class="account-actions">
+                                <button class="btn-save" type="submit"><i class="fas fa-shield-alt"></i> Update password</button>
+                                <button class="btn-link" type="button" id="forgotPwdBtn">Or send me a reset email instead</button>
+                                <span id="passwordStatus" class="account-status"></span>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/dataStore.js?v=18"></script>
+    <script src="js/toast.js?v=1"></script>
+    <script src="js/script.js?v=30"></script>
+    <script src="js/account.js?v=1"></script>
+    <script src="js/user-menu.js?v=7"></script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>(function(){try{var p=location.pathname;if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings — Bharat Tours &amp; Travels</title>
+    <meta name="description" content="Theme, currency and account preferences.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0d7a8a">
+    <link rel="icon" type="image/png" href="images/logo-white.png">
+    <link rel="stylesheet" href="css/style.css?v=39">
+    <link rel="stylesheet" href="css/account.css?v=1">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/firebase-config.js?v=18"></script>
+    <!-- Apply saved theme as early as possible to avoid a flash -->
+    <script>
+        (function () {
+            try {
+                var s = JSON.parse(localStorage.getItem('userPrefs') || '{}');
+                if (s && s.theme === 'dark') document.documentElement.classList.add('theme-dark');
+            } catch (e) {}
+        })();
+    </script>
+</head>
+<body>
+    <header class="topbar">
+        <a href="/" class="topbar-logo">
+            <img src="images/logo-white.png" alt="Bharat Tours and Travels logo">
+            <span class="brand-text">
+                <span class="brand-line1">Bharat Tours</span>
+                <span class="brand-line2">&amp; Travels</span>
+            </span>
+        </a>
+        <nav class="topnav" id="topnav">
+            <a href="/" class="topnav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="/#packages" class="topnav-item"><i class="fas fa-suitcase-rolling"></i><span>Packages</span></a>
+            <a href="/gallery" class="topnav-item"><i class="fas fa-images"></i><span>Gallery</span></a>
+            <a href="/bookings" class="topnav-item"><i class="fas fa-calendar-check"></i><span>Bookings</span></a>
+            <a href="/profile" class="topnav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+            <a href="/settings" class="topnav-item active"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </nav>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
+
+    <main class="main-content">
+
+        <section class="account-section">
+            <div class="container account-container">
+                <h1 class="account-title"><i class="fas fa-cog"></i> Settings</h1>
+                <p class="account-lead">Choose your theme, currency and account preferences. These are saved on this browser; account-related actions need you to be signed in.</p>
+
+                <!-- Appearance / Theme -->
+                <div class="account-card">
+                    <h2 class="account-card-title"><i class="fas fa-palette"></i> Appearance</h2>
+                    <p class="account-card-sub">Switch between light and dark mode. Default follows your system preference.</p>
+                    <div class="theme-grid" id="themeGrid">
+                        <button type="button" class="theme-card" data-theme="light">
+                            <div class="theme-preview theme-preview-light"></div>
+                            <span><i class="fas fa-sun"></i> Light</span>
+                        </button>
+                        <button type="button" class="theme-card" data-theme="dark">
+                            <div class="theme-preview theme-preview-dark"></div>
+                            <span><i class="fas fa-moon"></i> Dark</span>
+                        </button>
+                        <button type="button" class="theme-card" data-theme="auto">
+                            <div class="theme-preview theme-preview-auto"></div>
+                            <span><i class="fas fa-magic"></i> Auto (system)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Currency -->
+                <div class="account-card">
+                    <h2 class="account-card-title"><i class="fas fa-coins"></i> Currency</h2>
+                    <p class="account-card-sub">Prices on this site are quoted in <strong>INR (₹)</strong>. Choose another currency to see an approximate conversion alongside the rupee price.</p>
+                    <div class="setting-row">
+                        <label>
+                            <span>Display currency</span>
+                            <select id="currencySel">
+                                <option value="INR">🇮🇳 INR — Indian Rupee (₹)</option>
+                                <option value="USD">🇺🇸 USD — US Dollar ($)</option>
+                                <option value="EUR">🇪🇺 EUR — Euro (€)</option>
+                                <option value="GBP">🇬🇧 GBP — British Pound (£)</option>
+                                <option value="AUD">🇦🇺 AUD — Australian Dollar ($)</option>
+                                <option value="CAD">🇨🇦 CAD — Canadian Dollar ($)</option>
+                                <option value="SGD">🇸🇬 SGD — Singapore Dollar ($)</option>
+                                <option value="AED">🇦🇪 AED — UAE Dirham (د.إ)</option>
+                            </select>
+                        </label>
+                        <span id="currencyStatus" class="account-status"></span>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="account-card">
+                    <h2 class="account-card-title"><i class="fas fa-bell"></i> Notifications</h2>
+                    <div class="setting-toggle-row">
+                        <div>
+                            <strong>Booking confirmations &amp; reminders</strong>
+                            <p>Email me booking confirmations, payment receipts and a 7-day reminder before each trip.</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="optBookingEmails" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-toggle-row">
+                        <div>
+                            <strong>Promotions &amp; offers</strong>
+                            <p>Send me seasonal deals and last-minute offers (1–2 emails per month).</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="optPromoEmails">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Danger zone (signed-in only) -->
+                <div class="account-card account-danger" id="dangerCard" style="display:none;">
+                    <h2 class="account-card-title"><i class="fas fa-exclamation-triangle"></i> Delete account</h2>
+                    <p class="account-card-sub">
+                        This permanently deletes your account, your profile data and all your bookings.
+                        <strong>This cannot be undone.</strong>
+                    </p>
+                    <ol style="font-size:.86rem;color:var(--mmt-muted,#5a6877);line-height:1.6;margin:0 0 .9rem 1.1rem;">
+                        <li>Click <em>Send verification code</em> below — we'll email a 6-digit code to your inbox.</li>
+                        <li>Enter the code and your current password to confirm.</li>
+                        <li>Your account is wiped from Firebase Auth + Firestore in one go.</li>
+                    </ol>
+                    <div class="setting-row">
+                        <button class="btn-danger-outline" id="sendDelOtpBtn">
+                            <i class="fas fa-envelope"></i> Send verification code
+                        </button>
+                        <span id="delOtpStatus" class="account-status"></span>
+                    </div>
+                    <div id="delOtpFields" style="display:none;margin-top:1rem;">
+                        <div class="account-row">
+                            <label>
+                                <span>6-digit code from email</span>
+                                <input type="text" id="fldDelOtp" inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="••••••">
+                            </label>
+                            <label>
+                                <span>Confirm with current password</span>
+                                <input type="password" id="fldDelPwd" autocomplete="current-password">
+                            </label>
+                        </div>
+                        <button class="btn-danger" id="confirmDeleteBtn">
+                            <i class="fas fa-trash"></i> Permanently delete my account
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <script src="js/dataStore.js?v=18"></script>
+    <script src="js/toast.js?v=1"></script>
+    <script src="js/script.js?v=30"></script>
+    <script src="js/account.js?v=1"></script>
+    <script src="js/user-menu.js?v=7"></script>
+</body>
+</html>
