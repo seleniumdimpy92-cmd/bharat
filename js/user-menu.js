@@ -19,7 +19,14 @@
 
     function readCurrentUser() {
         try {
-            return JSON.parse(localStorage.getItem('currentUser') || 'null') || null;
+            const cu  = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            const tok = localStorage.getItem('token');
+            // Treat as logged-in only if we have both a profile object AND a
+            // token. Stops the menu showing stale "logged-in" state when a
+            // previous session left a `currentUser` blob behind but the
+            // token has since been cleared by Firebase.
+            if (cu && (cu.uid || cu.id) && tok) return cu;
+            return null;
         } catch (e) { return null; }
     }
     function getInitials(u) {
