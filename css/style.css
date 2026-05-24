@@ -186,15 +186,17 @@ body.hero-page .hero,body.hero-page .gallery-hero,body.hero-page .about-hero{pad
 .carousel-dots{position:absolute;bottom:.6rem;left:50%;transform:translateX(-50%);display:flex;gap:.4rem;z-index:6}
 .carousel-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);border:none;cursor:pointer;transition:all .3s;padding:0}
 .carousel-dot.active{background:var(--primary-teal);transform:scale(1.3);width:22px;border-radius:5px}
-.hero-content{position:relative;z-index:5;width:100%;max-width:1280px;margin:0 auto;padding:.5rem 1.5rem 3.5rem;display:flex;flex-direction:column;align-items:stretch;gap:1.25rem}
-.hero-heading{text-align:center}
-.hero-heading h1{font-size:2.6rem;font-weight:800;margin:0;line-height:1.15;text-shadow:0 2px 8px rgba(0,0,0,.4)}
-.hero-heading h1 small{display:block;font-size:1.2rem;font-weight:600;margin-top:.4rem;opacity:.95}
-.hero-subtext{text-align:center;max-width:900px;margin:0 auto}
-.hero-subtext p{font-size:.98rem;margin:0 0 .9rem;opacity:.95;line-height:1.55;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+.hero-content{position:relative;z-index:5;width:100%;max-width:1120px;margin:0 auto;padding:1.25rem 1.5rem 3rem;display:flex;flex-direction:column;align-items:stretch;gap:1rem}
+.hero-heading,.hero-subtext{text-align:center}
+.hero-heading{max-width:720px;margin:0 auto}
+.hero-eyebrow{display:inline-block;margin-bottom:.65rem;padding:.45rem .95rem;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);font-size:.85rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.hero-heading h1{font-size:3rem;font-weight:800;margin:0;line-height:1.08;letter-spacing:-.03em;text-shadow:0 2px 8px rgba(0,0,0,.4)}
+.hero-subtext{max-width:620px;margin:0 auto}
+.hero-subtext p{font-size:1rem;margin:0;opacity:.95;line-height:1.55;text-shadow:0 1px 4px rgba(0,0,0,.4)}
 @media (max-width:768px){
-  .hero-heading h1{font-size:1.9rem}
-  .hero-heading h1 small{font-size:1rem}
+  .hero-content{padding:1rem 1rem 2.5rem}
+  .hero-eyebrow{font-size:.75rem;padding:.38rem .78rem}
+  .hero-heading h1{font-size:2.1rem}
   .hero-subtext p{font-size:.92rem}
 }
 .search-box{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem}
