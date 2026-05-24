@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<!-- HERO REDESIGN MOCKUP — preview only. No backend, no Firebase, no production touch. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hero mockup — Bharat Tours &amp; Travels</title>
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--teal:#0d7a8a;--teal2:#16a085;--teal-d:#0a4f5c;--coral:#ff6b5b;--gold:#f7c948;--ink:#0c1c24;--ink2:#4a5d6a;--paper:#fbf9f3;--shadow:0 24px 60px -20px rgba(10,31,68,.55)}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:'Poppins',system-ui,sans-serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased}
+a{text-decoration:none}
+
+/* 1. Glass topbar */
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;padding:.85rem 2rem;background:rgba(255,255,255,.06);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid rgba(255,255,255,.14)}
+.nav__brand{display:flex;align-items:center;gap:.7rem;color:#fff;margin-right:auto}
+.nav__mark{width:40px;height:40px;background:linear-gradient(135deg,var(--teal2),var(--teal));border-radius:11px;display:grid;place-items:center;color:#fff;font-size:1.1rem;box-shadow:0 4px 14px rgba(13,122,138,.45)}
+.nav__name{font-weight:800;font-size:1.05rem;letter-spacing:-.01em;line-height:1.05}
+.nav__tag{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;opacity:.75;margin-top:4px;font-weight:500}
+.nav__menu{display:flex;gap:.15rem;align-items:center}
+.nav__menu a{color:#fff;padding:.55rem 1rem;border-radius:8px;font-weight:500;font-size:.92rem;opacity:.9;transition:background .15s}
+.nav__menu a:hover{background:rgba(255,255,255,.12);opacity:1}
+.nav__menu a.is-active{background:rgba(255,255,255,.18);font-weight:600}
+.nav__cta{margin-left:1rem;padding:.55rem 1.2rem;background:#fff;color:var(--teal-d)!important;border-radius:999px;font-weight:700!important;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+/* When the page has been scrolled past the hero, the topbar swaps to a solid dark background so it stays readable over the white/cream content sections. */
+.nav.is-scrolled{background:rgba(12,28,36,.96);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);box-shadow:0 4px 20px rgba(0,0,0,.18);border-bottom-color:rgba(255,255,255,.06);padding-top:.7rem;padding-bottom:.7rem}
+.nav.is-scrolled .nav__brand-tag{opacity:.6}
+.nav.is-scrolled .nav__cta{background:linear-gradient(135deg,var(--teal2),var(--teal));color:#fff!important;box-shadow:0 4px 14px rgba(13,122,138,.4)}
+
+
+/* 3. Hero with real Andaman photo */
+.hero{position:relative;min-height:760px;color:#fff;display:flex;flex-direction:column;padding:6.25rem 2rem 2.5rem;overflow:hidden;isolation:isolate}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(180deg,rgba(8,30,42,.4),rgba(8,30,42,.55) 60%,rgba(8,30,42,.85)),url('images/neil2.jpg') center 42%/cover no-repeat}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse 80% 60% at 25% 35%,rgba(0,0,0,.35),rgba(0,0,0,0) 70%);pointer-events:none}
+.hero__inner{max-width:1280px;width:100%;margin:auto;display:grid;gap:1.6rem}
+
+.hero__title{font-size:clamp(2.4rem,5.6vw,4.4rem);font-weight:800;line-height:1.05;letter-spacing:-.025em;max-width:18ch;margin:0;text-shadow:0 2px 30px rgba(0,0,0,.35)}
+.hero__title em{font-style:normal;color:var(--gold);white-space:nowrap}
+
+/* 5. Price callout */
+.hero__price{display:inline-flex;align-items:baseline;gap:.7rem;flex-wrap:wrap}
+.hero__price-was{text-decoration:line-through;opacity:.55;font-size:1.2rem;font-weight:500}
+.hero__price-now{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:800;color:var(--gold);line-height:1}
+.hero__price-pp{font-size:.85rem;font-weight:500;opacity:.85}
+.hero__price-save{background:var(--coral);color:#fff;padding:.25rem .65rem;border-radius:4px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;box-shadow:0 2px 8px rgba(255,107,91,.4)}
+
+/* 11. Tight subhead */
+.hero__sub{font-size:1.05rem;max-width:56ch;opacity:.92;line-height:1.5;margin:0}
+
+/* 7. Dense search bar */
+.search{margin-top:.8rem;background:rgba(255,255,255,.97);border-radius:14px;padding:.45rem;display:grid;grid-template-columns:1.3fr 1.1fr 1fr .9fr .9fr auto;gap:.25rem;box-shadow:var(--shadow);color:var(--ink);max-width:1100px}
+.search__field{display:flex;flex-direction:column;justify-content:center;padding:.55rem .85rem;border-radius:10px;cursor:pointer;min-height:56px;transition:background .15s}
+.search__field:hover{background:rgba(13,122,138,.07)}
+.search__field-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--ink2);margin-bottom:2px}
+.search__field-value{font-size:.95rem;font-weight:600;display:flex;align-items:center;gap:.35rem;line-height:1.2}
+.search__field-value i{font-size:.65rem;opacity:.5}
+.search__btn{background:linear-gradient(135deg,var(--teal2),var(--teal));color:#fff;border:0;border-radius:10px;padding:0 1.8rem;font-family:inherit;font-weight:700;font-size:.95rem;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:.5rem;box-shadow:0 6px 18px rgba(13,122,138,.35);transition:transform .12s,filter .12s}
+.search__btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+
+/* 8. Secondary CTA */
+.hero__cta2{display:inline-flex;align-items:center;gap:.4rem;color:#fff;padding:.55rem 0;font-size:.92rem;font-weight:500;opacity:.85;justify-self:start;transition:opacity .15s,gap .15s}
+.hero__cta2:hover{opacity:1;gap:.65rem}
+.hero__cta2 i{font-size:.8rem}
+
+/* 9. Trust strip */
+.trust{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;padding:1rem 1.2rem;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:12px;max-width:1100px}
+.trust__label{font-size:.7rem;text-transform:uppercase;letter-spacing:.18em;opacity:.7;font-weight:600}
+.trust__row{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
+.trust__item{display:inline-flex;align-items:center;gap:.45rem;font-size:.85rem;font-weight:500;opacity:.92}
+.trust__item i{color:var(--gold);font-size:.95rem}
+/* 10. Contact pills inline with trust strip */
+.trust__contact{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .9rem;background:rgba(255,255,255,.14);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:999px;font-size:.84rem;font-weight:600}
+.trust__contact:hover{background:rgba(255,255,255,.22)}
+.trust__contact i{color:var(--gold)}
+
+/* 12. Dot indicator instead of arrows */
+.dots{display:flex;gap:.45rem;justify-self:center;margin-top:1.5rem}
+.dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4)}
+.dots span.is-active{background:#fff;width:24px;border-radius:4px}
+
+@media(max-width:980px){
+    .nav{padding:.7rem 1rem}
+    .nav__menu{display:none}
+    .hero{min-height:auto;padding:5.25rem 1rem 2rem}
+    .search{grid-template-columns:1fr 1fr;gap:.4rem}
+    .search__btn{grid-column:1/-1;padding:.9rem}
+}
+
+/* User avatar + dropdown menu (right end of topbar) */
+.usr-menu{position:relative;margin-left:1rem}
+.usr-avatar{width:42px;height:42px;border:0;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,var(--teal2),var(--teal));color:#fff;font-weight:700;font-size:.95rem;letter-spacing:.02em;display:grid;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.18);position:relative;font-family:inherit;transition:transform .15s,box-shadow .15s}
+.usr-avatar:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.usr-avatar.is-guest{background:linear-gradient(135deg,#5a6877,#3a4654)}
+.usr-avatar.is-admin::after{content:"";position:absolute;top:2px;right:2px;width:10px;height:10px;background:#27ae60;border:2px solid #fff;border-radius:50%}
+.usr-pop{position:absolute;top:calc(100% + 12px);right:0;width:280px;background:#fff;border-radius:14px;box-shadow:0 18px 50px rgba(10,31,68,.22),0 0 0 1px rgba(0,0,0,.04);overflow:hidden;opacity:0;transform:translateY(-6px) scale(.97);transform-origin:top right;pointer-events:none;transition:opacity .15s,transform .15s;z-index:60}
+.usr-menu.is-open .usr-pop{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.usr-pop__head{padding:1.1rem 1.2rem;background:linear-gradient(135deg,var(--teal-d),var(--teal));color:#fff}
+.usr-pop__head .name{font-weight:700;font-size:1rem;line-height:1.2;margin:0}
+.usr-pop__head .email{font-size:.78rem;opacity:.8;margin:3px 0 0;word-break:break-all}
+.usr-pop__head .role{display:inline-block;background:rgba(255,255,255,.18);padding:.15rem .55rem;border-radius:4px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-top:.5rem}
+.usr-pop__nav{padding:.4rem 0}
+.usr-pop__nav a,.usr-pop__nav button{display:flex;align-items:center;gap:.7rem;width:100%;padding:.65rem 1.2rem;background:0;border:0;font-family:inherit;font-size:.9rem;color:var(--ink);text-align:left;cursor:pointer;transition:background .12s;text-decoration:none}
+.usr-pop__nav a:hover,.usr-pop__nav button:hover{background:rgba(13,122,138,.06);color:var(--teal-d)}
+.usr-pop__nav i{width:18px;color:var(--ink2);font-size:.9rem;text-align:center}
+.usr-pop__nav .danger{color:#c0392b}
+.usr-pop__nav .danger i{color:#c0392b}
+.usr-pop__divider{height:1px;background:#eef1f4;margin:.4rem 0}
+.usr-pop__section-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:var(--ink2);padding:.7rem 1.2rem .3rem}
+.nav.is-scrolled .usr-avatar{box-shadow:0 0 0 2px rgba(255,255,255,.08),0 4px 14px rgba(0,0,0,.4)}
+
+/* Demo state switcher — only on this mockup, not in the real site */
+.demo-switch{position:fixed;bottom:1rem;right:1rem;z-index:99;display:flex;gap:.3rem;background:rgba(0,0,0,.85);padding:.4rem;border-radius:999px;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.demo-switch button{background:transparent;border:0;color:rgba(255,255,255,.6);padding:.4rem .9rem;border-radius:999px;font-family:inherit;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.05em}
+.demo-switch button:hover{color:#fff}
+.demo-switch button.active{background:#fff;color:#000}
+
+
+/* Side-by-side comparison label */
+.label{position:fixed;top:.5rem;right:.5rem;z-index:99;background:#000;color:#fff;font-size:.7rem;padding:.3rem .6rem;border-radius:4px;font-family:monospace;opacity:.6}
+</style>
+</head>
+<body>
+
+<div class="label">MOCKUP — hero-mockup.html</div>
+
+<!-- 1+2: Glass topbar, no admin links visible -->
+<nav class="nav">
+    <a href="#" class="nav__brand">
+        <span class="nav__mark"><i class="fas fa-umbrella-beach"></i></span>
+        <span>
+            <div class="nav__name">Bharat Tours &amp; Travels</div>
+            <div class="nav__tag">Andaman Specialists</div>
+        </span>
+    </a>
+    <div class="nav__menu">        <a href="#" class="is-active">Home</a>
+        <a href="#">Packages</a>
+        <a href="#">Flights</a>
+        <a href="#">Gallery</a>
+        <a href="#">Bookings</a>
+        <div class="usr-menu" id="usrMenu"><!-- injected by JS --></div>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero__inner">
+
+        <!-- Headline + accent -->
+        <h1 class="hero__title">Andaman, <em>Done Right</em>.</h1>
+
+        <!-- 5. Price callout with anchor + savings -->
+        <div class="hero__price">
+            <span class="hero__price-was">₹22,999</span>
+            <span class="hero__price-now">₹15,999</span>
+            <span class="hero__price-pp">per person, all-inclusive</span>
+            <span class="hero__price-save">Save ₹7,000</span>
+        </div>
+
+        <!-- 11. One-line punchy subhead -->
+        <p class="hero__sub">
+            Pristine beaches, crystal waters, expert local guides — every package
+            includes flights, ferries, hand-picked stays &amp; activities.
+        </p>
+
+        <!-- 7. Dense search bar -->
+        <form class="search" onsubmit="event.preventDefault();alert('This is a mockup — search disabled')">
+            <div class="search__field">
+                <span class="search__field-label">Travelling From</span>
+                <span class="search__field-value">Bangalore (BLR) <i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="search__field">
+                <span class="search__field-label">Going To</span>
+                <span class="search__field-value">Andaman <i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="search__field">
+                <span class="search__field-label">Travel Date</span>
+                <span class="search__field-value">15 Jun 2026 <i class="far fa-calendar"></i></span>
+            </div>
+            <div class="search__field">
+                <span class="search__field-label">Adults</span>
+                <span class="search__field-value">2 Adults <i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="search__field">
+                <span class="search__field-label">Children</span>
+                <span class="search__field-value">0 <i class="fas fa-chevron-down"></i></span>
+            </div>
+            <button type="submit" class="search__btn">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </form>
+
+        <!-- 8. Secondary CTA — no-commit browsing -->
+        <a href="#" class="hero__cta2">
+            Or browse all 10 curated packages <i class="fas fa-arrow-right"></i>
+        </a>
+
+        <!-- 9. Trust strip — payment + affiliate badges -->
+        <div class="trust">
+            <span class="trust__label">Trusted by</span>
+            <div class="trust__row">
+                <span class="trust__item"><i class="fas fa-shield-halved"></i> Secure SSL</span>
+                <span class="trust__item"><i class="fas fa-circle-check"></i> Instant Confirmation</span>
+                <span class="trust__item"><i class="fas fa-headset"></i> 24×7 Support</span>
+                <a href="tel:+918880195191" class="trust__contact"><i class="fas fa-phone"></i> +91-88801-95191</a>
+                <a href="mailto:booking@andamanvoyages.in" class="trust__contact"><i class="fas fa-envelope"></i> booking@andamanvoyages.in</a>
+            </div>
+        </div>
+
+        <!-- 12. Subtle dot indicator (replaces side arrows) -->
+        <div class="dots">
+            <span class="is-active"></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ═══ PACKAGES SECTION (mockup) — uses real packages.json data ═══ -->
+<style>
+.pkg-section{padding:5rem 2rem;max-width:1280px;margin:0 auto}
+.pkg-head{display:flex;align-items:end;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2.5rem}
+.pkg-head__eyebrow{font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:.5rem}
+.pkg-head__title{font-size:clamp(1.8rem,3.2vw,2.6rem);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:0;color:var(--ink)}
+.pkg-head__title em{font-style:normal;color:var(--teal)}
+.pkg-head__sub{margin:.5rem 0 0;color:var(--ink2);font-size:1rem;max-width:48ch}
+.pkg-head__view-all{padding:.7rem 1.4rem;background:transparent;color:var(--teal);border:2px solid var(--teal);border-radius:999px;font-weight:700;font-size:.9rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .15s}
+.pkg-head__view-all:hover{background:var(--teal);color:#fff}
+.pkg-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:1.5rem;align-items:start}
+.pkg-sidebar{background:#fff;border:1px solid #e5e9ee;border-radius:18px;padding:1.2rem;box-shadow:0 4px 16px rgba(10,31,68,.05);position:sticky;top:5.5rem}
+.pkg-sidebar__title{font-size:1rem;font-weight:800;color:var(--ink);margin:0 0 1rem}
+.pkg-filter-group{padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px solid #eef1f4}
+.pkg-filter-group:last-child{margin-bottom:0;padding-bottom:0;border-bottom:0}
+.pkg-filter-group h4{font-size:.8rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:0 0 .75rem}
+.pkg-checks{display:grid;gap:.65rem}
+.pkg-check{display:flex;align-items:center;gap:.6rem;font-size:.9rem;color:var(--ink2)}
+.pkg-check input{accent-color:var(--teal)}
+.pkg-results{min-width:0}
+.pkg-filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.pkg-filter{padding:.55rem 1.2rem;background:#fff;border:1px solid #e5e9ee;border-radius:999px;font-family:inherit;font-size:.88rem;font-weight:600;color:var(--ink2);cursor:pointer;transition:all .15s}
+.pkg-filter:hover{border-color:var(--teal);color:var(--teal)}
+.pkg-filter.is-active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pkg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.6rem}
+.pkg-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(10,31,68,.06);transition:transform .25s,box-shadow .25s;display:flex;flex-direction:column;border:1px solid #eef1f4;position:relative}
+.pkg-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(10,31,68,.16)}
+.pkg-card__img{position:relative;aspect-ratio:4/3;overflow:hidden;background:#eaf0f3}
+.pkg-card__img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.pkg-card:hover .pkg-card__img img{transform:scale(1.06)}
+.pkg-card__badge{position:absolute;top:.85rem;left:.85rem;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);color:#fff;padding:.3rem .7rem;border-radius:6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.pkg-card__badge--hot{background:linear-gradient(135deg,#ff6b5b,#ff4444)}
+.pkg-card__badge--best{background:linear-gradient(135deg,var(--gold),#e6a92e);color:#1c1409}
+.pkg-card__rating{position:absolute;top:.85rem;right:.85rem;background:rgba(255,255,255,.96);color:var(--ink);padding:.25rem .55rem;border-radius:6px;font-size:.78rem;font-weight:800;display:inline-flex;align-items:center;gap:.25rem}
+.pkg-card__rating i{color:var(--gold);font-size:.7rem}
+.pkg-card__heart{position:absolute;bottom:.85rem;right:.85rem;width:36px;height:36px;background:rgba(255,255,255,.92);border-radius:50%;display:grid;place-items:center;color:var(--ink2);cursor:pointer;font-size:.95rem;border:0;transition:all .15s}
+.pkg-card__heart:hover{color:#ff4d6d;transform:scale(1.1)}
+.pkg-card__body{padding:1.2rem 1.3rem 1.4rem;display:flex;flex-direction:column;flex:1}
+.pkg-card__title{font-size:1.1rem;font-weight:700;color:var(--ink);margin:0 0 .35rem;line-height:1.2}
+.pkg-card__desc{font-size:.82rem;color:var(--ink2);line-height:1.5;margin:0 0 .9rem}
+.pkg-card__chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem;min-height:24px}
+.pkg-card__chip{font-size:.7rem;font-weight:600;color:var(--teal);background:rgba(13,122,138,.08);padding:.25rem .6rem;border-radius:5px;display:inline-flex;align-items:center;gap:.3rem}
+.pkg-card__foot{margin-top:auto;padding-top:.8rem;border-top:1px dashed #e5e9ee;display:flex;align-items:end;justify-content:space-between;gap:.8rem}
+.pkg-card__price-block{display:flex;flex-direction:column;line-height:1.1}
+.pkg-card__price-was{font-size:.78rem;text-decoration:line-through;color:var(--ink2);opacity:.65}
+.pkg-card__price{font-size:1.4rem;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.pkg-card__price-pp{font-size:.7rem;color:var(--ink2);font-weight:500;margin-top:2px}
+.pkg-card__cta{padding:.65rem 1.1rem;background:var(--teal);color:#fff;border:0;border-radius:10px;font-family:inherit;font-weight:700;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;transition:all .15s;white-space:nowrap}
+.pkg-card__cta:hover{background:var(--teal-d);transform:translateY(-1px)}
+.pkg-benefits{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:0 0 2.5rem;padding:1.5rem;background:linear-gradient(135deg,rgba(13,122,138,.04),rgba(22,160,133,.04));border-radius:16px;border:1px solid rgba(13,122,138,.1)}
+.pkg-benefit{display:flex;align-items:center;gap:.85rem}
+.pkg-benefit__icon{width:42px;height:42px;background:#fff;border-radius:10px;display:grid;place-items:center;color:var(--teal);font-size:1.05rem;flex-shrink:0;box-shadow:0 2px 8px rgba(10,31,68,.08)}
+.pkg-benefit__text strong{display:block;font-size:.92rem;color:var(--ink);font-weight:700}
+.pkg-benefit__text span{font-size:.78rem;color:var(--ink2)}
+@media(max-width:980px){.pkg-layout{grid-template-columns:1fr}.pkg-sidebar{position:static}}
+@media(max-width:680px){.pkg-section{padding:3rem 1rem}.pkg-grid{grid-template-columns:1fr}.pkg-head__view-all{display:none}}
+</style>
+
+<section class="pkg-section">
+    <header class="pkg-head">
+        <div>
+            <div class="pkg-head__eyebrow">Curated Packages</div>
+            <h2 class="pkg-head__title">Pick your <em>perfect Andaman trip</em></h2>
+            <p class="pkg-head__sub">Hand-picked itineraries with flights, ferries, hotels &amp; activities — every package is fully customizable.</p>
+        </div>
+        <a href="#" class="pkg-head__view-all">View all packages <i class="fas fa-arrow-right"></i></a>
+    </header>
+
+    <div class="pkg-benefits">
+        <div class="pkg-benefit"><div class="pkg-benefit__icon"><i class="fas fa-handshake"></i></div><div class="pkg-benefit__text"><strong>No hidden charges</strong><span>All taxes &amp; fees included</span></div></div>
+        <div class="pkg-benefit"><div class="pkg-benefit__icon"><i class="fas fa-rotate-left"></i></div><div class="pkg-benefit__text"><strong>Free cancellation</strong><span>Up to 7 days before travel</span></div></div>
+        <div class="pkg-benefit"><div class="pkg-benefit__icon"><i class="fas fa-sliders"></i></div><div class="pkg-benefit__text"><strong>Fully customizable</strong><span>Tweak any itinerary on call</span></div></div>
+        <div class="pkg-benefit"><div class="pkg-benefit__icon"><i class="fas fa-headset"></i></div><div class="pkg-benefit__text"><strong>Local 24×7 support</strong><span>On-ground team in Port Blair</span></div></div>
+    </div>
+
+    <div class="pkg-layout">
+        <aside class="pkg-sidebar">
+            <h3 class="pkg-sidebar__title">Filter Packages</h3>
+
+            <div class="pkg-filter-group">
+                <h4>Budget</h4>
+                <div class="pkg-checks">
+                    <label class="pkg-check"><input type="checkbox"> Under ₹15,000</label>
+                    <label class="pkg-check"><input type="checkbox" checked> ₹15,000 – ₹25,000</label>
+                    <label class="pkg-check"><input type="checkbox"> Above ₹25,000</label>
+                </div>
+            </div>
+
+            <div class="pkg-filter-group">
+                <h4>Trip Type</h4>
+                <div class="pkg-checks">
+                    <label class="pkg-check"><input type="checkbox" checked> Family</label>
+                    <label class="pkg-check"><input type="checkbox"> Honeymoon</label>
+                    <label class="pkg-check"><input type="checkbox"> Adventure</label>
+                    <label class="pkg-check"><input type="checkbox"> Luxury</label>
+                </div>
+            </div>
+
+            <div class="pkg-filter-group">
+                <h4>Duration</h4>
+                <div class="pkg-checks">
+                    <label class="pkg-check"><input type="checkbox"> 3–4 Nights</label>
+                    <label class="pkg-check"><input type="checkbox" checked> 5–6 Nights</label>
+                    <label class="pkg-check"><input type="checkbox"> 7+ Nights</label>
+                </div>
+            </div>
+        </aside>
+
+        <div class="pkg-results">
+            <div class="pkg-filters">
+                <button class="pkg-filter is-active">All</button>
+                <button class="pkg-filter">Budget</button>
+                <button class="pkg-filter">Honeymoon</button>
+                <button class="pkg-filter">Family</button>
+                <button class="pkg-filter">Luxury</button>
+                <button class="pkg-filter">Adventure</button>
+            </div>
+
+            <div class="pkg-grid">
+
+        <article class="pkg-card">
+            <div class="pkg-card__img">
+                <img src="images/beach1.jpg" alt="Budget Andaman Escape" loading="lazy">
+                <span class="pkg-card__badge">Best Value</span>
+                <span class="pkg-card__rating"><i class="fas fa-star"></i>4.2</span>
+                <button class="pkg-card__heart" aria-label="Save"><i class="far fa-heart"></i></button>
+            </div>
+            <div class="pkg-card__body">
+                <h3 class="pkg-card__title">Budget Andaman Escape</h3>
+                <p class="pkg-card__desc">4N/5D · Port Blair + Havelock · Basic Hotels + Ferries — perfect for first-timers on a tight budget.</p>
+                <div class="pkg-card__chips">
+                    <span class="pkg-card__chip"><i class="fas fa-bed"></i> Hotels</span>
+                    <span class="pkg-card__chip"><i class="fas fa-ship"></i> Ferries</span>
+                    <span class="pkg-card__chip"><i class="fas fa-utensils"></i> Breakfast</span>
+                </div>
+                <div class="pkg-card__foot">
+                    <div class="pkg-card__price-block">
+                        <span class="pkg-card__price-was">₹19,999</span>
+                        <span class="pkg-card__price">₹15,999</span>
+                        <span class="pkg-card__price-pp">per person</span>
+                    </div>
+                    <button class="pkg-card__cta">Book Now <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </article>
+
+        <article class="pkg-card">
+            <div class="pkg-card__img">
+                <img src="images/beach2.jpg" alt="Standard Andaman Bliss" loading="lazy">
+                <span class="pkg-card__badge pkg-card__badge--hot"><i class="fas fa-fire"></i> Most Booked</span>
+                <span class="pkg-card__rating"><i class="fas fa-star"></i>4.6</span>
+                <button class="pkg-card__heart" aria-label="Save"><i class="far fa-heart"></i></button>
+            </div>
+            <div class="pkg-card__body">
+                <h3 class="pkg-card__title">Standard Andaman Bliss</h3>
+                <p class="pkg-card__desc">6N/7D · Port Blair + Havelock + Neil · Deluxe stays + Activities — the most popular pick for families.</p>
+                <div class="pkg-card__chips">
+                    <span class="pkg-card__chip"><i class="fas fa-hotel"></i> Deluxe Hotels</span>
+                    <span class="pkg-card__chip"><i class="fas fa-ship"></i> Premium Ferries</span>
+                    <span class="pkg-card__chip"><i class="fas fa-water"></i> Snorkeling</span>
+                </div>
+                <div class="pkg-card__foot">
+                    <div class="pkg-card__price-block">
+                        <span class="pkg-card__price-was">₹26,999</span>
+                        <span class="pkg-card__price">₹21,999</span>
+                        <span class="pkg-card__price-pp">per person</span>
+                    </div>
+                    <button class="pkg-card__cta">Book Now <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </article>
+
+        <article class="pkg-card">
+            <div class="pkg-card__img">
+                <img src="images/beach3.jpg" alt="Luxury Andaman Retreat" loading="lazy">
+                <span class="pkg-card__badge pkg-card__badge--best"><i class="fas fa-crown"></i> Premium</span>
+                <span class="pkg-card__rating"><i class="fas fa-star"></i>4.8</span>
+                <button class="pkg-card__heart" aria-label="Save"><i class="far fa-heart"></i></button>
+            </div>
+            <div class="pkg-card__body">
+                <h3 class="pkg-card__title">Luxury Andaman Retreat</h3>
+                <p class="pkg-card__desc">6N/7D · All Islands · 5-star resorts, scuba, private transfers — every detail handled.</p>
+                <div class="pkg-card__chips">
+                    <span class="pkg-card__chip"><i class="fas fa-star"></i> 5* Resorts</span>
+                    <span class="pkg-card__chip"><i class="fas fa-anchor"></i> VIP Ferries</span>
+                    <span class="pkg-card__chip"><i class="fas fa-water"></i> Scuba Dive</span>
+                </div>
+                <div class="pkg-card__foot">
+                    <div class="pkg-card__price-block">
+                        <span class="pkg-card__price-was">₹34,999</span>
+                        <span class="pkg-card__price">₹28,999</span>
+                        <span class="pkg-card__price-pp">per person</span>
+                    </div>
+                    <button class="pkg-card__cta">Book Now <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </article>
+
+        <article class="pkg-card">
+            <div class="pkg-card__img">
+                <img src="images/beach4.jpg" alt="Honeymoon Paradise" loading="lazy">
+                <span class="pkg-card__badge"><i class="fas fa-heart"></i> Couples</span>
+                <span class="pkg-card__rating"><i class="fas fa-star"></i>4.9</span>
+                <button class="pkg-card__heart" aria-label="Save"><i class="fas fa-heart" style="color:#ff4d6d"></i></button>
+            </div>
+            <div class="pkg-card__body">
+                <h3 class="pkg-card__title">Honeymoon Paradise</h3>
+                <p class="pkg-card__desc">5N/6D · Romantic stays, candlelight dinner, photoshoot — make memories that last forever.</p>
+                <div class="pkg-card__chips">
+                    <span class="pkg-card__chip"><i class="fas fa-gift"></i> Romantic Setup</span>
+                    <span class="pkg-card__chip"><i class="fas fa-camera"></i> Photoshoot</span>
+                    <span class="pkg-card__chip"><i class="fas fa-wine-glass"></i> Dinner</span>
+                </div>
+                <div class="pkg-card__foot">
+                    <div class="pkg-card__price-block">
+                        <span class="pkg-card__price-was">₹29,999</span>
+                        <span class="pkg-card__price">₹24,999</span>
+                        <span class="pkg-card__price-pp">per couple</span>
+                    </div>
+                    <button class="pkg-card__cta">Book Now <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </article>
+
+
+        <article class="pkg-card">
+            <div class="pkg-card__img">
+                <img src="images/neil1.jpg" alt="Family Andaman Special" loading="lazy">
+                <span class="pkg-card__badge"><i class="fas fa-users"></i> Family</span>
+                <span class="pkg-card__rating"><i class="fas fa-star"></i>4.7</span>
+                <button class="pkg-card__heart" aria-label="Save"><i class="far fa-heart"></i></button>
+            </div>
+            <div class="pkg-card__body">
+                <h3 class="pkg-card__title">Family Andaman Special</h3>
+                <p class="pkg-card__desc">5N/6D · Kid-friendly resorts, glass-bottom boats, beach picnics — designed for travel with children.</p>
+                <div class="pkg-card__chips">
+                    <span class="pkg-card__chip"><i class="fas fa-bed"></i> Family Rooms</span>
+                    <span class="pkg-card__chip"><i class="fas fa-ship"></i> Glass-Bottom Boat</span>
+                    <span class="pkg-card__chip"><i class="fas fa-ice-cream"></i> Kids Meals</span>
+                </div>
+                <div class="pkg-card__foot">
+                    <div class="pkg-card__price-block">
+                        <span class="pkg-card__price-was">₹24,999</span>
+                        <span class="pkg-card__price">₹19,999</span>
+                        <span class="pkg-card__price-pp">per person</span>
+                    </div>
+                    <button class="pkg-card__cta">Book Now <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </article>
+
+        <article class="pkg-card">
+            <div class="pkg-card__img">
+                <img src="images/neil3.jpg" alt="Adventure Andaman" loading="lazy">
+                <span class="pkg-card__badge pkg-card__badge--hot"><i class="fas fa-bolt"></i> Adventure</span>
+                <span class="pkg-card__rating"><i class="fas fa-star"></i>4.7</span>
+                <button class="pkg-card__heart" aria-label="Save"><i class="far fa-heart"></i></button>
+            </div>
+            <div class="pkg-card__body">
+                <h3 class="pkg-card__title">Adventure Andaman</h3>
+                <p class="pkg-card__desc">5N/6D · Scuba certification, jet ski, parasailing, sea-walking — for the thrill-seekers.</p>
+                <div class="pkg-card__chips">
+                    <span class="pkg-card__chip"><i class="fas fa-water"></i> PADI Scuba</span>
+                    <span class="pkg-card__chip"><i class="fas fa-helicopter"></i> Parasailing</span>
+                    <span class="pkg-card__chip"><i class="fas fa-fish"></i> Sea Walking</span>
+                </div>
+                <div class="pkg-card__foot">
+                    <div class="pkg-card__price-block">
+                        <span class="pkg-card__price-was">₹27,999</span>
+                        <span class="pkg-card__price">₹22,999</span>
+                        <span class="pkg-card__price-pp">per person</span>
+                    </div>
+                    <button class="pkg-card__cta">Book Now <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </article>
+
+        <article class="pkg-card">
+            <div class="pkg-card__img">
+                <img src="images/ross2.jpg" alt="Heritage Port Blair" loading="lazy">
+                <span class="pkg-card__badge"><i class="fas fa-landmark"></i> Heritage</span>
+                <span class="pkg-card__rating"><i class="fas fa-star"></i>4.5</span>
+                <button class="pkg-card__heart" aria-label="Save"><i class="far fa-heart"></i></button>
+            </div>
+            <div class="pkg-card__body">
+                <h3 class="pkg-card__title">Heritage Port Blair</h3>
+                <p class="pkg-card__desc">3N/4D · Cellular Jail, Ross & Smith Islands, Light & Sound Show — short, story-rich, ideal weekend trip.</p>
+                <div class="pkg-card__chips">
+                    <span class="pkg-card__chip"><i class="fas fa-monument"></i> Cellular Jail</span>
+                    <span class="pkg-card__chip"><i class="fas fa-tree"></i> Ross Island</span>
+                    <span class="pkg-card__chip"><i class="fas fa-lightbulb"></i> Light Show</span>
+                </div>
+                <div class="pkg-card__foot">
+                    <div class="pkg-card__price-block">
+                        <span class="pkg-card__price-was">₹14,999</span>
+                        <span class="pkg-card__price">₹11,999</span>
+                        <span class="pkg-card__price-pp">per person</span>
+                    </div>
+                    <button class="pkg-card__cta">Book Now <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </article>
+
+        <article class="pkg-card">
+            <div class="pkg-card__img">
+                <img src="images/neil4.jpg" alt="Solo Backpacker" loading="lazy">
+                <span class="pkg-card__badge"><i class="fas fa-person-hiking"></i> Solo</span>
+                <span class="pkg-card__rating"><i class="fas fa-star"></i>4.4</span>
+                <button class="pkg-card__heart" aria-label="Save"><i class="far fa-heart"></i></button>
+            </div>
+            <div class="pkg-card__body">
+                <h3 class="pkg-card__title">Solo Backpacker Andaman</h3>
+                <p class="pkg-card__desc">6N/7D · Hostels, scooter rentals, group activities — meet other travelers, explore on your own pace.</p>
+                <div class="pkg-card__chips">
+                    <span class="pkg-card__chip"><i class="fas fa-bed"></i> Hostels</span>
+                    <span class="pkg-card__chip"><i class="fas fa-motorcycle"></i> Scooter</span>
+                    <span class="pkg-card__chip"><i class="fas fa-fire"></i> Beach Camping</span>
+                </div>
+                <div class="pkg-card__foot">
+                    <div class="pkg-card__price-block">
+                        <span class="pkg-card__price-was">₹16,999</span>
+                        <span class="pkg-card__price">₹13,499</span>
+                        <span class="pkg-card__price-pp">per person</span>
+                    </div>
+                    <button class="pkg-card__cta">Book Now <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </article>
+
+        <article class="pkg-card">
+            <div class="pkg-card__img">
+                <img src="images/neil6.jpg" alt="Senior-Friendly Andaman" loading="lazy">
+                <span class="pkg-card__badge"><i class="fas fa-leaf"></i> Relaxed Pace</span>
+                <span class="pkg-card__rating"><i class="fas fa-star"></i>4.6</span>
+                <button class="pkg-card__heart" aria-label="Save"><i class="far fa-heart"></i></button>
+            </div>
+            <div class="pkg-card__body">
+                <h3 class="pkg-card__title">Senior-Friendly Andaman</h3>
+                <p class="pkg-card__desc">6N/7D · Ground-floor rooms, slow itinerary, wheelchair-accessible transfers, doctor on call — built for elders.</p>
+                <div class="pkg-card__chips">
+                    <span class="pkg-card__chip"><i class="fas fa-wheelchair"></i> Accessible</span>
+                    <span class="pkg-card__chip"><i class="fas fa-user-doctor"></i> Doctor On Call</span>
+                    <span class="pkg-card__chip"><i class="fas fa-utensils"></i> Veg Meals</span>
+                </div>
+                <div class="pkg-card__foot">
+                    <div class="pkg-card__price-block">
+                        <span class="pkg-card__price-was">₹28,999</span>
+                        <span class="pkg-card__price">₹23,999</span>
+                        <span class="pkg-card__price-pp">per person</span>
+                    </div>
+                    <button class="pkg-card__cta">Book Now <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </article>
+
+        <article class="pkg-card">
+            <div class="pkg-card__img">
+                <img src="images/ross3.jpg" alt="Photographer's Andaman" loading="lazy">
+                <span class="pkg-card__badge pkg-card__badge--best"><i class="fas fa-camera"></i> Limited</span>
+                <span class="pkg-card__rating"><i class="fas fa-star"></i>4.9</span>
+                <button class="pkg-card__heart" aria-label="Save"><i class="far fa-heart"></i></button>
+            </div>
+            <div class="pkg-card__body">
+                <h3 class="pkg-card__title">Photographer's Expedition</h3>
+                <p class="pkg-card__desc">7N/8D · Sunrise/sunset shoots, drone permits, dolphin tours, mangrove kayaks — small groups of 6 max.</p>
+                <div class="pkg-card__chips">
+                    <span class="pkg-card__chip"><i class="fas fa-drone"></i> Drone Permit</span>
+                    <span class="pkg-card__chip"><i class="fas fa-fish"></i> Dolphin Tour</span>
+                    <span class="pkg-card__chip"><i class="fas fa-water"></i> Mangrove Kayak</span>
+                </div>
+                <div class="pkg-card__foot">
+                    <div class="pkg-card__price-block">
+                        <span class="pkg-card__price-was">₹39,999</span>
+                        <span class="pkg-card__price">₹32,999</span>
+                        <span class="pkg-card__price-pp">per person</span>
+                    </div>
+                    <button class="pkg-card__cta">Book Now <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </article>
+
+    </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══ DESTINATIONS — visual island picker ═══════════════════════ -->
+<style>
+.dest-section{padding:5rem 2rem;max-width:1280px;margin:0 auto}
+.dest-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:1rem;margin-top:2rem}
+.dest-card{position:relative;isolation:isolate;border-radius:18px;overflow:hidden;cursor:pointer;color:#fff;min-height:240px;display:flex;align-items:flex-end;padding:1.4rem;transition:transform .3s ease;background:#0a4f5c}
+.dest-card::before{content:"";position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .6s ease;z-index:0}
+.dest-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.75));z-index:1}
+.dest-card>div{position:relative;z-index:2}
+.dest-card:hover{transform:translateY(-4px)}
+.dest-card:hover::before{transform:scale(1.08)}
+.dest-card--lg{grid-column:span 6;min-height:380px}
+.dest-card--md{grid-column:span 6;min-height:240px}
+.dest-card--sm{grid-column:span 4;min-height:240px}
+.dest-card__title{font-size:1.5rem;font-weight:800;margin:0;letter-spacing:-.01em;line-height:1.1}
+.dest-card--lg .dest-card__title{font-size:2.2rem}
+.dest-card__meta{display:flex;align-items:center;gap:.6rem;margin-top:.4rem;font-size:.82rem;opacity:.92;flex-wrap:wrap}
+.dest-card__meta .pill{background:rgba(255,255,255,.2);backdrop-filter:blur(8px);padding:.2rem .6rem;border-radius:999px;font-weight:600;font-size:.72rem}
+.dest-card[data-dest="havelock"]::before{background-image:url('images/beach2.jpg')}
+.dest-card[data-dest="neil"]::before{background-image:url('images/neil2.jpg')}
+.dest-card[data-dest="portblair"]::before{background-image:url('images/ross2.jpg')}
+.dest-card[data-dest="baratang"]::before{background-image:url('images/beach3.jpg')}
+.dest-card[data-dest="diglipur"]::before{background-image:url('images/neil4.jpg')}
+.dest-card[data-dest="rosssmith"]::before{background-image:url('images/ross3.jpg')}
+@media(max-width:680px){.dest-section{padding:3rem 1rem}.dest-card{grid-column:span 12 !important;min-height:200px}.dest-card--lg{min-height:280px}}
+</style>
+
+<section class="dest-section">
+    <header class="pkg-head">
+        <div>
+            <div class="pkg-head__eyebrow">Destinations</div>
+            <h2 class="pkg-head__title">Where do you want to <em>wake up</em>?</h2>
+            <p class="pkg-head__sub">Six islands, six personalities. Build your trip around the ones that match your mood.</p>
+        </div>
+    </header>
+    <div class="dest-grid">
+        <a class="dest-card dest-card--lg" data-dest="havelock"><div><h3 class="dest-card__title">Havelock Island</h3><div class="dest-card__meta"><span class="pill">Most Popular</span><span><i class="fas fa-water"></i> Radhanagar Beach (Asia&#39;s #7)</span></div></div></a>
+        <a class="dest-card dest-card--md" data-dest="neil"><div><h3 class="dest-card__title">Neil Island</h3><div class="dest-card__meta"><span class="pill">Quiet &amp; Slow</span><span><i class="fas fa-leaf"></i> Natural bridge &amp; coral</span></div></div></a>
+        <a class="dest-card dest-card--md" data-dest="portblair"><div><h3 class="dest-card__title">Port Blair</h3><div class="dest-card__meta"><span class="pill">History</span><span><i class="fas fa-monument"></i> Cellular Jail capital</span></div></div></a>
+        <a class="dest-card dest-card--sm" data-dest="baratang"><div><h3 class="dest-card__title">Baratang</h3><div class="dest-card__meta"><span class="pill">Day Trip</span></div></div></a>
+        <a class="dest-card dest-card--sm" data-dest="diglipur"><div><h3 class="dest-card__title">Diglipur</h3><div class="dest-card__meta"><span class="pill">Off-beat</span></div></div></a>
+        <a class="dest-card dest-card--sm" data-dest="rosssmith"><div><h3 class="dest-card__title">Ross &amp; Smith</h3><div class="dest-card__meta"><span class="pill">Twin Islands</span></div></div></a>
+    </div>
+</section>
+<!-- ═══ HOW IT WORKS — 4-step process ═════════════════════════════ -->
+<style>
+.how-section{padding:5rem 2rem;background:linear-gradient(180deg,#fff,#f4f8f9)}
+.how-inner{max-width:1280px;margin:0 auto}
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-top:3rem;position:relative}
+.how-grid::before{content:"";position:absolute;top:38px;left:8%;right:8%;height:2px;background:repeating-linear-gradient(90deg,var(--teal) 0 8px,transparent 8px 16px);z-index:0}
+@media(max-width:980px){.how-grid::before{display:none}}
+.how-step{position:relative;text-align:center;padding:0 1rem;z-index:1}
+.how-step__num{width:78px;height:78px;margin:0 auto 1.2rem;background:#fff;border:3px solid var(--teal);border-radius:50%;display:grid;place-items:center;color:var(--teal);box-shadow:0 8px 24px rgba(13,122,138,.15)}
+.how-step__num i{font-size:1.4rem}
+.how-step__title{font-size:1.1rem;font-weight:700;color:var(--ink);margin:0 0 .5rem;letter-spacing:-.01em}
+.how-step__desc{font-size:.9rem;color:var(--ink2);line-height:1.55;margin:0}
+</style>
+
+<section class="how-section">
+    <div class="how-inner">
+        <header class="pkg-head" style="justify-content:center">
+            <div style="text-align:center;width:100%">
+                <div class="pkg-head__eyebrow">How it works</div>
+                <h2 class="pkg-head__title" style="margin:0 auto">Book your trip in <em>4 simple steps</em></h2>
+                <p class="pkg-head__sub" style="margin:.6rem auto 0">No phone tag, no email chains — start to finish in under 10 minutes.</p>
+            </div>
+        </header>
+        <div class="how-grid">
+            <div class="how-step"><div class="how-step__num"><i class="fas fa-magnifying-glass"></i></div><h3 class="how-step__title">1. Browse &amp; Pick</h3><p class="how-step__desc">Filter by budget, group size, or interest. Or build a custom itinerary from scratch.</p></div>
+            <div class="how-step"><div class="how-step__num"><i class="fas fa-pen-to-square"></i></div><h3 class="how-step__title">2. Customize</h3><p class="how-step__desc">Tweak nights, hotel category, activities, meals. We confirm changes within 2 hours.</p></div>
+            <div class="how-step"><div class="how-step__num"><i class="fas fa-credit-card"></i></div><h3 class="how-step__title">3. Pay 5% to Book</h3><p class="how-step__desc">Secure your seats with a 5% advance via Razorpay. Balance only at trip end.</p></div>
+            <div class="how-step"><div class="how-step__num"><i class="fas fa-plane-departure"></i></div><h3 class="how-step__title">4. Travel Worry-Free</h3><p class="how-step__desc">24×7 on-ground support in Port Blair. Vouchers &amp; WhatsApp group on day one.</p></div>
+        </div>
+    </div>
+</section>
+<!-- ═══ TESTIMONIALS + STATS ══════════════════════════════════════ -->
+<style>
+.tst-section{padding:5rem 2rem;max-width:1280px;margin:0 auto}
+.tst-stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin:2rem 0 3rem;padding:2rem;background:linear-gradient(135deg,var(--teal-d),var(--teal));border-radius:20px;color:#fff}
+.tst-stat{text-align:center}
+.tst-stat__num{font-size:2.4rem;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--gold)}
+.tst-stat__label{font-size:.85rem;opacity:.9;margin-top:.4rem;font-weight:500}
+.tst-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:1.5rem}
+.tst-card{background:#fff;border:1px solid #eef1f4;border-radius:18px;padding:1.8rem;display:flex;flex-direction:column;gap:1rem;box-shadow:0 4px 16px rgba(10,31,68,.04);transition:transform .2s,box-shadow .2s}
+.tst-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(10,31,68,.10)}
+.tst-card__head{display:flex;align-items:center;gap:.9rem}
+.tst-card__avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal2));color:#fff;display:grid;place-items:center;font-weight:700;font-size:1.05rem;flex-shrink:0}
+.tst-card__name{font-weight:700;color:var(--ink);font-size:.98rem;margin:0}
+.tst-card__meta{font-size:.78rem;color:var(--ink2);margin:2px 0 0}
+.tst-card__stars{color:var(--gold);font-size:.85rem;letter-spacing:1px;margin-left:auto}
+.tst-card__quote{font-size:.92rem;color:var(--ink);line-height:1.6;margin:0;flex:1}
+.tst-card__pkg{font-size:.72rem;color:var(--teal);background:rgba(13,122,138,.08);padding:.3rem .7rem;border-radius:5px;font-weight:700;align-self:flex-start;text-transform:uppercase;letter-spacing:.06em}
+.tst-source{display:flex;align-items:center;gap:.5rem;justify-content:center;margin-top:2rem;font-size:.85rem;color:var(--ink2)}
+.tst-source img{height:18px}
+</style>
+
+<section class="tst-section">
+    <header class="pkg-head" style="justify-content:center">
+        <div style="text-align:center;width:100%">
+            <div class="pkg-head__eyebrow">Travelers love us</div>
+            <h2 class="pkg-head__title" style="margin:0 auto"><em>50,000+</em> happy travelers, and counting</h2>
+        </div>
+    </header>
+
+    <div class="tst-stat-row">
+        <div class="tst-stat"><div class="tst-stat__num">50K+</div><div class="tst-stat__label">Happy travelers</div></div>
+        <div class="tst-stat"><div class="tst-stat__num">4.8★</div><div class="tst-stat__label">Avg. Google rating</div></div>
+        <div class="tst-stat"><div class="tst-stat__num">98%</div><div class="tst-stat__label">Would recommend</div></div>
+        <div class="tst-stat"><div class="tst-stat__num">12+</div><div class="tst-stat__label">Years in Andaman</div></div>
+        <div class="tst-stat"><div class="tst-stat__num">24×7</div><div class="tst-stat__label">On-ground support</div></div>
+    </div>
+
+    <div class="tst-grid">
+        <div class="tst-card">
+            <div class="tst-card__head">
+                <div class="tst-card__avatar">PS</div>
+                <div><p class="tst-card__name">Priya Sharma</p><p class="tst-card__meta">Bangalore · Honeymoon · Mar 2026</p></div>
+                <div class="tst-card__stars">★★★★★</div>
+            </div>
+            <p class="tst-card__quote">Honestly the smoothest trip planning we've ever done. Aditya from the team customized our itinerary three times without fuss, and the candlelight dinner on Radhanagar Beach was straight out of a movie.</p>
+            <span class="tst-card__pkg">Honeymoon Paradise</span>
+        </div>
+        <div class="tst-card">
+            <div class="tst-card__head">
+                <div class="tst-card__avatar">RK</div>
+                <div><p class="tst-card__name">Rahul &amp; Kavya</p><p class="tst-card__meta">Mumbai · Family · Feb 2026</p></div>
+                <div class="tst-card__stars">★★★★★</div>
+            </div>
+            <p class="tst-card__quote">Travelled with two kids (5 and 8) — the family-friendly resorts were a lifesaver. Glass-bottom boat at Elephant Beach was the highlight; kids still talk about it. Thank you for the WhatsApp updates, very reassuring.</p>
+            <span class="tst-card__pkg">Family Andaman Special</span>
+        </div>
+        <div class="tst-card">
+            <div class="tst-card__head">
+                <div class="tst-card__avatar">AM</div>
+                <div><p class="tst-card__name">Arjun Menon</p><p class="tst-card__meta">Chennai · Adventure · Jan 2026</p></div>
+                <div class="tst-card__stars">★★★★★</div>
+            </div>
+            <p class="tst-card__quote">Got my PADI scuba certification + parasailed over Havelock + sea-walked at North Bay — three new things ticked off in one trip. The dive instructors were ridiculously good. Worth every rupee.</p>
+            <span class="tst-card__pkg">Adventure Andaman</span>
+        </div>
+        <div class="tst-card">
+            <div class="tst-card__head">
+                <div class="tst-card__avatar">SD</div>
+                <div><p class="tst-card__name">Sneha Das</p><p class="tst-card__meta">Kolkata · Solo · Dec 2025</p></div>
+                <div class="tst-card__stars">★★★★★</div>
+            </div>
+            <p class="tst-card__quote">As a solo female traveler, safety was my #1 concern. The hostel they picked at Havelock was clean, safe, and full of other solo travelers. Made friends for life. The on-ground team checked on me every single day.</p>
+            <span class="tst-card__pkg">Solo Backpacker</span>
+        </div>
+        <div class="tst-card">
+            <div class="tst-card__head">
+                <div class="tst-card__avatar">VG</div>
+                <div><p class="tst-card__name">Vikram &amp; Geeta</p><p class="tst-card__meta">Delhi · Senior · Nov 2025</p></div>
+                <div class="tst-card__stars">★★★★★</div>
+            </div>
+            <p class="tst-card__quote">My parents (78 and 75) wanted to see Cellular Jail. Bharat Tours arranged ground-floor rooms, wheelchair-friendly cars, and even a doctor for one minor scare. Extraordinary care. Will book again for our anniversary.</p>
+            <span class="tst-card__pkg">Senior-Friendly</span>
+        </div>
+        <div class="tst-card">
+            <div class="tst-card__head">
+                <div class="tst-card__avatar">NA</div>
+                <div><p class="tst-card__name">Nishant Agarwal</p><p class="tst-card__meta">Pune · Photographer · Oct 2025</p></div>
+                <div class="tst-card__stars">★★★★★</div>
+            </div>
+            <p class="tst-card__quote">Drone permits sorted before I landed. Sunrise at Kalapathar, sunset at Radhanagar, dolphin tour at Havelock — the schedule was a photographer's dream. Got 200+ portfolio shots in 7 days. Not your typical tour operator.</p>
+            <span class="tst-card__pkg">Photographer's Expedition</span>
+        </div>
+    </div>
+
+    <div class="tst-source">
+        <i class="fab fa-google" style="color:#4285f4"></i>
+        Verified reviews from Google · TripAdvisor · MakeMyTrip
+    </div>
+</section>
+<!-- ═══ RECENT BOOKINGS TICKER (FOMO / social proof) ══════════════ -->
+<style>
+.fomo-section{padding:3rem 2rem;background:#0c1c24;color:#fff}
+.fomo-inner{max-width:1280px;margin:0 auto}
+.fomo-head{text-align:center;margin-bottom:1.5rem}
+.fomo-head h2{font-size:1.4rem;font-weight:700;margin:0;letter-spacing:-.01em}
+.fomo-head h2 i{color:#ff6b5b;margin-right:.5rem;animation:pulse 1.5s infinite}
+.fomo-head p{color:rgba(255,255,255,.6);font-size:.85rem;margin:.4rem 0 0}
+.fomo-track-wrap{position:relative;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
+.fomo-track{display:flex;gap:1rem;animation:fomo-scroll 40s linear infinite;width:max-content}
+@keyframes fomo-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.fomo-pill{flex-shrink:0;display:flex;align-items:center;gap:.6rem;padding:.7rem 1.1rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;font-size:.85rem;white-space:nowrap}
+.fomo-pill i{color:var(--gold);font-size:.7rem}
+.fomo-pill b{color:#fff;font-weight:600}
+.fomo-pill span{color:rgba(255,255,255,.6);font-size:.78rem}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+
+<section class="fomo-section">
+    <div class="fomo-inner">
+        <div class="fomo-head">
+            <h2><i class="fas fa-circle"></i>Live: Recent bookings from across India</h2>
+            <p>Real travelers booking right now</p>
+        </div>
+        <div class="fomo-track-wrap">
+            <div class="fomo-track">
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Aarav from Delhi</b><span>booked Honeymoon Paradise · 12 min ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Meera from Hyderabad</b><span>booked Standard Bliss · 26 min ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Karthik from Chennai</b><span>booked Adventure Andaman · 41 min ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Anjali from Bangalore</b><span>booked Family Special · 1 hr ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Rohan from Mumbai</b><span>booked Luxury Retreat · 1 hr ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Divya from Pune</b><span>booked Solo Backpacker · 2 hr ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Sandeep from Ahmedabad</b><span>booked Heritage Port Blair · 2 hr ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Ritu from Jaipur</b><span>booked Senior-Friendly · 3 hr ago</span></div>
+                <!-- duplicate set for seamless loop -->
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Aarav from Delhi</b><span>booked Honeymoon Paradise · 12 min ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Meera from Hyderabad</b><span>booked Standard Bliss · 26 min ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Karthik from Chennai</b><span>booked Adventure Andaman · 41 min ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Anjali from Bangalore</b><span>booked Family Special · 1 hr ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Rohan from Mumbai</b><span>booked Luxury Retreat · 1 hr ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Divya from Pune</b><span>booked Solo Backpacker · 2 hr ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Sandeep from Ahmedabad</b><span>booked Heritage Port Blair · 2 hr ago</span></div>
+                <div class="fomo-pill"><i class="fas fa-circle"></i><b>Ritu from Jaipur</b><span>booked Senior-Friendly · 3 hr ago</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════ -->
+<style>
+.ft{background:#0a1419;color:rgba(255,255,255,.85);padding:4rem 2rem 2rem}
+.ft-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:3rem;border-bottom:1px solid rgba(255,255,255,.08)}
+@media(max-width:880px){.ft-inner{grid-template-columns:1fr 1fr;gap:2rem}}
+@media(max-width:480px){.ft-inner{grid-template-columns:1fr}}
+.ft-brand{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem}
+.ft-brand .nav__mark{width:36px;height:36px;font-size:1rem}
+.ft-brand-name{font-weight:800;font-size:1.1rem;color:#fff}
+.ft-about{font-size:.88rem;line-height:1.6;color:rgba(255,255,255,.65);max-width:34ch;margin:0 0 1.4rem}
+.ft-social{display:flex;gap:.5rem}
+.ft-social a{width:38px;height:38px;background:rgba(255,255,255,.06);border-radius:10px;display:grid;place-items:center;color:#fff;font-size:.95rem;transition:all .15s}
+.ft-social a:hover{background:var(--teal);transform:translateY(-2px)}
+.ft-col h4{font-size:.78rem;font-weight:700;color:#fff;margin:0 0 1rem;letter-spacing:.18em;text-transform:uppercase}
+.ft-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.65rem}
+.ft-col a{color:rgba(255,255,255,.65);font-size:.88rem;transition:color .15s}
+.ft-col a:hover{color:#fff}
+.ft-contact{display:flex;align-items:flex-start;gap:.7rem;font-size:.85rem;color:rgba(255,255,255,.65);margin-bottom:.85rem;line-height:1.5}
+.ft-contact i{color:var(--teal2);margin-top:3px;flex-shrink:0;width:14px;text-align:center}
+.ft-contact a{color:rgba(255,255,255,.85)}
+.ft-bottom{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding-top:2rem;font-size:.8rem;color:rgba(255,255,255,.5)}
+.ft-bottom-links{display:flex;gap:1.5rem;flex-wrap:wrap}
+.ft-bottom-links a{color:rgba(255,255,255,.5);transition:color .15s}
+.ft-bottom-links a:hover{color:#fff}
+.ft-license{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.05);font-size:.75rem;color:rgba(255,255,255,.4)}
+.ft-license-badge{background:rgba(255,255,255,.05);padding:.3rem .65rem;border-radius:5px;color:rgba(255,255,255,.7);font-weight:600}
+</style>
+
+<footer class="ft">
+    <div class="ft-inner">
+        <div>
+            <div class="ft-brand">
+                <span class="nav__mark"><i class="fas fa-umbrella-beach"></i></span>
+                <span class="ft-brand-name">Bharat Tours &amp; Travels</span>
+            </div>
+            <p class="ft-about">Andaman specialists since 2013. We're a small, on-ground team in Port Blair — every booking is handled by humans, not bots. We don't sell what we wouldn't book ourselves.</p>
+            <div class="ft-social">
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                <a href="#" aria-label="TripAdvisor"><i class="fab fa-tripadvisor"></i></a>
+            </div>
+        </div>
+
+        <div class="ft-col">
+            <h4>Explore</h4>
+            <ul>
+                <li><a href="#">All packages</a></li>
+                <li><a href="#">Honeymoon</a></li>
+                <li><a href="#">Family</a></li>
+                <li><a href="#">Adventure</a></li>
+                <li><a href="#">Luxury</a></li>
+                <li><a href="#">Custom itinerary</a></li>
+            </ul>
+        </div>
+
+        <div class="ft-col">
+            <h4>Company</h4>
+            <ul>
+                <li><a href="#">About us</a></li>
+                <li><a href="#">Blog &amp; travel guides</a></li>
+                <li><a href="#">Careers</a></li>
+                <li><a href="#">Press</a></li>
+                <li><a href="#">Affiliate program</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+
+        <div class="ft-col">
+            <h4>Get in touch</h4>
+            <div class="ft-contact"><i class="fas fa-phone"></i><div><a href="tel:+918880195191">+91-88801-95191</a><br><span style="font-size:.75rem">Daily 9 AM – 9 PM IST</span></div></div>
+            <div class="ft-contact"><i class="fas fa-envelope"></i><a href="mailto:booking@andamanvoyages.in">booking@andamanvoyages.in</a></div>
+            <div class="ft-contact"><i class="fas fa-location-dot"></i><span>Office: Aberdeen Bazaar,<br>Port Blair, Andaman 744101</span></div>
+            <div class="ft-contact"><i class="fab fa-whatsapp"></i><a href="https://wa.me/918880195191">Chat on WhatsApp →</a></div>
+        </div>
+    </div>
+
+    <div class="ft-bottom">
+        <div>© 2025 Bharat Tours &amp; Travels. All rights reserved.</div>
+        <div class="ft-bottom-links">
+            <a href="#">Terms &amp; Conditions</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Cancellation Policy</a>
+            <a href="#">Sitemap</a>
+        </div>
+    </div>
+    <div class="ft-license" style="max-width:1280px;margin:0 auto">
+        <span class="ft-license-badge"><i class="fas fa-shield-halved"></i> IATA Affiliate</span>
+        <span class="ft-license-badge"><i class="fas fa-certificate"></i> Govt. of India · Tour Operator License</span>
+        <span class="ft-license-badge"><i class="fas fa-receipt"></i> GSTIN: 35ABCDE1234F1Z5</span>
+        <span style="margin-left:auto">Andaman Voyages is a unit of Bharat Tours &amp; Travels Pvt. Ltd., Port Blair.</span>
+    </div>
+</footer>
+
+
+<script>
+/* Toggle .is-scrolled on the topbar once the user scrolls past ~80px.
+   Lightweight rAF-throttled handler — fires at most once per frame. */
+(function(){
+    const nav = document.querySelector(".nav");
+    if (!nav) return;
+    let ticking = false;
+    function update(){
+        nav.classList.toggle("is-scrolled", window.scrollY > 80);
+        ticking = false;
+    }
+    window.addEventListener("scroll", () => {
+        if (!ticking) { requestAnimationFrame(update); ticking = true; }
+    }, { passive: true });
+    update();
+})();
+</script>
+
+<script>
+/* User-menu (avatar + dropdown) — mirrors js/user-menu.js logic but with
+   a demo state switcher (Guest / User / Admin) at bottom-right. In the
+   real site, state comes from localStorage.currentUser + token. */
+(function () {
+    const DEMO_USERS = {
+        guest:  null,
+        user:   { fullName: "Priya Sharma",  email: "priya@example.com",   role: "user"  },
+        admin:  { fullName: "Debjyoti Das",  email: "deb@andamanvoyages.in", role: "admin" }
+    };
+    function getInitials(u) {
+        if (!u) return null;
+        const n = (u.fullName || u.email || "").trim();
+        const parts = n.split(/[\s@.]+/).filter(Boolean);
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return (parts[0] || "?").slice(0, 2).toUpperCase();
+    }
+    function render(state) {
+        const u = DEMO_USERS[state];
+        const wrap = document.getElementById("usrMenu");
+        wrap.classList.remove("is-open");
+        if (!u) {
+            wrap.innerHTML = '<button class="usr-avatar is-guest" type="button" aria-label="Account menu"><i class="fas fa-user"></i></button>'
+                + '<div class="usr-pop">'
+                + '<div class="usr-pop__head" style="background:linear-gradient(135deg,#3a4654,#1f2935)"><p class="name">Welcome, traveler</p><p class="email">Sign in for faster booking</p></div>'
+                + '<div class="usr-pop__nav">'
+                + '<a href="#"><i class="fas fa-right-to-bracket"></i> Login</a>'
+                + '<a href="#"><i class="fas fa-user-plus"></i> Create account</a>'
+                + '<div class="usr-pop__divider"></div>'
+                + '<a href="#"><i class="fas fa-magnifying-glass"></i> Track a booking</a>'
+                + '<a href="#"><i class="fas fa-circle-question"></i> Help &amp; support</a>'
+                + '<a href="tel:+918880195191"><i class="fas fa-phone"></i> +91-88801-95191</a>'
+                + '</div></div>';
+        } else {
+            const initials = getInitials(u);
+            const isAdmin = u.role === "admin";
+            const adminBlock = isAdmin
+                ? '<div class="usr-pop__section-label">Admin</div>'
+                  + '<a href="#"><i class="fas fa-gauge"></i> Dashboard</a>'
+                  + '<a href="#"><i class="fas fa-clone"></i> Database mirror</a>'
+                  + '<a href="#"><i class="fas fa-images"></i> Manage gallery</a>'
+                : '';
+            const roleBadge = isAdmin
+                ? '<span class="role"><i class="fas fa-shield-halved"></i> Admin</span>'
+                : '<span class="role">Member</span>';
+            wrap.innerHTML = '<button class="usr-avatar ' + (isAdmin ? 'is-admin' : '') + '" type="button" aria-label="Account menu">' + initials + '</button>'
+                + '<div class="usr-pop">'
+                + '<div class="usr-pop__head"><p class="name">' + u.fullName + '</p><p class="email">' + u.email + '</p>' + roleBadge + '</div>'
+                + '<div class="usr-pop__nav">'
+                + '<a href="#"><i class="fas fa-suitcase"></i> My bookings</a>'
+                + '<a href="#"><i class="fas fa-heart"></i> Saved packages</a>'
+                + '<a href="#"><i class="fas fa-user"></i> Profile &amp; settings</a>'
+                + adminBlock
+                + '<div class="usr-pop__divider"></div>'
+                + '<a href="#"><i class="fas fa-circle-question"></i> Help &amp; support</a>'
+                + '<a href="#"><i class="fas fa-file-contract"></i> Terms &amp; privacy</a>'
+                + '<button class="danger"><i class="fas fa-arrow-right-from-bracket"></i> Sign out</button>'
+                + '</div></div>';
+        }
+        const btn = wrap.querySelector(".usr-avatar");
+        btn.addEventListener("click", function (e) { e.stopPropagation(); wrap.classList.toggle("is-open"); });
+        document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) wrap.classList.remove("is-open"); });
+    }
+
+    // Demo state switcher
+    const sw = document.createElement("div");
+    sw.className = "demo-switch";
+    sw.innerHTML = '<button data-state="guest">Guest</button>'
+        + '<button data-state="user" class="active">User</button>'
+        + '<button data-state="admin">Admin</button>';
+    document.body.appendChild(sw);
+    sw.addEventListener("click", function (e) {
+        const b = e.target.closest("button[data-state]");
+        if (!b) return;
+        sw.querySelectorAll("button").forEach(function (x) { x.classList.toggle("active", x === b); });
+        render(b.dataset.state);
+    });
+    render("user");
+})();
+</script>
+</body>
+</html>
