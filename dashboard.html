@@ -414,14 +414,15 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:.5rem;">
                         <input type="text" id="ga4MeasInput"   placeholder="G-XXXXXXXXXX (Measurement ID)"
                                style="padding:.6rem .8rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;">
-                        <input type="text" id="ga4StreamInput" placeholder="1234567890 (Stream ID — for live widget)"
+                        <input type="text" id="ga4StreamInput" placeholder="1234567890 (Stream ID — optional)"
                                style="padding:.6rem .8rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;">
                         <button class="btn-save-packages" id="ga4SaveBtn">
                             <i class="fas fa-save"></i> Save
                         </button>
                     </div>
                     <small style="color:#888;">
-                        Tip: the Stream ID enables the live realtime widget. Find it in GA4 → Admin → Data streams → click your stream.
+                        The Measurement ID is the only required field — it enables visitor tracking on the public site.
+                        Stream ID is kept here for backwards-compat but isn't currently used by any widget.
                     </small>
                     <div id="ga4SaveStatus" style="font-size:.88rem;"></div>
                 </div>
@@ -459,20 +460,15 @@
                 </a>
             </div>
 
-            <!-- Realtime iframe widget (only visible if a stream ID is set) -->
-            <div class="chart-card" id="ga4RealtimeCard" style="margin-top:1.25rem;display:none;">
-                <h3 class="chart-title">
-                    <i class="fas fa-circle" style="color:#27ae60;font-size:.65rem;animation:pulse 1.5s infinite;"></i>
-                    Realtime visitors (last 30 min)
-                </h3>
-                <div style="position:relative;width:100%;height:520px;border-radius:8px;overflow:hidden;border:1px solid #e3e8ef;">
-                    <iframe id="ga4RealtimeIframe" src="" style="width:100%;height:100%;border:0;"></iframe>
-                </div>
-                <p style="font-size:.78rem;color:#888;margin:.6rem 0 0;">
-                    <i class="fas fa-info-circle"></i> Embedded directly from Google Analytics.
-                    Requires you to be logged into the same Google account that owns the GA4 property.
-                </p>
-            </div>
+            <!-- Realtime iframe widget — REMOVED.
+                 Google sends X-Frame-Options: SAMEORIGIN on every analytics.google.com
+                 page, so embedding GA4 in an iframe always renders blank. The "Realtime"
+                 stat card above already deep-links into your property's Realtime report
+                 in a new tab, and the Looker Studio embed below renders the same data
+                 inline (Looker has explicit cross-origin embedding support, GA4 doesn't).
+                 If you ever build a backend proxy for the GA4 Data API, the runtime
+                 chart can drop in here — see the (now-removed) realtime block in
+                 git history for the original markup. -->
 
             <!-- Looker Studio embed (optional) -->
             <div class="chart-card" style="margin-top:1.25rem;">
@@ -1100,8 +1096,10 @@
         const streamInput    = document.getElementById('ga4StreamInput');
         const saveBtn        = document.getElementById('ga4SaveBtn');
         const saveStatus     = document.getElementById('ga4SaveStatus');
-        const realtimeCard   = document.getElementById('ga4RealtimeCard');
-        const realtimeFrame  = document.getElementById('ga4RealtimeIframe');
+        // (Realtime iframe widget was removed — Google blocks GA4 embedding via
+        // X-Frame-Options: SAMEORIGIN. The "Realtime" stat card above deep-links
+        // into a new tab instead, and the Looker Studio embed below provides the
+        // inline view.)
         const lookerInput    = document.getElementById('lookerUrlInput');
         const lookerSaveBtn  = document.getElementById('lookerSaveBtn');
         const lookerWrap     = document.getElementById('lookerEmbedWrap');
@@ -1177,29 +1175,10 @@
             }
         }
 
-        // Realtime iframe — points at this property's GA4 Realtime view.
-        // The URL convention is /analytics/web/#/p<propertyId>/realtime/overview
-        // (the key ID is the **Property ID**, not the Stream ID — earlier
-        // versions of this file confused the two and the iframe loaded the
-        // wrong property when the IDs differed).
-        // GA4 still serves the page with X-Frame-Options: SAMEORIGIN, so
-        // when the iframe is blocked the admin sees Google's "refused to
-        // connect" notice and can use the Realtime card link above to open
-        // the same view in a new tab.
-        function refreshRealtimeIframe() {
-            if (!realtimeCard || !realtimeFrame) return;
-            // Need a Property ID to build a working URL. Stream ID alone
-            // is no longer enough (and was wrong before — the URL slot is
-            // for the property, not the stream).
-            if (isPlaceholder(measurementId) || !propertyId) {
-                realtimeCard.style.display = 'none';
-                realtimeFrame.src = '';
-                return;
-            }
-            realtimeCard.style.display = '';
-            const url = `https://analytics.google.com/analytics/web/#/p${encodeURIComponent(propertyId)}/realtime/overview`;
-            realtimeFrame.src = url;
-        }
+        // (refreshRealtimeIframe was removed alongside the iframe — see
+        // the note where the realtime block used to live in the markup
+        // above. The "Realtime" deep-link card already handles this case
+        // by sending the admin to a new tab.)
 
         // ── Date-range pills ────────────────────────────────────
         // Looker Studio supports overriding the report's date_range via the
@@ -1301,7 +1280,6 @@
                 } catch (e) {}
                 measurementId = m; streamId = s;
                 refreshSetupCard();
-                refreshRealtimeIframe();
                 saveStatus.textContent = '✓ Saved on this device. To deploy site-wide, also paste it into js/firebase-config.js.';
                 saveStatus.style.color = '#0a5a68';
             });
@@ -1331,14 +1309,12 @@
                 const t = document.getElementById('pageTitle');
                 if (t) t.textContent = 'Analytics — Google Analytics 4';
                 refreshSetupCard();
-                refreshRealtimeIframe();
                 refreshLooker();
             });
         });
 
         // Initial render (if user lands directly on this section)
         refreshSetupCard();
-        refreshRealtimeIframe();
         refreshLooker();
     })();
     </script>
