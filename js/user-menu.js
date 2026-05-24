@@ -47,7 +47,31 @@
             || (u.username || '').toLowerCase() === 'deb';
     }
 
+    // Wrap each letter of the brand text in <span class="bl"> so the
+    // hover wave animation (in style.css) works on EVERY page, not just
+    // pages that load js/script.js.
+    function wrapBrandLetters() {
+        document.querySelectorAll('.brand-line1, .brand-line2').forEach(line => {
+            // Already wrapped? skip
+            if (line.querySelector('.bl')) return;
+            const text = line.textContent;
+            line.innerHTML = '';
+            for (const ch of text) {
+                const sp = document.createElement('span');
+                sp.className = 'bl';
+                if (ch === ' ') {
+                    sp.style.width = '.35em';
+                    sp.innerHTML = '&nbsp;';
+                } else {
+                    sp.textContent = ch;
+                }
+                line.appendChild(sp);
+            }
+        });
+    }
+
     function build() {
+        wrapBrandLetters();
         // Hide any old text "Admin" badge in the dashboard topbar
         document.querySelectorAll('.topbar-user').forEach(el => {
             el.style.display = 'none';
