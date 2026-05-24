@@ -1117,13 +1117,26 @@
         // and from localStorage overrides (saved by the inline form below).
         let measurementId = (window.GA4_CONFIG && window.GA4_CONFIG.measurementId) || '';
         let streamId      = (window.GA4_CONFIG && window.GA4_CONFIG.streamId) || '';
-        let lookerUrl     = '';
+        // GA4 Property ID + Account ID drive deep-links into the live
+        // analytics.google.com UI. URL convention: /a<accountId>p<propertyId>/...
+        // These are read-only IDs (safe to ship to browsers) — you still
+        // need to be signed into a Google account that has Read access.
+        const propertyId  = (window.GA4_CONFIG && window.GA4_CONFIG.propertyId) || '';
+        const accountId   = (window.GA4_CONFIG && window.GA4_CONFIG.accountId) || '';
+
+        // Pre-configured Looker Studio embed URL for THIS site's GA4 property.
+        // The admin can replace it via the input field below; their choice is
+        // stored in localStorage and overrides this default.
+        const DEFAULT_LOOKER_URL = 'https://lookerstudio.google.com/embed/reporting/4457bd4b-94a8-453a-b0ac-db067d21f97b/page/p_m63q9t54bd?params=%7B%22dp56%22%3A%22a141318394w538554925%22%7D';
+        let lookerUrl = DEFAULT_LOOKER_URL;
 
         try {
             const local = JSON.parse(localStorage.getItem('ga4Override') || 'null');
             if (local) {
                 if (local.measurementId) measurementId = local.measurementId;
                 if (local.streamId)      streamId      = local.streamId;
+                // Only override the default if the admin actually saved a
+                // non-empty Looker URL.
                 if (local.lookerUrl)     lookerUrl     = local.lookerUrl;
             }
         } catch (e) {}
@@ -1131,17 +1144,19 @@
         function isPlaceholder(v) { return !v || /REPLACE_WITH_YOUR_GA4/i.test(v); }
 
         // GA4 deep-link generator (works without API access).
-        // GA4 dashboards are filtered via /p<propertyId>/ in the URL but we
-        // don't need that — the property selector in GA4 will pick up the
-        // last used property automatically. We just open the right report.
+        // GA4 URLs encode the active property as `/a<accountId>p<propertyId>/`
+        // BEFORE the report path. When we know both IDs we prefix the URL so
+        // the link opens YOUR property directly (instead of whichever one the
+        // admin had selected last). Falls back gracefully when IDs are blank.
         function gaLink(report) {
-            // Without a known propertyId we just send the user to the GA home
-            // and the right report — they can pick the property at the top.
+            const prefix = (accountId && propertyId)
+                ? `https://analytics.google.com/analytics/web/#/p${encodeURIComponent(propertyId)}/`
+                : 'https://analytics.google.com/analytics/web/#/';
             const map = {
-                realtime:    'https://analytics.google.com/analytics/web/#/reports/realtime/',
-                acquisition: 'https://analytics.google.com/analytics/web/#/reports/lifecycle/acquisition/',
-                engagement:  'https://analytics.google.com/analytics/web/#/reports/lifecycle/engagement/pages-and-screens/',
-                monetization:'https://analytics.google.com/analytics/web/#/reports/lifecycle/monetization/'
+                realtime:    prefix + 'reports/realtime/',
+                acquisition: prefix + 'reports/lifecycle/acquisition/',
+                engagement:  prefix + 'reports/lifecycle/engagement/pages-and-screens/',
+                monetization:prefix + 'reports/lifecycle/monetization/'
             };
             return map[report] || 'https://analytics.google.com';
         }
@@ -1162,30 +1177,27 @@
             }
         }
 
-        // Realtime iframe — Google has an embeddable realtime view at
-        // /analytics/web/#/realtime/p<propertyId>/ … we don't have the
-        // propertyId, so we use Google's general /realtime/ page which
-        // requires the admin to be already signed into Google.
-        // For an inline experience, the streamId-keyed embed below works
-        // when the admin is signed into the same Google account.
+        // Realtime iframe — points at this property's GA4 Realtime view.
+        // The URL convention is /analytics/web/#/p<propertyId>/realtime/overview
+        // (the key ID is the **Property ID**, not the Stream ID — earlier
+        // versions of this file confused the two and the iframe loaded the
+        // wrong property when the IDs differed).
+        // GA4 still serves the page with X-Frame-Options: SAMEORIGIN, so
+        // when the iframe is blocked the admin sees Google's "refused to
+        // connect" notice and can use the Realtime card link above to open
+        // the same view in a new tab.
         function refreshRealtimeIframe() {
             if (!realtimeCard || !realtimeFrame) return;
-            if (isPlaceholder(measurementId) || !streamId) {
+            // Need a Property ID to build a working URL. Stream ID alone
+            // is no longer enough (and was wrong before — the URL slot is
+            // for the property, not the stream).
+            if (isPlaceholder(measurementId) || !propertyId) {
                 realtimeCard.style.display = 'none';
                 realtimeFrame.src = '';
                 return;
             }
             realtimeCard.style.display = '';
-            // GA4 doesn't expose a direct iframe-friendly realtime URL, so
-            // we link out via a wrapper page — Google's realtime view does
-            // not allow X-Frame-Options across origins.
-            // Best we can do: an iframe to the property's quickstart page,
-            // which IS embeddable. If Google blocks, we render a "click to
-            // open" placeholder.
-            const url = `https://analytics.google.com/analytics/web/#/p${encodeURIComponent(streamId)}/realtime/overview`;
-            // We try the iframe first; if X-Frame blocks load, the user
-            // will see Google's "refused to connect" message and can click
-            // the deep-link card above instead.
+            const url = `https://analytics.google.com/analytics/web/#/p${encodeURIComponent(propertyId)}/realtime/overview`;
             realtimeFrame.src = url;
         }
 

@@ -95,14 +95,51 @@ window.CLOUDINARY_CONFIG = {
 // While these stay as placeholders, no tracking code is loaded
 // and the dashboard tab shows a setup-needed banner. Both values
 // are safe to ship to browsers — that's how GA4 works.
+//
+// ── GA4 identifiers — three numbers, three different roles ────
+// Google Analytics 4 hands you THREE different IDs for the same
+// "andaman-b886d" data stream. Don't confuse them:
+//
+//   • Measurement ID  → "G-XXXXXXXXXX" string
+//                       Used by gtag.js to send events. This is the
+//                       only one the public site (analytics.js) needs.
+//
+//   • Stream ID       → ~11-digit number ("14922182432")
+//                       Identifies the *web data stream* inside the
+//                       property. We don't currently use it (kept for
+//                       backwards-compat).
+//
+//   • Property ID     → 9-digit number ("538554925")
+//                       Identifies the GA4 property itself. The
+//                       analytics.google.com URL you see in the address
+//                       bar uses this format:
+//                          /a<accountId>p<propertyId>/...
+//                       The admin dashboard uses this to deep-link
+//                       directly to YOUR property's reports (Realtime,
+//                       Acquisition, Engagement, Monetization) instead
+//                       of dumping the user on the GA4 home page.
+//
+// Where to find them: GA4 → Admin → (left col) Account details →
+// noted under "Account ID"; (middle col) Property details → "Property ID";
+// (right col) Data streams → click your stream → "Measurement ID" and
+// "Stream ID".
+//
+// Heads-up on legacy IDs: "UA-XXXXXXXX-Y" / web-property numbers were
+// the Universal Analytics format; UA was shut down 1-Jul-2024. Don't
+// paste a UA ID into measurementId — gtag.js will silently no-op.
 window.GA4_CONFIG = {
     // Same Measurement ID as window.FIREBASE_CONFIG.measurementId — your
     // Firebase project's auto-linked GA4 property. Open
     // https://analytics.google.com to manage the property.
     measurementId: "G-B2EH7QRMGE",
-    // Web Stream ID from GA4 → Admin → Data streams. Used by the
-    // realtime iframe widget in the admin dashboard.
-    streamId:      "14922182432"
+    // Web Stream ID from GA4 → Admin → Data streams.
+    streamId:      "14922182432",
+    // GA4 Property ID — used by dashboard.html to deep-link directly
+    // into THIS property's reports and to drive the Looker Studio
+    // embed's `dp56` data-source parameter. Account ID is the leading
+    // half of the analytics.google.com URL prefix `a<accountId>p<id>`.
+    propertyId:    "538554925",
+    accountId:     "141318394"
 };
 
 // ── Flight affiliate program IDs ──────────────────────────────
