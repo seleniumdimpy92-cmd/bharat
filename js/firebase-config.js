@@ -2,16 +2,61 @@
 // This config is **safe to ship to browsers** — it identifies the
 // project but does not grant write access. Real security is enforced
 // by Firestore security rules (see firestore.rules in the repo).
+//
+// ── TWO-PROJECT SETUP ──────────────────────────────────────────
+// We have two Firebase projects available:
+//   • PRIMARY  : andaman-b886d  (current production — all live data)
+//   • SECONDARY: andaman-c85f0  (new — empty, awaiting migration)
+//
+// To switch the live site to the new project, set window.FIREBASE_USE
+// below to "secondary" and re-deploy.  To go back, change it to
+// "primary" again — no other file edits needed.
+//
+// IMPORTANT: each project is a completely separate database, so users,
+// bookings, packages, gallery items etc. are NOT automatically copied
+// between them. Migrate data manually via the Firebase Console
+// (export → import) or with a one-off script BEFORE switching.
 
-window.FIREBASE_CONFIG = {
-    apiKey: "AIzaSyCRezAvtDfPv9vHxOXF7zhv5WZhCLRFBho",
-    authDomain: "andaman-b886d.firebaseapp.com",
-    projectId: "andaman-b886d",
-    storageBucket: "andaman-b886d.firebasestorage.app",
-    messagingSenderId: "1090773870572",
-    appId: "1:1090773870572:web:f1d772ecf4937b205942c9",
-    measurementId: "G-B2EH7QRMGE"
+const FIREBASE_PROJECTS = {
+    primary: {
+        // andaman-b886d — original / production
+        apiKey:            "AIzaSyCRezAvtDfPv9vHxOXF7zhv5WZhCLRFBho",
+        authDomain:        "andaman-b886d.firebaseapp.com",
+        projectId:         "andaman-b886d",
+        storageBucket:     "andaman-b886d.firebasestorage.app",
+        messagingSenderId: "1090773870572",
+        appId:             "1:1090773870572:web:f1d772ecf4937b205942c9",
+        measurementId:     "G-B2EH7QRMGE"
+    },
+    secondary: {
+        // andaman-c85f0 — newly created, ready to migrate to
+        apiKey:            "AIzaSyB13askn_x12iTHsWbgvYmUz6MVDfXEAco",
+        authDomain:        "andaman-c85f0.firebaseapp.com",
+        projectId:         "andaman-c85f0",
+        storageBucket:     "andaman-c85f0.firebasestorage.app",
+        messagingSenderId: "914557305468",
+        appId:             "1:914557305468:web:7c2df6a76ddfeea4a17ff9",
+        measurementId:     "G-98PFHRYCSR"
+    }
 };
+
+// Per-host override:
+//   • Anyone visiting localhost / 127.0.0.1 → uses the SECONDARY project
+//     (handy for local dev so you don't write test data to production).
+//   • Everyone else (incl. andamanvoyages.in) → uses PRIMARY.
+// To change the production project, just flip the default below.
+const _hostIsLocal = (typeof location !== 'undefined') &&
+    /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(location.hostname);
+
+window.FIREBASE_USE = window.FIREBASE_USE || (_hostIsLocal ? 'secondary' : 'primary');
+window.FIREBASE_CONFIG = FIREBASE_PROJECTS[window.FIREBASE_USE] || FIREBASE_PROJECTS.primary;
+
+// Expose both maps so other scripts (e.g. an admin migration tool) can
+// reach into the secondary project without a hard refresh.
+window.FIREBASE_PROJECTS = FIREBASE_PROJECTS;
+
+console.info('[firebase] using project →', window.FIREBASE_CONFIG.projectId,
+    '(' + window.FIREBASE_USE + ')');
 
 // List of admin emails. Anyone signed in with one of these emails can
 // write the packages collection and access the dashboard. Must match
@@ -23,6 +68,22 @@ window.ADMIN_EMAILS = [
 
 // Back-compat: keep a single ADMIN_EMAIL pointing at the first admin.
 window.ADMIN_EMAIL = window.ADMIN_EMAILS[0];
+
+// ── Staff allowlist ───────────────────────────────────────────
+// Staff users have limited dashboard access:
+//   • Can see only the Packages and Gallery sections.
+//   • Can EDIT existing packages but cannot ADD or DELETE packages.
+//   • Can UPLOAD gallery photos (with all metadata fields mandatory)
+//     and edit existing photos, but cannot DELETE them.
+// Anything else falls through to "customer" (no dashboard access).
+//
+// IMPORTANT: this list MUST be kept in sync with the corresponding
+// allowlist inside firestore.rules — that's where the rules are
+// actually enforced. The browser-side checks are UX guards only.
+window.STAFF_EMAILS = [
+    "pittu.das2@gmail.com",
+    "debjyoti.office@gmail.com"
+];
 
 // ── Cloudinary configuration (for the photo gallery uploads) ──
 // Sign up free at https://cloudinary.com (no credit card needed) and
@@ -50,14 +111,51 @@ window.CLOUDINARY_CONFIG = {
 // While these stay as placeholders, no tracking code is loaded
 // and the dashboard tab shows a setup-needed banner. Both values
 // are safe to ship to browsers — that's how GA4 works.
+//
+// ── GA4 identifiers — three numbers, three different roles ────
+// Google Analytics 4 hands you THREE different IDs for the same
+// "andaman-b886d" data stream. Don't confuse them:
+//
+//   • Measurement ID  → "G-XXXXXXXXXX" string
+//                       Used by gtag.js to send events. This is the
+//                       only one the public site (analytics.js) needs.
+//
+//   • Stream ID       → ~11-digit number ("14922182432")
+//                       Identifies the *web data stream* inside the
+//                       property. We don't currently use it (kept for
+//                       backwards-compat).
+//
+//   • Property ID     → 9-digit number ("538554925")
+//                       Identifies the GA4 property itself. The
+//                       analytics.google.com URL you see in the address
+//                       bar uses this format:
+//                          /a<accountId>p<propertyId>/...
+//                       The admin dashboard uses this to deep-link
+//                       directly to YOUR property's reports (Realtime,
+//                       Acquisition, Engagement, Monetization) instead
+//                       of dumping the user on the GA4 home page.
+//
+// Where to find them: GA4 → Admin → (left col) Account details →
+// noted under "Account ID"; (middle col) Property details → "Property ID";
+// (right col) Data streams → click your stream → "Measurement ID" and
+// "Stream ID".
+//
+// Heads-up on legacy IDs: "UA-XXXXXXXX-Y" / web-property numbers were
+// the Universal Analytics format; UA was shut down 1-Jul-2024. Don't
+// paste a UA ID into measurementId — gtag.js will silently no-op.
 window.GA4_CONFIG = {
     // Same Measurement ID as window.FIREBASE_CONFIG.measurementId — your
     // Firebase project's auto-linked GA4 property. Open
     // https://analytics.google.com to manage the property.
     measurementId: "G-B2EH7QRMGE",
-    // Web Stream ID from GA4 → Admin → Data streams. Used by the
-    // realtime iframe widget in the admin dashboard.
-    streamId:      "14922182432"
+    // Web Stream ID from GA4 → Admin → Data streams.
+    streamId:      "14922182432",
+    // GA4 Property ID — used by dashboard.html to deep-link directly
+    // into THIS property's reports and to drive the Looker Studio
+    // embed's `dp56` data-source parameter. Account ID is the leading
+    // half of the analytics.google.com URL prefix `a<accountId>p<id>`.
+    propertyId:    "538554925",
+    accountId:     "141318394"
 };
 
 // ── Flight affiliate program IDs ──────────────────────────────
@@ -81,3 +179,74 @@ window.FLIGHT_AFFILIATES = {
     cleartrip:     { tag: "AFFID-CLEARTRIP",    subId: "andamanvoyages" },
     travelpayouts: { tag: "",                   marker: "" }   // optional widget
 };
+
+// ── Google Reviews (Places API via Maps JavaScript API) ──────────
+// Used by js/google-reviews.js to fetch & render up to 5 live Google
+// reviews for the business on any page that has a `[data-google-reviews]`
+// host element (currently the homepage testimonials section).
+//
+// SECURITY: the API key WILL appear in your page source — that's how
+// browser-side Google Maps integrations work. The mitigation is a
+// referrer restriction: in https://console.cloud.google.com/apis/credentials
+// click your key → Application restrictions → "HTTP referrers" and add:
+//   • https://andamanvoyages.in/*
+//   • https://*.andamanvoyages.in/*
+//   • http://localhost:*/*       (only if you also dev locally)
+// With that lock in place, the key is useless from any other origin.
+// Also restrict the API list to: Places API + Maps JavaScript API.
+//
+// To find your Place ID: https://developers.google.com/maps/documentation/places/web-service/place-id
+// Search by your business name and copy the alphanumeric Place ID.
+window.GOOGLE_REVIEWS = {
+    apiKey:       "AIzaSyCcWzQqx4ftndN_9s9BfhSV5Pzyy9QXwLs",
+    placeId:      "ChIJYVLws7yViDARQMew5EIX0Dk",
+    cacheHours:   24,    // localStorage cache lifetime
+    mapsLanguage: "en"
+};
+
+// ── Password-reset Worker ─────────────────────────────────────
+// js/dataStore.js → sendPasswordReset() POSTs the user's email here
+// instead of letting Firebase's built-in `sendPasswordResetEmail()`
+// ship the message FROM noreply@<project>.firebaseapp.com (which
+// Gmail almost always classifies as spam — see the original bug
+// report screenshot).
+//
+// The Worker generates a real Firebase reset link via the Identity
+// Toolkit REST API (`accounts:sendOobCode` with `returnOobLink=true`)
+// and ships a branded email through Brevo FROM
+// `noreply@andamanvoyages.in` — a domain with verified SPF / DKIM /
+// DMARC, so the email reaches the inbox.
+//
+// To switch off the branded send (e.g. during a Worker outage or
+// before deploy), simply blank this string. js/dataStore.js will
+// fall back to Firebase's built-in sender — which works, but the
+// email will land in spam again.
+//
+// Endpoint: POST <url>/auth/password-reset  body { email }
+// Source:   workers/email-router/password-reset.js
+// Setup:    received_email_cloudflare_setup.md "Password reset" section
+window.PASSWORD_RESET_WORKER_URL = "https://email-router.pittu-das2.workers.dev";
+
+// ── ai-assistant Cloudflare Worker URL ─────────────────────────
+// Hosts the public POST /password-reset endpoint that sends a
+// branded password-reset email via Brevo from noreply@andamanvoyages.in
+// (Firebase's default noreply@<project>.firebaseapp.com lands in spam
+// because it isn't aligned with our DKIM/SPF/DMARC records).
+//
+// Also hosts admin-only endpoints (/summarize, /draft-reply,
+// /daily-report, /extract-package) used by the dashboard. Those
+// require a Firebase admin ID token; only the password-reset
+// endpoint is open (with anti-enumeration + per-IP rate-limit).
+//
+// If this URL is empty / unreachable, js/dataStore.js falls back
+// to Firebase Auth's built-in sendPasswordResetEmail — the email
+// still goes out, it just lands in spam. Setting this URL is what
+// fixes the spam-folder problem.
+//
+// Deployed via:
+//     cd workers/ai-assistant && npx wrangler deploy
+// Then paste the resulting "https://ai-assistant.<sub>.workers.dev"
+// URL here. (Same value also set in dashboard.html for the admin
+// AI features.)
+window.AI_ASSISTANT_WORKER_URL = window.AI_ASSISTANT_WORKER_URL ||
+    'https://ai-assistant.pittu-das2.workers.dev';

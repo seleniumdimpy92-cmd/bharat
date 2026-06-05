@@ -1,68 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Hide .html and /index from the URL bar without re-loading the page -->
+    <script>(function(){try{var p=location.pathname;if(/\/index(\.html)?$/i.test(p)){history.replaceState(null,"",p.replace(/\/index(\.html)?$/i,"/")+location.search+location.hash);}else if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Bharat Tours and Travels</title>
+    <title>Admin Dashboard - Bharat Transport and Tourism</title>
 
     <!-- ── SEO: Admin page — DO NOT index ──────────────────────── -->
-    <meta name="description" content="Admin dashboard for Bharat Tours and Travels. Restricted access only.">
+    <meta name="description" content="Admin dashboard for Bharat Transport and Tourism. Restricted access only.">
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
     <meta name="googlebot" content="noindex, nofollow">
     <meta name="theme-color" content="#0d7a8a">
     <meta name="google-adsense-account" content="ca-pub-8154901590978667">
-    <link rel="canonical" href="https://andamanvoyages.in/dashboard.html">
+    <link rel="canonical" href="https://andamanvoyages.in/dashboard">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="images/logo.png">
-    <link rel="apple-touch-icon" href="images/logo.png">
+    <link rel="icon" type="image/png" href="images/logo-white.png">
+    <link rel="apple-touch-icon" href="images/logo-white.png">
 
-    <link rel="stylesheet" href="css/style.css?v=27">
-    <link rel="stylesheet" href="css/dashboard.css?v=3">
-    <link rel="stylesheet" href="css/gallery.css?v=1">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=56">
+    <link rel="stylesheet" href="css/dashboard.css?v=13">
+    <!-- Compact base font for the admin dashboard (overrides style.css 16px default) -->
+    <style>
+        html, body { font-size: 13px !important; }
+        body { line-height: 1.45 !important; }
+    </style>
+    <link rel="stylesheet" href="css/gallery.css?v=5">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Pacifico&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="js/firebase-config.js?v=17"></script>
+    <script src="js/firebase-config.js?v=21"></script>
     <script>
-        // Access guard — only admin users may view this page.
-        // Admin emails come from window.ADMIN_EMAILS (set in firebase-config.js).
+        // Access guard — admin OR staff may view this page.
+        //   • Admin emails come from window.ADMIN_EMAILS (firebase-config.js).
+        //   • Staff emails come from window.STAFF_EMAILS (firebase-config.js).
         // The real authority is Firebase Auth + Firestore rules; this is a UX block.
+        // The staff role is then carried into the body classlist as "is-staff"
+        // so CSS/JS gating below can hide admin-only sections and buttons.
         (function() {
             var ADMIN_EMAILS = (Array.isArray(window.ADMIN_EMAILS) && window.ADMIN_EMAILS.length)
                 ? window.ADMIN_EMAILS.map(function (e) { return String(e).toLowerCase(); })
                 : [String(window.ADMIN_EMAIL || 'deb@andamanvoyages.in').toLowerCase()];
+            var STAFF_EMAILS = (Array.isArray(window.STAFF_EMAILS) && window.STAFF_EMAILS.length)
+                ? window.STAFF_EMAILS.map(function (e) { return String(e).toLowerCase(); })
+                : [];
             var ADMIN_USERNAME = 'deb';
             var token = localStorage.getItem('token');
             var raw   = localStorage.getItem('currentUser');
             if (!token || !raw) {
                 alert('⛔ Access denied. Please login first.');
-                window.location.replace('index.html');
+                window.location.replace('/');
                 return;
             }
             try {
                 var user = JSON.parse(raw);
                 var email = (user && user.email) ? String(user.email).toLowerCase() : '';
-                var isAdmin = user && (
+                var isAdmin = !!user && (
                     ADMIN_EMAILS.indexOf(email) >= 0 ||
                     user.role === 'admin' ||
                     (user.username || '').toLowerCase() === ADMIN_USERNAME
                 );
-                if (!isAdmin) {
+                var isStaff = !!user && (
+                    STAFF_EMAILS.indexOf(email) >= 0 ||
+                    user.role === 'staff'
+                );
+                if (!isAdmin && !isStaff) {
                     alert('⛔ Access denied. This dashboard is restricted.');
-                    window.location.replace('index.html');
+                    window.location.replace('/');
+                    return;
                 }
+                // Tag the role on <html> early so styles below apply on first paint
+                // (we'll move it to <body> in DOMContentLoaded for compatibility).
+                window.__dashRole = isAdmin ? 'admin' : 'staff';
+                document.documentElement.setAttribute('data-dashboard-role', window.__dashRole);
             } catch(e) {
-                window.location.replace('index.html');
+                window.location.replace('/');
             }
         })();
     </script>
     <script src="js/travelpayouts-init.js?v=1"></script>
+
+    <!-- ── Staff role gating CSS ─────────────────────────────
+         Hides admin-only sections / buttons when the current user is
+         a staff member (window.__dashRole === 'staff'). The role was
+         tagged on <html data-dashboard-role="..."> by the access guard
+         above, BEFORE first paint, so these rules apply with zero flicker.
+         Staff can see only Packages and Gallery. Inside those, they can
+         edit existing items and upload new gallery photos, but they
+         cannot ADD or DELETE packages, and cannot DELETE gallery photos.
+         All gallery upload-form fields are required for staff. -->
+    <style>
+        /* Hide every sidebar link except Packages + Gallery for staff */
+        html[data-dashboard-role="staff"] .sidebar-link[data-section="overview"],
+        html[data-dashboard-role="staff"] .sidebar-link[data-section="bookings"],
+        html[data-dashboard-role="staff"] .sidebar-link[data-section="locks"],
+        html[data-dashboard-role="staff"] .sidebar-link[data-section="inbox"],
+        html[data-dashboard-role="staff"] .sidebar-link[data-section="chats"],
+        html[data-dashboard-role="staff"] .sidebar-link[data-section="analytics"],
+        html[data-dashboard-role="staff"] .sidebar-link[data-section="customers"],
+        html[data-dashboard-role="staff"] .sidebar-link[data-section="revenue"],
+        html[data-dashboard-role="staff"] .sidebar-link[data-section="settings"] {
+            display: none !important;
+        }
+        /* Belt-and-braces: hide the Live Chats + Locks section content itself
+           (so a staff user who somehow forces #section-chats / #section-locks
+           — e.g. a hand-edited URL or a stale localStorage value — sees nothing).
+           The activate-section logic in dashboard.js already redirects
+           staff away from these sections, but it's safer to also gate on
+           CSS in case the script ordering changes. Price Locks is admin-only
+           because it shows every customer's payment id + lock fee, which staff
+           shouldn't have visibility into. */
+        html[data-dashboard-role="staff"] #section-chats,
+        html[data-dashboard-role="staff"] #section-locks {
+            display: none !important;
+        }
+        /* Hide admin-only controls in the Packages section.
+           Staff CAN save & publish their edits (#publishBtn is intentionally
+           NOT in this list) — they just can't add/delete or seed sample data. */
+        html[data-dashboard-role="staff"] #addPackageBtn,
+        html[data-dashboard-role="staff"] #seedPackagesBtn,
+        html[data-dashboard-role="staff"] .btn-del-pkg {
+            display: none !important;
+        }
+        /* Hide gallery photo-card delete buttons for staff (edit + view stay) */
+        html[data-dashboard-role="staff"] .admin-gallery-card-actions .btn-del,
+        html[data-dashboard-role="staff"] .gal-edit-modal .gal-edit-delete {
+            display: none !important;
+        }
+        /* Highlight required upload fields in red so staff can't miss them */
+        html[data-dashboard-role="staff"] .agf-field input[required],
+        html[data-dashboard-role="staff"] .agf-field input.staff-required {
+            border-color: #e6b1b1 !important;
+            background: #fffafa;
+        }
+        html[data-dashboard-role="staff"] .agf-field input[required]:invalid {
+            box-shadow: 0 0 0 2px rgba(231,76,60,0.18);
+        }
+        /* Show a "Staff" badge next to the username in the topbar */
+        html[data-dashboard-role="staff"] #topbarUser::after {
+            content: 'STAFF';
+            display: inline-block;
+            margin-left: .45rem;
+            padding: .12rem .5rem;
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+            color: #fff;
+            background: linear-gradient(135deg,#3498db,#0d7a8a);
+            border-radius: 999px;
+            vertical-align: middle;
+        }
+    </style>
 </head>
-<body class="dashboard-body">
+<body class="dashboard-body dashboard-page">
+    <!-- ── Theme bootstrap (FOUC-safe) ──────────────────────────
+         Apply the saved theme class to body BEFORE first paint so the
+         dashboard never flashes the default theme. The theme choice is
+         stored in localStorage as 'adminDashboardTheme'.
+         Valid values: hacker, light (Clean SaaS — default), ocean, sunset,
+         midnight, cyberpunk. The picker UI in Settings → Appearance
+         updates the class live and persists it here. -->
+    <script>
+    (function(){
+        try{
+            var THEMES = ['hacker','light','ocean','sunset','midnight','cyberpunk'];
+            var t = localStorage.getItem('adminDashboardTheme') || 'light';
+            if (THEMES.indexOf(t) < 0) t = 'light';
+            document.body.classList.add('theme-' + t);
+        }catch(e){
+            document.body.classList.add('theme-light');
+        }
+    })();
+    </script>
     <!-- ── Top Brand Bar with Inline Icon Nav ───────────────── -->
     <header class="topbar dashboard-topbar-merged">
         <a href="/" class="topbar-logo" title="Back to site">
-            <img src="images/logo.png" alt="Bharat Tours and Travels logo">
+            <img src="images/logo-white.png" alt="Bharat Transport and Tourism logo">
             <span>Admin Dashboard</span>
         </a>
         <nav class="topnav" id="topnav">
@@ -72,11 +185,20 @@
             <a href="#" class="topnav-item sidebar-link" data-section="bookings">
                 <i class="fas fa-calendar-check"></i><span>Bookings</span>
             </a>
+            <a href="#" class="topnav-item sidebar-link" data-section="locks">
+                <i class="fas fa-lock"></i><span>Locks</span>
+            </a>
             <a href="#" class="topnav-item sidebar-link" data-section="packages">
                 <i class="fas fa-suitcase"></i><span>Packages</span>
             </a>
             <a href="#" class="topnav-item sidebar-link" data-section="gallery">
                 <i class="fas fa-images"></i><span>Gallery</span>
+            </a>
+            <a href="#" class="topnav-item sidebar-link" data-section="inbox">
+                <i class="fas fa-inbox"></i><span>Inbox</span>
+            </a>
+            <a href="#" class="topnav-item sidebar-link" data-section="chats">
+                <i class="fas fa-comments"></i><span>Live Chats</span>
             </a>
             <a href="#" class="topnav-item sidebar-link" data-section="analytics">
                 <i class="fas fa-chart-area"></i><span>Analytics</span>
@@ -148,6 +270,15 @@
                         <span class="stat-label">Confirmed</span>
                     </div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #f3eefc; color: #8e44ad;">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="overviewInboxValue">0</span>
+                        <span class="stat-label">Unread Mails</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Charts Row -->
@@ -184,65 +315,217 @@
                 </div>
             </div>
 
-            <!-- Recent Bookings -->
-            <div class="table-card">
-                <div class="table-header">
-                    <h3><i class="fas fa-clock"></i> Recent Bookings</h3>
+            <!-- Recent Bookings + Unread Mail -->
+            <div class="charts-row" style="align-items:stretch;">
+                <div class="table-card" style="flex:1 1 62%;margin:0;">
+                    <div class="table-header">
+                        <h3><i class="fas fa-clock"></i> Recent Bookings</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Customer</th>
+                                    <th>Package</th>
+                                    <th>Trip</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentBookingsBody">
+                                <tr><td colspan="6" class="table-empty">No bookings yet</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Package</th>
-                                <th>Customer</th>
-                                <th>Duration</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recentBookingsBody">
-                            <tr><td colspan="7" class="table-empty">No bookings yet</td></tr>
-                        </tbody>
-                    </table>
+
+                <div class="table-card" style="flex:1 1 38%;margin:0;">
+                    <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;">
+                        <h3 style="margin:0;"><i class="fas fa-inbox"></i> Unread Mails</h3>
+                        <button type="button" id="overviewOpenInboxBtn" class="action-btn" style="white-space:nowrap;">
+                            Open Inbox
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Received</th>
+                                    <th>From</th>
+                                    <th>Body / Mail ID</th>
+                                </tr>
+                            </thead>
+                            <tbody id="overviewUnreadInboxBody">
+                                <tr><td colspan="3" class="table-empty">Loading unread mails…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Bookings Section -->
         <section class="dashboard-section" id="section-bookings">
-            <div class="section-header">
-                <h2>All Bookings</h2>
+            <!-- The section's <h2> title was removed because the
+                 .dashboard-page-title bar above the main content already
+                 shows "All Bookings" — having both produced an obvious
+                 duplicate. The toolbar still gets its own row via
+                 .section-header (now flex-end aligned). -->
+            <div class="section-header" style="justify-content:flex-end;">
                 <div class="section-actions">
                     <input type="text" class="search-input" id="bookingSearch" placeholder="Search bookings...">
-                    <select class="filter-select" id="bookingFilter">
+                    <!-- Hidden select kept for JS backward-compat; pills below drive it -->
+                    <select class="filter-select" id="bookingFilter" style="display:none;">
                         <option value="all">All Status</option>
                         <option value="confirmed">Confirmed</option>
                         <option value="cancelled">Cancelled</option>
+                        <option value="refunded">Refunded</option>
                     </select>
+                    <!-- Admin-only test helper -->
+                    <button class="btn-add-package" id="seedFakeBookingsBtn" style="background:#9b59b6;" title="Seed test bookings">
+                        <i class="fas fa-flask"></i> Seed
+                    </button>
+                    <button class="btn-add-package" id="bulkArchiveBookingsBtn" style="background:#e67e22;" title="Archive selected bookings">
+                        <i class="fas fa-box-archive"></i> Arch.
+                    </button>
+                    <button class="btn-add-package" id="bulkDeleteBookingsBtn" style="background:#c0392b;" title="Delete selected bookings">
+                        <i class="fas fa-trash"></i> Del.
+                    </button>
+                    <button class="btn-add-package" id="clearFakeBookingsBtn" style="background:#e74c3c;" title="Archive closed bookings">
+                        <i class="fas fa-box-archive"></i> Arc. Closed
+                    </button>
                 </div>
             </div>
-            <div class="table-card">
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Package</th>
-                                <th>Customer</th>
-                                <th>Duration</th>
-                                <th>Guests</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="allBookingsBody">
-                            <tr><td colspan="9" class="table-empty">No bookings yet</td></tr>
-                        </tbody>
-                    </table>
+            <!-- Status filter pills — mirrors the inbox mailbox-tabs style -->
+            <div class="booking-status-tabs" role="tablist" id="bookingStatusTabs">
+                <button type="button" class="bk-status-tab active" data-bk-status="all" role="tab" aria-selected="true">
+                    <i class="fas fa-layer-group"></i> All
+                    <span class="bk-status-count" id="bkCountAll">0</span>
+                </button>
+                <button type="button" class="bk-status-tab" data-bk-status="confirmed" role="tab" aria-selected="false">
+                    <i class="fas fa-calendar-check"></i> Confirmed
+                    <span class="bk-status-count" id="bkCountConfirmed">0</span>
+                </button>
+                <button type="button" class="bk-status-tab" data-bk-status="cancelled" role="tab" aria-selected="false">
+                    <i class="fas fa-ban"></i> Cancelled
+                    <span class="bk-status-count" id="bkCountCancelled">0</span>
+                </button>
+                <button type="button" class="bk-status-tab" data-bk-status="refunded" role="tab" aria-selected="false">
+                    <i class="fas fa-undo-alt"></i> Refunded
+                    <span class="bk-status-count" id="bkCountRefunded">0</span>
+                </button>
+            </div>
+            <!-- bookings two-pane: same .inbox-split machinery as the inbox.
+                 List width is driven by the --inbox-list-w CSS variable
+                 (defaulted to 70 % via the inline style below) and is
+                 made resizable + persisted by initBookingsResizableSplit()
+                 in js/dashboard.js. The <980px breakpoint in the embedded
+                 .inbox-split CSS auto-collapses both panes to a single
+                 column on tablets/phones. -->
+            <div class="inbox-split" id="bookingsSplit" style="--inbox-list-w:70%;height:auto;min-height:520px;">
+                <div class="inbox-list-wrap table-card">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="bookingSelectAll" aria-label="Select all visible bookings"></th>
+                                    <th>ID</th>
+                                    <th>Package</th>
+                                    <th>Customer</th>
+                                    <th>Duration</th>
+                                    <th>Guests</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allBookingsBody">
+                                <tr><td colspan="11" class="table-empty">No bookings yet</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="inbox-divider" id="bookingsDivider" role="separator" aria-orientation="vertical" aria-label="Drag to resize bookings panel" tabindex="0"></div>
+                <div class="inbox-preview-wrap" id="bookingPreview">
+                    <div class="inbox-preview-empty">
+                        <i class="fas fa-receipt"></i>
+                        <p>Select a booking row to view customer and package details.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Price Locks Section (admin) ──────────────────────────────
+             Lists every /priceLocks doc across all customers. Read by
+             js/dashboard-locks.js using LocksStore-style direct
+             Firestore access (admin can read all per firestore.rules).
+             Active / Used / Expired / Cancelled buckets, search and
+             a side-pane preview that mirrors the bookings layout. -->
+        <section class="dashboard-section" id="section-locks">
+            <div class="section-header" style="justify-content:space-between;">
+                <h2 style="margin:0;"><i class="fas fa-lock"></i> Price Locks</h2>
+                <div class="section-actions">
+                    <input type="text" class="search-input" id="lockSearch" placeholder="Search lock ref, package, email…">
+                    <button class="btn-add-package" id="locksRefreshBtn" style="background:#3498db;" title="Reload locks from Firestore">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <p style="color:#666;font-size:0.92rem;margin-top:.4rem;line-height:1.55;">
+                Customers pay <strong>₹500 / head</strong> on a package page to freeze that day's price for <strong>10 days</strong>.
+                If they convert the lock to a booking within the window, the lock fee is auto-deducted from the advance.
+                Otherwise the fee is forfeited and the lock expires.
+            </p>
+
+            <div class="booking-status-tabs" role="tablist" id="lockStatusTabs">
+                <button type="button" class="bk-status-tab active" data-lock-status="all"       role="tab" aria-selected="true">
+                    <i class="fas fa-layer-group"></i> All <span class="bk-status-count" id="lkCountAll">0</span>
+                </button>
+                <button type="button" class="bk-status-tab" data-lock-status="active"    role="tab" aria-selected="false">
+                    <i class="fas fa-bolt"></i> Active <span class="bk-status-count" id="lkCountActive">0</span>
+                </button>
+                <button type="button" class="bk-status-tab" data-lock-status="used"      role="tab" aria-selected="false">
+                    <i class="fas fa-check-circle"></i> Used <span class="bk-status-count" id="lkCountUsed">0</span>
+                </button>
+                <button type="button" class="bk-status-tab" data-lock-status="expired"   role="tab" aria-selected="false">
+                    <i class="fas fa-hourglass-end"></i> Expired <span class="bk-status-count" id="lkCountExpired">0</span>
+                </button>
+                <button type="button" class="bk-status-tab" data-lock-status="cancelled" role="tab" aria-selected="false">
+                    <i class="fas fa-ban"></i> Cancelled <span class="bk-status-count" id="lkCountCancelled">0</span>
+                </button>
+            </div>
+
+            <div class="inbox-split" id="locksSplit" style="--inbox-list-w:65%;height:auto;min-height:520px;">
+                <div class="inbox-list-wrap table-card">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Lock Ref</th>
+                                    <th>Customer</th>
+                                    <th>Package</th>
+                                    <th>Heads</th>
+                                    <th>Fee</th>
+                                    <th>Locked</th>
+                                    <th>Expires</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allLocksBody">
+                                <tr><td colspan="8" class="table-empty">Loading price locks…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="inbox-divider" id="locksDivider" role="separator" aria-orientation="vertical" aria-label="Drag to resize locks panel" tabindex="0"></div>
+                <div class="inbox-preview-wrap" id="lockPreview">
+                    <div class="inbox-preview-empty">
+                        <i class="fas fa-lock"></i>
+                        <p>Select a lock row to view details, customer and payment id.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -276,7 +559,7 @@
                 <p style="color:#666;font-size:0.92rem;margin-top:.4rem;">
                     Images upload to <strong>Cloudinary</strong> (free 25 GB, auto-CDN, auto WebP) and metadata
                     is stored in Firestore. They'll appear instantly on the public
-                    <a href="/gallery.html" target="_blank" rel="noopener">Gallery page</a>.
+                    <a href="/gallery" target="_blank" rel="noopener">Gallery page</a>.
                     First-time setup: see <code>gallery_setup.md</code> in the repo.
                 </p>
             </div>
@@ -292,21 +575,58 @@
                     <input type="file" id="galFileInput" accept="image/*" multiple>
                 </label>
 
-                <div class="admin-gallery-form-row">
-                    <input type="text" id="galTitle"    placeholder="Title (e.g. Radhanagar Beach)">
-                    <input type="text" id="galCaption"  placeholder="Caption (optional)">
-                    <input type="text" id="galCategory" placeholder="Category (e.g. Beaches)" list="galCategoryList">
-                    <datalist id="galCategoryList">
-                        <option value="Beaches">
-                        <option value="Islands">
-                        <option value="Activities">
-                        <option value="Resorts">
-                        <option value="Sunsets">
-                    </datalist>
-                    <input type="number" id="galOrder" placeholder="Order" min="0" step="1" style="text-align:center;">
-                    <button class="admin-gallery-upload-btn" id="galUploadBtn" disabled>
-                        <i class="fas fa-upload"></i> Upload
-                    </button>
+                <div class="admin-gallery-fields">
+                    <div class="agf-section">
+                        <h4 class="agf-title"><i class="fas fa-tag"></i> Photo details</h4>
+                        <div class="agf-grid">
+                            <label class="agf-field">
+                                <span>Title <span class="agf-req">*</span></span>
+                                <input type="text" id="galTitle" placeholder="e.g. Radhanagar Beach" required aria-required="true" data-required-upload="1">
+                            </label>
+                            <label class="agf-field">
+                                <span>Caption (optional)</span>
+                                <input type="text" id="galCaption" placeholder="Short caption">
+                            </label>
+                            <label class="agf-field">
+                                <span>Category <span class="agf-req">*</span></span>
+                                <select id="galCategory" required aria-required="true" data-required-upload="1" data-dropdown="category">
+                                    <option value="">— Choose category —</option>
+                                </select>
+                            </label>
+                            <label class="agf-field" style="max-width:120px;">
+                                <span>Order <span class="agf-opt">(optional)</span></span>
+                                <input type="number" id="galOrder" placeholder="0" min="0" step="1" style="text-align:center;">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="agf-section agf-section-trip">
+                        <h4 class="agf-title"><i class="fas fa-map-marked-alt"></i> Trip tags &mdash; used for grouping on the public gallery</h4>
+                        <div class="agf-grid">
+                            <label class="agf-field">
+                                <span><i class="fas fa-calendar-day"></i> Date <span class="agf-req">*</span> <small style="font-weight:400;opacity:.75;">(when the photo was taken — used for Year / Month grouping)</small></span>
+                                <input type="date" id="galDate" required aria-required="true" data-required-upload="1">
+                            </label>
+                            <label class="agf-field">
+                                <span><i class="fas fa-map-marker-alt"></i> Place <span class="agf-req">*</span></span>
+                                <select id="galPlace" required aria-required="true" data-required-upload="1" data-dropdown="place">
+                                    <option value="">— Choose place —</option>
+                                </select>
+                            </label>
+                            <label class="agf-field">
+                                <span><i class="fas fa-suitcase"></i> Package <span class="agf-req">*</span></span>
+                                <select id="galPackage" required aria-required="true" data-required-upload="1" data-dropdown="package">
+                                    <option value="">— Choose package —</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="agf-actions">
+                        <button class="admin-gallery-upload-btn" id="galUploadBtn" disabled>
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
+                    </div>
                 </div>
 
                 <div class="admin-gallery-progress" id="galProgress">
@@ -327,6 +647,142 @@
             <div class="admin-gallery-grid" id="galGrid">
                 <p class="chart-empty" style="grid-column:1/-1;">Loading…</p>
             </div>
+        </section>
+
+        <!-- Inbox Section (admin-only) -->
+        <section class="dashboard-section" id="section-inbox">
+            <div class="section-header">
+                <h2><i class="fas fa-inbox"></i> Admin Inbox</h2>
+                <div class="section-actions">
+                    <button class="btn-add-package" id="inboxComposeBtn">
+                        <i class="fas fa-pen"></i> Compose
+                    </button>
+                    <button class="btn-add-package" id="inboxRefreshBtn" style="background:#3498db;">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <p style="color:#666;font-size:0.92rem;margin-top:.4rem;line-height:1.6;">
+                Outbound replies go through Brevo (<code style="background:#eef3f5;padding:.1rem .35rem;border-radius:4px;">inbox-mail</code> Worker);
+                inbound mail is captured by Cloudflare Email Routing and persisted via the
+                <code style="background:#eef3f5;padding:.1rem .35rem;border-radius:4px;">email-router</code> Worker.
+                The <strong>Received</strong> tab below mirrors everything sent to
+                <strong>booking@</strong>, <strong>info@</strong>, <strong>cancellation@</strong> and
+                <strong>enquiries@andamanvoyages.in</strong>; click any row to preview, then hit Reply to prefill Compose.
+            </p>
+
+            <!-- Sent / Received tabs -->
+            <div class="inbox-tabs" role="tablist" style="margin-top:1rem;">
+                <button type="button" class="inbox-tab active" data-inbox-tab="received" role="tab" aria-selected="true">
+                    <i class="fas fa-inbox"></i> Received <span class="inbox-tab-count" id="inboxReceivedCount"></span>
+                </button>
+                <button type="button" class="inbox-tab" data-inbox-tab="sent" role="tab" aria-selected="false">
+                    <i class="fas fa-paper-plane"></i> Sent
+                </button>
+            </div>
+
+            <!-- Received pane (default visible) -->
+            <div class="inbox-pane" id="inboxReceivedPane" data-inbox-pane="received">
+                <!-- Mailbox sub-tabs (Booking / Info / Cancellation / All) -->
+                <div class="inbox-mailbox-tabs" role="tablist">
+                    <button type="button" class="inbox-mbx-tab active" data-mailbox="booking@andamanvoyages.in" role="tab" aria-selected="true">
+                        <i class="fas fa-suitcase"></i> Bookings
+                        <span class="inbox-mbx-count" data-mbx-count="booking@andamanvoyages.in">0</span>
+                    </button>
+                    <button type="button" class="inbox-mbx-tab" data-mailbox="info@andamanvoyages.in" role="tab" aria-selected="false">
+                        <i class="fas fa-info-circle"></i> Info
+                        <span class="inbox-mbx-count" data-mbx-count="info@andamanvoyages.in">0</span>
+                    </button>
+                    <button type="button" class="inbox-mbx-tab" data-mailbox="cancellation@andamanvoyages.in" role="tab" aria-selected="false">
+                        <i class="fas fa-ban"></i> Cancellations
+                        <span class="inbox-mbx-count" data-mbx-count="cancellation@andamanvoyages.in">0</span>
+                    </button>
+                    <button type="button" class="inbox-mbx-tab" data-mailbox="enquiries@andamanvoyages.in" role="tab" aria-selected="false">
+                        <i class="fas fa-question-circle"></i> Enquiries
+                        <span class="inbox-mbx-count" data-mbx-count="enquiries@andamanvoyages.in">0</span>
+                    </button>
+                    <button type="button" class="inbox-mbx-tab" data-mailbox="__all__" role="tab" aria-selected="false">
+                        <i class="fas fa-layer-group"></i> All
+                        <span class="inbox-mbx-count" data-mbx-count="__all__">0</span>
+                    </button>
+                </div>
+                <div class="inbox-split" id="inboxSplit">
+                    <div class="inbox-list-wrap table-card">
+                        <div class="table-header" style="display:flex;align-items:center;gap:.75rem;justify-content:space-between;">
+                            <h3 style="margin:0;"><i class="fas fa-inbox"></i> <span id="inboxMbxLabel">Bookings</span></h3>
+                            <label style="font-size:.78rem;color:#5a6877;display:inline-flex;align-items:center;gap:.4rem;font-weight:500;">
+                                <input type="checkbox" id="inboxGroupBySender" checked>
+                                Group by sender
+                            </label>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:32px;"></th>
+                                        <th>Received</th>
+                                        <th>From</th>
+                                        <th>Subject</th>
+                                        <th>Mailbox</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inboxReceivedBody">
+                                    <tr><td colspan="5" class="table-empty">Click <strong>Refresh</strong> to load.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="inbox-divider" id="inboxDivider" role="separator" aria-orientation="vertical" aria-label="Drag to resize" tabindex="0"></div>
+                    <div class="inbox-preview-wrap" id="inboxPreview">
+                        <div class="inbox-preview-empty">
+                            <i class="fas fa-envelope-open"></i>
+                            <p>Select an email to preview.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sent pane -->
+            <div class="inbox-pane" id="inboxSentPane" data-inbox-pane="sent" style="display:none;">
+                <div class="table-card" style="margin-top:1rem;">
+                    <div class="table-header"><h3><i class="fas fa-paper-plane"></i> Sent</h3></div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Sent at</th>
+                                    <th>To</th>
+                                    <th>Subject</th>
+                                    <th>From</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inboxSentBody">
+                                <tr><td colspan="5" class="table-empty">Click <strong>Refresh</strong> to load history, or <strong>Compose</strong> to send your first email.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Live Chats Section (admin reply UI for the LIVE chat widget) ──
+             Renders a two-pane Slack-style inbox of live chat sessions. The
+             actual UI is built by js/dashboard-chats.js inside #lcAdminRoot.
+             js/live-chat.js (loaded on every public page) writes customer
+             messages to /chats/{sessionId}/messages, and this section reads
+             from the same Firestore path + writes admin replies back. -->
+        <section class="dashboard-section" id="section-chats">
+            <div class="section-header">
+                <h2><i class="fas fa-comments" style="color:#e74c3c;"></i> Live Chats</h2>
+                <p style="color:#666;font-size:0.92rem;margin-top:.4rem;line-height:1.6;">
+                    Real-time conversations from the LIVE chat bubble on every public page.
+                    Click a session to read the thread; replies show in the visitor's bubble within ~1 second.
+                    Chats also forward to WhatsApp when the bridge is enabled in
+                    <strong>Settings → Chat Widget</strong>.
+                </p>
+            </div>
+            <div id="lcAdminRoot"></div>
         </section>
 
         <!-- Analytics Section -->
@@ -355,14 +811,15 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:.5rem;">
                         <input type="text" id="ga4MeasInput"   placeholder="G-XXXXXXXXXX (Measurement ID)"
                                style="padding:.6rem .8rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;">
-                        <input type="text" id="ga4StreamInput" placeholder="1234567890 (Stream ID — for live widget)"
+                        <input type="text" id="ga4StreamInput" placeholder="1234567890 (Stream ID — optional)"
                                style="padding:.6rem .8rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;">
                         <button class="btn-save-packages" id="ga4SaveBtn">
                             <i class="fas fa-save"></i> Save
                         </button>
                     </div>
                     <small style="color:#888;">
-                        Tip: the Stream ID enables the live realtime widget. Find it in GA4 → Admin → Data streams → click your stream.
+                        The Measurement ID is the only required field — it enables visitor tracking on the public site.
+                        Stream ID is kept here for backwards-compat but isn't currently used by any widget.
                     </small>
                     <div id="ga4SaveStatus" style="font-size:.88rem;"></div>
                 </div>
@@ -400,24 +857,99 @@
                 </a>
             </div>
 
-            <!-- Realtime iframe widget (only visible if a stream ID is set) -->
-            <div class="chart-card" id="ga4RealtimeCard" style="margin-top:1.25rem;display:none;">
-                <h3 class="chart-title">
-                    <i class="fas fa-circle" style="color:#27ae60;font-size:.65rem;animation:pulse 1.5s infinite;"></i>
-                    Realtime visitors (last 30 min)
-                </h3>
-                <div style="position:relative;width:100%;height:520px;border-radius:8px;overflow:hidden;border:1px solid #e3e8ef;">
-                    <iframe id="ga4RealtimeIframe" src="" style="width:100%;height:100%;border:0;"></iframe>
+            <!-- Realtime iframe widget — REMOVED.
+                 Google sends X-Frame-Options: SAMEORIGIN on every analytics.google.com
+                 page, so embedding GA4 in an iframe always renders blank. The "Realtime"
+                 stat card above already deep-links into your property's Realtime report
+                 in a new tab, and the Looker Studio embed below renders the same data
+                 inline (Looker has explicit cross-origin embedding support, GA4 doesn't).
+                 If you ever build a backend proxy for the GA4 Data API, the runtime
+                 chart can drop in here — see the (now-removed) realtime block in
+                 git history for the original markup. -->
+
+            <!-- ── Pre-embedded Looker Studio reports ───────────────
+                 Three pages of report 4457bd4b-94a8-453a-b0ac-db067d21f97b
+                 rendered side-by-side in a compact responsive grid.
+                 Each card scales the 1366×768 native Looker page down with
+                 CSS transform so the whole report fits without scroll.
+                 Click "Expand" to toggle a single card to full size.       -->
+            <div class="looker-grid">
+                <div class="looker-card">
+                    <div class="looker-card-head">
+                        <h4><i class="fas fa-chart-line"></i> Acquisition</h4>
+                        <div class="looker-card-actions">
+                            <button type="button" class="looker-expand-btn" title="Toggle full size">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <a class="looker-open-btn"
+                               href="https://datastudio.google.com/u/0/reporting/4457bd4b-94a8-453a-b0ac-db067d21f97b/page/kIV1C?s=iF5e78n_lg8&params=%7B%22dp56%22:%22a141318394w538554925%22%7D"
+                               target="_blank" rel="noopener" title="Open in Looker Studio">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="looker-frame-shell">
+                        <iframe class="looker-frame"
+                            src="https://datastudio.google.com/embed/reporting/4457bd4b-94a8-453a-b0ac-db067d21f97b/page/kIV1C"
+                            frameborder="0" allowfullscreen
+                            sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                            loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                            title="Looker Studio — Acquisition"></iframe>
+                    </div>
                 </div>
-                <p style="font-size:.78rem;color:#888;margin:.6rem 0 0;">
-                    <i class="fas fa-info-circle"></i> Embedded directly from Google Analytics.
-                    Requires you to be logged into the same Google account that owns the GA4 property.
-                </p>
+
+                <div class="looker-card">
+                    <div class="looker-card-head">
+                        <h4><i class="fas fa-chart-bar"></i> Engagement &amp; Pages</h4>
+                        <div class="looker-card-actions">
+                            <button type="button" class="looker-expand-btn" title="Toggle full size">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <a class="looker-open-btn"
+                               href="https://datastudio.google.com/u/0/reporting/4457bd4b-94a8-453a-b0ac-db067d21f97b/page/p_ev5o6t54bd?s=iF5e78n_lg8&params=%7B%22dp56%22:%22a141318394w538554925%22%7D"
+                               target="_blank" rel="noopener" title="Open in Looker Studio">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="looker-frame-shell">
+                        <iframe class="looker-frame"
+                            src="https://datastudio.google.com/embed/reporting/4457bd4b-94a8-453a-b0ac-db067d21f97b/page/p_ev5o6t54bd"
+                            frameborder="0" allowfullscreen
+                            sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                            loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                            title="Looker Studio — Engagement"></iframe>
+                    </div>
+                </div>
+
+                <div class="looker-card">
+                    <div class="looker-card-head">
+                        <h4><i class="fas fa-chart-pie"></i> Tech &amp; Demographics</h4>
+                        <div class="looker-card-actions">
+                            <button type="button" class="looker-expand-btn" title="Toggle full size">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <a class="looker-open-btn"
+                               href="https://datastudio.google.com/u/0/reporting/4457bd4b-94a8-453a-b0ac-db067d21f97b/page/p_m63q9t54bd?s=iF5e78n_lg8&params=%7B%22dp56%22:%22a141318394w538554925%22%7D"
+                               target="_blank" rel="noopener" title="Open in Looker Studio">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="looker-frame-shell">
+                        <iframe class="looker-frame"
+                            src="https://datastudio.google.com/embed/reporting/4457bd4b-94a8-453a-b0ac-db067d21f97b/page/p_m63q9t54bd"
+                            frameborder="0" allowfullscreen
+                            sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                            loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                            title="Looker Studio — Tech &amp; Demographics"></iframe>
+                    </div>
+                </div>
             </div>
 
-            <!-- Looker Studio embed (optional) -->
+            <!-- Looker Studio embed (optional, custom URL) -->
             <div class="chart-card" style="margin-top:1.25rem;">
-                <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Embedded full report</h3>
+                <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Custom embedded report</h3>
                 <p style="color:#666;font-size:.92rem;margin:0 0 1rem;">
                     Want a beautiful dashboard right inside this admin panel? Clone Google's
                     free <strong>GA4 Looker Studio template</strong>, point it at your property, set
@@ -572,6 +1104,42 @@
 
             <div id="settingsStatus" class="publish-status" style="display:none;"></div>
 
+            <!-- ── Appearance / Theme picker ─────────────────────── -->
+            <div class="settings-card">
+                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:.5rem;">
+                    <div class="settings-label-block" style="margin-bottom:.5rem;">
+                        <h3><i class="fas fa-palette"></i> Appearance &mdash; Dashboard Theme</h3>
+                        <p>Pick the look &amp; feel of your admin dashboard. The choice is saved to <strong>this device</strong> only (per-admin preference) and applies instantly &mdash; no reload needed.</p>
+                    </div>
+                    <div class="theme-picker-grid" id="themePickerGrid">
+                        <div class="theme-swatch" data-theme="hacker" tabindex="0" role="button" aria-label="Hacker / Terminal theme">
+                            <div class="theme-swatch-preview theme-swatch-preview-hacker"><span>$ ./admin --bharat</span></div>
+                            <div class="theme-swatch-meta"><strong>Hacker</strong><small>Green-on-black terminal · default</small></div>
+                        </div>
+                        <div class="theme-swatch" data-theme="light" tabindex="0" role="button" aria-label="Light theme">
+                            <div class="theme-swatch-preview theme-swatch-preview-light"><span>Clean SaaS</span></div>
+                            <div class="theme-swatch-meta"><strong>Light</strong><small>Crisp white · easy on the eyes</small></div>
+                        </div>
+                        <div class="theme-swatch" data-theme="ocean" tabindex="0" role="button" aria-label="Ocean theme">
+                            <div class="theme-swatch-preview theme-swatch-preview-ocean"><span>🏝 Andaman</span></div>
+                            <div class="theme-swatch-meta"><strong>Ocean</strong><small>Deep teal · matches your brand</small></div>
+                        </div>
+                        <div class="theme-swatch" data-theme="sunset" tabindex="0" role="button" aria-label="Sunset theme">
+                            <div class="theme-swatch-preview theme-swatch-preview-sunset"><span>🌅 Radhanagar</span></div>
+                            <div class="theme-swatch-meta"><strong>Sunset</strong><small>Warm peach + plum gradient</small></div>
+                        </div>
+                        <div class="theme-swatch" data-theme="midnight" tabindex="0" role="button" aria-label="Midnight theme">
+                            <div class="theme-swatch-preview theme-swatch-preview-midnight"><span>🌙 After hours</span></div>
+                            <div class="theme-swatch-meta"><strong>Midnight</strong><small>Navy + neon-violet</small></div>
+                        </div>
+                        <div class="theme-swatch" data-theme="cyberpunk" tabindex="0" role="button" aria-label="Cyberpunk theme">
+                            <div class="theme-swatch-preview theme-swatch-preview-cyberpunk"><span>⚡ NEON CITY</span></div>
+                            <div class="theme-swatch-meta"><strong>Cyberpunk</strong><small>Magenta + cyan + lime neon</small></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Payments toggle -->
             <div class="settings-card">
                 <div class="settings-row">
@@ -601,24 +1169,84 @@
                 </div>
             </div>
 
-            <!-- Advance / Commission % -->
-            <div class="settings-card" style="margin-top:1.5rem;">
+            <!-- Booking Advance — informational only; advance is now a flat per-head amount, not a % -->
+            <div class="settings-card" style="margin-top:1.5rem;background:#f8fcfd;border-left:3px solid #0d7a8a;">
                 <div class="settings-row">
                     <div class="settings-label-block">
-                        <h3><i class="fas fa-percent"></i> Booking Advance / Commission Rate</h3>
-                        <p>The percentage of total trip cost charged via Razorpay to confirm a booking. The remaining balance is collected at the end of the trip. Default is <strong>5%</strong>. Each customer can have their own override (set in the <em>Customers</em> tab) which takes priority over this global value.</p>
+                        <h3><i class="fas fa-rupee-sign"></i> Booking Advance &mdash; <strong>Flat per-head</strong> (no longer a percentage)</h3>
+                        <p>The booking advance charged via Razorpay is now a <strong>flat amount per traveller</strong> &mdash; not a percentage of the trip cost. The values are hard-coded in <code style="background:#eef3f5;padding:.1rem .35rem;border-radius:4px;">js/checkout.js</code> in the <code>ADVANCE_BY_PKG</code> map:</p>
+                        <ul style="margin:.6rem 0 .6rem 1.1rem;color:#3a4a55;line-height:1.7;">
+                            <li><strong>Budget &amp; Standard packages:</strong> ₹6,000 per traveller</li>
+                            <li><strong>Luxury, Premium &amp; Honeymoon packages:</strong> ₹11,000 per traveller</li>
+                        </ul>
+                        <p style="margin-top:.5rem;">To run a per-customer <strong>discount</strong> instead, open the <em>Customers</em> tab and click the <i class="fas fa-tags"></i> <strong>Discount</strong> button on the customer's row &mdash; that discount auto-applies on top of any coupon code at checkout.</p>
+                        <p style="margin-top:.5rem;color:#7a8b96;font-size:.88rem;">The legacy global &ldquo;advance percentage&rdquo; setting below is kept for reference only &mdash; <strong>changing it has no effect</strong> on what customers actually pay.</p>
+                    </div>
+                </div>
+                <div class="settings-row" style="margin-top:1rem;align-items:center;">
+                    <div class="settings-label-block">
+                        <h4 style="margin:0;color:#7a8b96;font-size:.95rem;">Legacy: global advance % (no longer used)</h4>
                     </div>
                     <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0;">
                         <input type="number" id="advanceRateInput" min="0" max="100" step="0.1" value="5"
-                               style="width:90px;padding:.55rem .7rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:1rem;font-weight:600;text-align:center;">
-                        <span style="font-weight:700;color:#0d7a8a;font-size:1.1rem;">%</span>
+                               style="width:90px;padding:.55rem .7rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:1rem;font-weight:600;text-align:center;color:#7a8b96;">
+                        <span style="font-weight:700;color:#7a8b96;font-size:1.1rem;">%</span>
                     </div>
                 </div>
-                <div class="settings-actions" style="margin-top:1.2rem;display:flex;gap:.6rem;align-items:center;">
-                    <button class="btn-save-packages" id="saveAdvanceRateBtn">
-                        <i class="fas fa-save"></i> Save Advance Rate
+                <div class="settings-actions" style="margin-top:.8rem;display:flex;gap:.6rem;align-items:center;">
+                    <button class="btn-save-packages" id="saveAdvanceRateBtn" style="opacity:.7;">
+                        <i class="fas fa-save"></i> Save (legacy &mdash; not applied at checkout)
                     </button>
-                    <span id="advanceRateInfo" style="color:#666;font-size:.9rem;"></span>
+                    <span id="advanceRateInfo" style="color:#7a8b96;font-size:.9rem;"></span>
+                </div>
+            </div>
+
+            <!-- ── Razorpay LIVE / TEST mode switch ───────────────────────
+                 When TEST is ON, js/checkout.js reads the test key from the
+                 input below and uses it for all checkouts on the public site —
+                 customers can pay with test cards (4111…1111) and no real
+                 money moves. When OFF (default), the hard-coded LIVE key in
+                 js/checkout.js is used. The Razorpay SECRET (refund Worker)
+                 is NEVER stored here — it lives in Cloudflare Worker secrets.
+            -->
+            <div class="settings-card" style="margin-top:1.5rem;background:#fff8e7;border-left:3px solid #f39c12;">
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <h3>
+                            <i class="fas fa-flask" style="color:#f39c12;"></i>
+                            Razorpay Mode &mdash; <span id="razorpayModeBadge" style="display:inline-block;padding:.15rem .55rem;border-radius:999px;font-size:.78rem;font-weight:700;background:#0a5a68;color:#fff;vertical-align:middle;">LIVE</span>
+                        </h3>
+                        <p>
+                            Toggle <strong>ON</strong> to switch the public checkout to Razorpay's <strong>Test Mode</strong> &mdash; ideal for end-to-end QA of booking, cancellation and auto-refund without spending a single rupee. Toggle <strong>OFF</strong> to revert to LIVE keys (real money). The change applies the moment Settings are saved &mdash; no redeploy needed.
+                        </p>
+                        <p style="margin-top:.4rem;color:#7a8b96;font-size:.85rem;">
+                            ⚠️ <strong>Don't forget to also swap the refund Worker secrets</strong> when you flip this toggle &mdash; otherwise refunds will fail with <code style="background:#fef9e7;padding:.05rem .3rem;border-radius:3px;">id does not exist</code> because LIVE secrets can't refund TEST payments and vice-versa. See <a href="razorpay_test_mode_guide.md" target="_blank" style="color:#0a5a68;">razorpay_test_mode_guide.md</a> &rarr; Step 3.
+                        </p>
+                    </div>
+                    <label class="toggle-switch" title="Switch between LIVE and TEST Razorpay keys">
+                        <input type="checkbox" id="razorpayTestModeToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row" style="margin-top:1rem;flex-direction:column;align-items:stretch;gap:.5rem;">
+                    <label for="razorpayTestKeyInput" style="font-weight:600;color:#333;">
+                        Razorpay <strong>Test</strong> Key ID (only used when toggle is ON)
+                    </label>
+                    <input type="text" id="razorpayTestKeyInput"
+                           placeholder="rzp_test_XXXXXXXXXXXXXX"
+                           autocomplete="off" spellcheck="false"
+                           style="width:100%;padding:.65rem .85rem;border:1px solid #e0e0e0;border-radius:8px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.9rem;letter-spacing:.3px;">
+                    <small style="color:#888;line-height:1.5;">
+                        Get this from <a href="https://dashboard.razorpay.com/app/keys" target="_blank" rel="noopener" style="color:#0a5a68;">Razorpay Dashboard &rarr; Test Mode &rarr; API Keys</a>. Must start with <code style="background:#fef9e7;padding:.05rem .3rem;border-radius:3px;">rzp_test_</code>. The key SECRET is never stored here &mdash; it's set as a Cloudflare Worker secret via <code style="background:#fef9e7;padding:.05rem .3rem;border-radius:3px;">wrangler secret put</code>.
+                    </small>
+                </div>
+
+                <div class="settings-actions" style="margin-top:1.2rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
+                    <button class="btn-save-packages" id="saveRazorpayModeBtn">
+                        <i class="fas fa-save"></i> Save Razorpay Mode
+                    </button>
+                    <span id="razorpayModeInfo" style="color:#666;font-size:.9rem;"></span>
                 </div>
             </div>
 
@@ -639,6 +1267,991 @@
                         <i class="fas fa-save"></i> Save Console Lock
                     </button>
                     <span id="consoleLockInfo" style="color:#666;font-size:.9rem;"></span>
+                </div>
+            </div>
+
+            <!-- ── Push-Notification Ads (kill switch) ─────────────
+                 Site-wide kill switch for the third-party push-notification
+                 ad-network registered via /sw.js. When OFF, js/push-ads-init.js
+                 ACTIVELY UNREGISTERS the worker on every visitor's next
+                 page-load, so flipping this off in Firestore propagates within
+                 minutes — no redeploy needed. Admins/staff are always exempt
+                 anyway (push-ads-init.js skips them by role/email match).
+                 ⚠️ See ezoic_ads_setup.md and sw.js for risk acknowledgement
+                 (AdSense conflict, Ezoic ToS, SEO impact). -->
+            <div class="settings-card" style="margin-top:1.5rem;background:#fdf2f2;border-left:3px solid #c0392b;">
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <h3>
+                            <i class="fas fa-bell-slash" style="color:#c0392b;"></i>
+                            Push-Notification Ads &mdash; <span id="pushAdsBadge" style="display:inline-block;padding:.15rem .55rem;border-radius:999px;font-size:.78rem;font-weight:700;background:#c0392b;color:#fff;vertical-align:middle;">CHECKING…</span>
+                        </h3>
+                        <p>
+                            Site-wide kill switch for the third-party <strong>push-notification ad network</strong>
+                            (zone <code style="background:#fef9e7;padding:.05rem .3rem;border-radius:3px;">11069054</code> via <code style="background:#fef9e7;padding:.05rem .3rem;border-radius:3px;">/sw.js</code>).
+                            Toggle <strong>OFF</strong> to immediately stop registering the service worker
+                            on new visits AND unregister it on returning visitors' next page-load.
+                            Useful when:
+                        </p>
+                        <ul style="margin:.5rem 0 .5rem 1.1rem;color:#3a4a55;font-size:.88rem;line-height:1.65;">
+                            <li>Your AdSense application is under review (push-ads will get it rejected).</li>
+                            <li>Ezoic flags a ToS violation about competing ad networks.</li>
+                            <li>You see a spike in bounce rate / push-permission complaints.</li>
+                        </ul>
+                        <p style="margin-top:.4rem;color:#7a8b96;font-size:.85rem;">
+                            Admins &amp; staff are <strong>always</strong> exempt &mdash; you never see push prompts
+                            even when this toggle is ON. Booking / checkout / dashboard pages are also
+                            ad-free by design (the script never loads there).
+                        </p>
+                    </div>
+                    <label class="toggle-switch" title="Enable / disable the push-notification ad network">
+                        <input type="checkbox" id="pushAdsEnabledToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-actions" style="margin-top:1.2rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
+                    <button class="btn-save-packages" id="savePushAdsBtn">
+                        <i class="fas fa-save"></i> Save Push-Ads Setting
+                    </button>
+                    <button type="button" class="action-btn action-btn-cancel" id="killPushAdsThisDeviceBtn"
+                            title="Set the local kill switch and unregister /sw.js on THIS browser only — useful for QA without flipping the global setting.">
+                        <i class="fas fa-skull-crossbones"></i> Kill on this device
+                    </button>
+                    <span id="pushAdsInfo" style="color:#666;font-size:.9rem;"></span>
+                </div>
+            </div>
+
+            <!-- ── Conversion Boosters ─────────────────────────── -->
+            <div class="settings-card" style="margin-top:1.5rem;background:#fff8e1;border-left:3px solid #f39c12;">
+                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:.5rem;">
+                    <div class="settings-label-block" style="margin-bottom:.4rem;">
+                        <h3><i class="fas fa-rocket" style="color:#f39c12;"></i> Conversion Boosters</h3>
+                        <p>Live, settings-driven widgets that lift conversion on every public page. Each toggle takes effect immediately for new visitors. Loaded from <code style="background:#fef9e7;padding:.1rem .35rem;border-radius:4px;">js/conversion-kit.js</code>.</p>
+                    </div>
+
+                    <!-- 1. Urgency bar -->
+                    <div class="settings-row" style="margin-top:.5rem;">
+                        <div class="settings-label-block">
+                            <h4 style="margin:0 0 .2rem;font-size:1rem;color:#1c2b48;"><i class="fas fa-fire" style="color:#e74c3c;"></i> Urgency Bar</h4>
+                            <p style="font-size:.86rem;color:#666;">Sticky red bar at the top of every package page with a live midnight countdown. Boosts urgency &amp; reduces "I'll book later" drop-off.</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="ckUrgencyToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row" style="margin-top:.4rem;flex-direction:column;align-items:stretch;gap:.3rem;">
+                        <label for="ckUrgencyMessage" style="font-size:.82rem;font-weight:600;color:#666;">Message text</label>
+                        <input type="text" id="ckUrgencyMessage"
+                               placeholder="🔥 Bookings closing soon — reserve your seats today"
+                               style="width:100%;padding:.55rem .75rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:.9rem;">
+                    </div>
+
+                    <!-- 2. WhatsApp FAB -->
+                    <div class="settings-row" style="margin-top:1.1rem;">
+                        <div class="settings-label-block">
+                            <h4 style="margin:0 0 .2rem;font-size:1rem;color:#1c2b48;"><i class="fab fa-whatsapp" style="color:#25d366;"></i> WhatsApp Floating Button</h4>
+                            <p style="font-size:.86rem;color:#666;">Pulsing green WhatsApp circle bottom-right of every page. Indians prefer WhatsApp 4&times; over phone calls — biggest single inquiry-rate lever.</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="ckWhatsappToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row" style="margin-top:.4rem;flex-direction:column;align-items:stretch;gap:.3rem;">
+                        <label for="ckWhatsappNumber" style="font-size:.82rem;font-weight:600;color:#666;">WhatsApp number <small style="color:#aaa;text-transform:none;font-weight:400;">(international, no '+', e.g. 918880195191)</small></label>
+                        <input type="text" id="ckWhatsappNumber" placeholder="918880195191" style="width:100%;padding:.55rem .75rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:.9rem;">
+                        <label for="ckWhatsappMessage" style="font-size:.82rem;font-weight:600;color:#666;margin-top:.4rem;">Pre-filled message</label>
+                        <input type="text" id="ckWhatsappMessage"
+                               placeholder="Hi! I'm interested in an Andaman package — could you share more details?"
+                               style="width:100%;padding:.55rem .75rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:.9rem;">
+                    </div>
+
+                    <!-- 3. Exit-intent popup -->
+                    <div class="settings-row" style="margin-top:1.1rem;">
+                        <div class="settings-label-block">
+                            <h4 style="margin:0 0 .2rem;font-size:1rem;color:#1c2b48;"><i class="fas fa-door-open" style="color:#a04000;"></i> Exit-Intent Coupon</h4>
+                            <p style="font-size:.86rem;color:#666;">When the visitor's mouse moves toward the close-tab button (or after 30s on mobile), a popup offers a coupon. Shown once per session.</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="ckExitToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row" style="margin-top:.4rem;align-items:end;gap:.6rem;">
+                        <div style="flex:1;">
+                            <label for="ckExitCode" style="font-size:.82rem;font-weight:600;color:#666;display:block;margin-bottom:.2rem;">Coupon code</label>
+                            <input type="text" id="ckExitCode" placeholder="COMEBACK10" style="width:100%;padding:.55rem .75rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;">
+                        </div>
+                        <div style="flex-shrink:0;">
+                            <label for="ckExitPercent" style="font-size:.82rem;font-weight:600;color:#666;display:block;margin-bottom:.2rem;">Discount %</label>
+                            <div style="display:flex;align-items:center;gap:.3rem;">
+                                <input type="number" id="ckExitPercent" min="1" max="50" step="1" value="10" style="width:70px;padding:.55rem .65rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:.9rem;text-align:center;font-weight:600;">
+                                <span style="font-weight:700;color:#666;">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Launch advance coupon -->
+                    <div class="settings-row" style="margin-top:1.1rem;">
+                        <div class="settings-label-block">
+                            <h4 style="margin:0 0 .2rem;font-size:1rem;color:#1c2b48;"><i class="fas fa-tag" style="color:#0d7a8a;"></i> Launch Advance Coupon</h4>
+                            <p style="font-size:.86rem;color:#666;">When a customer types this code at checkout, the per-head advance drops to a flat amount (e.g. ₹2,000) instead of ₹6K/₹11K. Massive friction-reducer for first-time buyers.</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="ckLaunchToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row" style="margin-top:.4rem;align-items:end;gap:.6rem;">
+                        <div style="flex:1;">
+                            <label for="ckLaunchCode" style="font-size:.82rem;font-weight:600;color:#666;display:block;margin-bottom:.2rem;">Coupon code</label>
+                            <input type="text" id="ckLaunchCode" placeholder="LAUNCH2000" style="width:100%;padding:.55rem .75rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;">
+                        </div>
+                        <div style="flex-shrink:0;">
+                            <label for="ckLaunchAmount" style="font-size:.82rem;font-weight:600;color:#666;display:block;margin-bottom:.2rem;">Advance ₹/head</label>
+                            <input type="number" id="ckLaunchAmount" min="500" step="500" value="2000" style="width:100px;padding:.55rem .65rem;border:1px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:.9rem;text-align:center;font-weight:600;">
+                        </div>
+                    </div>
+
+                    <!-- 5. Google Reviews + 6. Landing pages (single-row toggles) -->
+                    <div class="settings-row" style="margin-top:1.1rem;">
+                        <div class="settings-label-block">
+                            <h4 style="margin:0 0 .2rem;font-size:1rem;color:#1c2b48;"><i class="fab fa-google" style="color:#4285f4;"></i> Live Google Reviews</h4>
+                            <p style="font-size:.86rem;color:#666;">Replace the homepage testimonials block with the Trustindex live-reviews widget (auto-pulls your real Google reviews).</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="ckGoogleReviewsToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row" style="margin-top:1.1rem;">
+                        <div class="settings-label-block">
+                            <h4 style="margin:0 0 .2rem;font-size:1rem;color:#1c2b48;"><i class="fas fa-bullseye" style="color:#9b59b6;"></i> Landing Pages</h4>
+                            <p style="font-size:.86rem;color:#666;">Enable <code style="background:#f0e6f5;padding:.1rem .3rem;border-radius:3px;">/lp/honeymoon</code> &amp; <code style="background:#f0e6f5;padding:.1rem .3rem;border-radius:3px;">/lp/family</code> ad-landing pages (no nav, single CTA, social proof above the fold).</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="ckLandingPagesToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-actions" style="margin-top:1.4rem;display:flex;gap:.6rem;align-items:center;">
+                        <button class="btn-save-packages" id="saveConversionBoostersBtn">
+                            <i class="fas fa-save"></i> Save All Boosters
+                        </button>
+                        <span id="ckSaveStatus" style="color:#666;font-size:.9rem;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Chat Widget (admin-toggleable) ─────────────────
+                 Choose between three chat experiences:
+                   • Brevo Conversations (third-party, default)
+                   • Custom live-chat (Firestore-backed, integrates
+                     with the dashboard's "Live Chats" tab AND can
+                     forward each message to your WhatsApp via the
+                     WhatsApp Cloud API bridge worker).
+                   • None — no chat bubble at all.
+                 Read by js/brevo.js + js/chat.js on every public page.
+                 Flipping this saves to /settings/site immediately and
+                 every NEW visitor sees the new widget; visitors with the
+                 old widget already in their tab won't lose it until they
+                 reload (we hide the Brevo widget on the next settings
+                 load to soften the transition).
+            -->
+            <div class="settings-card" style="margin-top:1.5rem;background:#f5f7ff;border-left:3px solid #7d3c98;">
+                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:.5rem;">
+                    <div class="settings-label-block" style="margin-bottom:.5rem;">
+                        <h3><i class="fas fa-comments" style="color:#7d3c98;"></i> Chat Widget</h3>
+                        <p>Decide which chat bubble appears on the public site. Switch any time &mdash; visitors see the new widget on their next page load.</p>
+                    </div>
+
+                    <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.86rem;font-weight:600;color:#3a4a55;">
+                        Provider
+                        <select id="chatProviderSelect" style="padding:.55rem .75rem;border:1px solid #cfd9df;border-radius:8px;font-family:inherit;font-size:.92rem;">
+                            <option value="brevo">Brevo Conversations &mdash; third-party (default)</option>
+                            <option value="custom">Custom live-chat &mdash; Firestore + dashboard reply + optional WhatsApp</option>
+                            <option value="none">None &mdash; hide the chat bubble</option>
+                        </select>
+                    </label>
+
+                    <!-- ── Auto-reply on customer's first message ──────
+                         When the LIVE chat widget (custom provider only)
+                         receives the customer's very first message in a
+                         session, this text is shown back as an
+                         "Andaman Voyages Team" bubble within ~0.5s so the
+                         visitor knows we're notified and is more likely
+                         to keep the tab open until a real human replies.
+                         The bubble is also persisted to Firestore as
+                         role:'bot' so the dashboard's Live Chats panel
+                         shows the same context — the dashboard treats
+                         only role:'admin' as a real human reply, so
+                         this never gets confused with one.
+
+                         Empty value → use the built-in default in
+                         js/live-chat.js. -->
+                    <label style="display:flex;flex-direction:column;gap:.3rem;font-size:.86rem;font-weight:600;color:#3a4a55;margin-top:.6rem;">
+                        Auto-reply on first customer message
+                        <small style="font-weight:400;color:#888;text-transform:none;">
+                            Shown automatically when a visitor sends their first chat message in a session, so they don't feel ignored. Leave blank to use the default.
+                        </small>
+                        <textarea id="liveChatAutoReplyInput" rows="3"
+                                  placeholder="Thank you for contacting us! 🙏 Please share your query and we will assign someone from our team to answer you shortly."
+                                  style="padding:.55rem .75rem;border:1px solid #cfd9df;border-radius:8px;font-family:inherit;font-size:.92rem;resize:vertical;min-height:64px;"></textarea>
+                    </label>
+
+                    <!-- WhatsApp bridge sub-section (only relevant for 'custom') -->
+                    <div id="chatWhatsappBlock" style="margin-top:.85rem;background:#fff;border:1px solid #e3e8ef;border-radius:10px;padding:1rem;">
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <h4 style="margin:0 0 .2rem;font-size:1rem;color:#1c2b48;">
+                                    <i class="fab fa-whatsapp" style="color:#25d366;"></i>
+                                    Forward chats to WhatsApp
+                                </h4>
+                                <p style="font-size:.86rem;color:#666;">
+                                    When enabled, every customer message lands in your WhatsApp via Meta's
+                                    <strong>WhatsApp Cloud API</strong>. Reply back from WhatsApp and your message returns
+                                    to the customer's chat in real-time. <em>Setup: see <code style="background:#fef9e7;padding:.05rem .3rem;border-radius:3px;">whatsapp_setup.md</code> in the repo.</em>
+                                </p>
+                            </div>
+                            <label class="toggle-switch" title="Forward customer messages to your WhatsApp">
+                                <input type="checkbox" id="whatsappBridgeToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="settings-row" style="margin-top:.6rem;flex-direction:column;align-items:stretch;gap:.3rem;">
+                            <label for="whatsappBridgeWorkerUrl" style="font-size:.82rem;font-weight:600;color:#666;">
+                                WhatsApp bridge Worker URL
+                                <small style="color:#aaa;text-transform:none;font-weight:400;">(after deploying <code>workers/whatsapp-bridge</code>)</small>
+                            </label>
+                            <input type="text" id="whatsappBridgeWorkerUrl"
+                                   placeholder="https://whatsapp-bridge.<account>.workers.dev"
+                                   spellcheck="false"
+                                   style="width:100%;padding:.55rem .75rem;border:1px solid #cfd9df;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:.88rem;">
+                            <label for="whatsappBridgeAdminPhone" style="font-size:.82rem;font-weight:600;color:#666;margin-top:.5rem;">
+                                Your WhatsApp number <small style="color:#aaa;text-transform:none;font-weight:400;">(E.164, no '+', e.g. 918880195191)</small>
+                            </label>
+                            <input type="text" id="whatsappBridgeAdminPhone"
+                                   placeholder="918880195191"
+                                   spellcheck="false"
+                                   style="width:100%;padding:.55rem .75rem;border:1px solid #cfd9df;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:.88rem;">
+                            <label for="whatsappBridgePhoneNumberId" style="font-size:.82rem;font-weight:600;color:#666;margin-top:.5rem;">
+                                Meta WhatsApp Phone Number ID <small style="color:#aaa;text-transform:none;font-weight:400;">(numeric, from Meta Developer console)</small>
+                            </label>
+                            <input type="text" id="whatsappBridgePhoneNumberId"
+                                   placeholder="100000000000000"
+                                   spellcheck="false"
+                                   style="width:100%;padding:.55rem .75rem;border:1px solid #cfd9df;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:.88rem;">
+                            <small style="color:#888;line-height:1.5;margin-top:.4rem;">
+                                The Meta Access Token + App Secret are <strong>not</strong> stored here &mdash; they live as Cloudflare Worker secrets on the bridge worker. See <code style="background:#fef9e7;padding:.05rem .3rem;border-radius:3px;">whatsapp_setup.md</code>.
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- ── Telegram-bridge sub-section (only relevant for 'custom') ──
+                         Mirrors the WhatsApp bridge but uses the Telegram Bot
+                         API (much simpler — no Meta dev account, no review
+                         queue). Bot token + webhook secret live as Cloudflare
+                         Worker secrets on workers/telegram-bridge. The admin's
+                         Telegram chat-id is the only public-facing setting. -->
+                    <div id="chatTelegramBlock" style="margin-top:.85rem;background:#fff;border:1px solid #e3e8ef;border-radius:10px;padding:1rem;">
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <h4 style="margin:0 0 .2rem;font-size:1rem;color:#1c2b48;">
+                                    <i class="fab fa-telegram-plane" style="color:#0088cc;"></i>
+                                    Forward chats to Telegram
+                                </h4>
+                                <p style="font-size:.86rem;color:#666;">
+                                    When enabled, every customer message also lands in your Telegram via the
+                                    <strong>telegram-bridge</strong> Cloudflare Worker. Reply in your bot chat and the
+                                    message returns to the customer's open browser within ~1 second &mdash; same flow
+                                    as WhatsApp, but with a free bot you create in <strong>@BotFather</strong>.
+                                    <em>Setup: see <code style="background:#fef9e7;padding:.05rem .3rem;border-radius:3px;">telegram_setup.md</code> in the repo.</em>
+                                </p>
+                            </div>
+                            <label class="toggle-switch" title="Forward customer messages to your Telegram bot">
+                                <input type="checkbox" id="telegramBridgeToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="settings-row" style="margin-top:.6rem;flex-direction:column;align-items:stretch;gap:.3rem;">
+                            <label for="telegramBridgeWorkerUrl" style="font-size:.82rem;font-weight:600;color:#666;">
+                                Telegram bridge Worker URL
+                                <small style="color:#aaa;text-transform:none;font-weight:400;">(after deploying <code>workers/telegram-bridge</code>)</small>
+                            </label>
+                            <input type="text" id="telegramBridgeWorkerUrl"
+                                   placeholder="https://telegram-bridge.<account>.workers.dev"
+                                   spellcheck="false"
+                                   style="width:100%;padding:.55rem .75rem;border:1px solid #cfd9df;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:.88rem;">
+
+                            <label for="telegramBridgeChatId" style="font-size:.82rem;font-weight:600;color:#666;margin-top:.5rem;">
+                                Your Telegram chat-id
+                                <small style="color:#aaa;text-transform:none;font-weight:400;">(send <code>/chatid</code> to your bot — the worker echoes it back)</small>
+                            </label>
+                            <input type="text" id="telegramBridgeChatId"
+                                   placeholder="123456789"
+                                   spellcheck="false"
+                                   style="width:100%;padding:.55rem .75rem;border:1px solid #cfd9df;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:.88rem;">
+
+                            <label for="telegramBridgeBotUsername" style="font-size:.82rem;font-weight:600;color:#666;margin-top:.5rem;">
+                                Bot username <small style="color:#aaa;text-transform:none;font-weight:400;">(optional &mdash; used for the <em>Open bot</em> shortcut)</small>
+                            </label>
+                            <input type="text" id="telegramBridgeBotUsername"
+                                   placeholder="BharatTourismBot"
+                                   spellcheck="false"
+                                   style="width:100%;padding:.55rem .75rem;border:1px solid #cfd9df;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:.88rem;">
+
+                            <small style="color:#888;line-height:1.5;margin-top:.4rem;">
+                                The bot token + webhook secret are <strong>not</strong> stored here &mdash; they live as Cloudflare Worker secrets on the telegram-bridge worker. See <code style="background:#fef9e7;padding:.05rem .3rem;border-radius:3px;">telegram_setup.md</code>.
+                                <br>Quick test: open <a href="#" id="telegramBridgeOpenBot" target="_blank" rel="noopener" style="color:#0088cc;font-weight:600;">your bot in Telegram</a> and send <code>/start</code>.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="settings-actions" style="margin-top:1.2rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
+                        <button class="btn-save-packages" id="saveChatWidgetBtn">
+                            <i class="fas fa-save"></i> Save Chat Widget
+                        </button>
+                        <span id="chatWidgetStatus" style="color:#666;font-size:.9rem;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Manage Gallery Dropdowns (admin-only) ──────────
+                 The Category / Place / Package fields on the gallery
+                 upload form are now locked to dropdowns so staff can
+                 only pick from a fixed list. The lists themselves are
+                 stored in /settings/site under galleryCategoryOptions /
+                 galleryPlaceOptions / galleryPackageOptions and can be
+                 edited here by an admin. Any change saves immediately
+                 to Firestore and is read by the upload form on next
+                 page-load.
+
+                 This whole section is hidden for staff users via the
+                 sidebar-link[data-section=settings] CSS rule near the
+                 top of the file. -->
+            <div class="settings-card" style="margin-top:1.5rem;background:#f8fcfd;border-left:3px solid #16a085;">
+                <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:.5rem;">
+                    <div class="settings-label-block" style="margin-bottom:.4rem;">
+                        <h3><i class="fas fa-list-check" style="color:#16a085;"></i> Manage Gallery Dropdowns</h3>
+                        <p>Control the values staff can pick from when uploading photos. Add or remove options here — staff will see them on the upload form immediately. <em>Admin-only.</em></p>
+                    </div>
+                    <div id="gdMgr" class="gd-mgr">
+                        <div class="gd-list" data-list="category">
+                            <h4>Category options</h4>
+                            <ul></ul>
+                            <div class="gd-add-row">
+                                <input type="text" placeholder="e.g. Food &amp; Drink" maxlength="60">
+                                <button type="button" class="gd-add-btn"><i class="fas fa-plus"></i> Add</button>
+                            </div>
+                        </div>
+                        <div class="gd-list" data-list="place">
+                            <h4>Place options</h4>
+                            <ul></ul>
+                            <div class="gd-add-row">
+                                <input type="text" placeholder="e.g. Mount Harriet" maxlength="60">
+                                <button type="button" class="gd-add-btn"><i class="fas fa-plus"></i> Add</button>
+                            </div>
+                        </div>
+                        <div class="gd-list" data-list="package">
+                            <h4>Package options</h4>
+                            <ul></ul>
+                            <div class="gd-add-row">
+                                <input type="text" placeholder="e.g. Wedding" maxlength="60">
+                                <button type="button" class="gd-add-btn"><i class="fas fa-plus"></i> Add</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-actions" style="margin-top:1rem;display:flex;gap:.6rem;align-items:center;">
+                        <span id="gdSaveStatus" style="color:#0d7a8a;font-size:.88rem;"></span>
+                    </div>
+                </div>
+            </div>
+            <style>
+                /* ── Sent / Received tabs (Inbox tab) ──────────── */
+                .inbox-tabs {
+                    display: flex;
+                    gap: .35rem;
+                    border-bottom: 2px solid #e3e8ef;
+                    padding: 0;
+                }
+                .inbox-tab {
+                    background: transparent;
+                    border: 0;
+                    border-bottom: 3px solid transparent;
+                    padding: .65rem 1rem;
+                    margin-bottom: -2px;
+                    font-family: inherit;
+                    font-size: .9rem;
+                    font-weight: 600;
+                    color: #5a6877;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: .45rem;
+                    transition: color .15s, border-color .15s;
+                }
+                .inbox-tab:hover { color: #0d7a8a; }
+                .inbox-tab.active {
+                    color: #0d7a8a;
+                    border-bottom-color: #0d7a8a;
+                }
+                .inbox-tab-count {
+                    background: #eef3f5;
+                    color: #5a6877;
+                    font-size: .72rem;
+                    padding: .1rem .55rem;
+                    border-radius: 999px;
+                    font-weight: 700;
+                }
+                .inbox-tab.active .inbox-tab-count {
+                    background: #0d7a8a;
+                    color: #fff;
+                }
+
+                /* Mailbox sub-tabs (Bookings / Info / Cancellations / All) */
+                .inbox-mailbox-tabs {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: .4rem;
+                    margin: 1rem 0 .25rem;
+                }
+                .inbox-mbx-tab {
+                    background: #fff;
+                    border: 1px solid #cfd9df;
+                    color: #5a6877;
+                    padding: .45rem .9rem;
+                    border-radius: 999px;
+                    font-family: inherit;
+                    font-size: .82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: .4rem;
+                    transition: background .12s, border-color .12s, color .12s, transform .1s, box-shadow .12s;
+                }
+                .inbox-mbx-tab:hover {
+                    background: #eef6f8;
+                    border-color: #b7cdd6;
+                    color: #0d7a8a;
+                }
+                .inbox-mbx-tab.active {
+                    background: linear-gradient(135deg, #0d7a8a, #16a085);
+                    color: #fff;
+                    border-color: transparent;
+                    box-shadow: 0 2px 6px rgba(13,122,138,.22);
+                }
+                .inbox-mbx-tab.active:hover {
+                    color: #fff;
+                    transform: translateY(-1px);
+                    filter: brightness(1.05);
+                }
+                .inbox-mbx-count {
+                    background: #eef3f5;
+                    color: #5a6877;
+                    font-size: .7rem;
+                    padding: .08rem .5rem;
+                    border-radius: 999px;
+                    font-weight: 700;
+                    min-width: 1.1rem;
+                    text-align: center;
+                }
+                .inbox-mbx-tab.active .inbox-mbx-count {
+                    background: rgba(255,255,255,.25);
+                    color: #fff;
+                }
+
+                /* Sender group header rows in the Received list */
+                .inbox-list-wrap .data-table tbody tr.group-header {
+                    cursor: pointer;
+                    background: #f3f8fa;
+                }
+                .inbox-list-wrap .data-table tbody tr.group-header:hover {
+                    background: #e8f1f4;
+                }
+                .inbox-list-wrap .data-table tbody tr.group-header td {
+                    font-weight: 700;
+                    color: #0d2c3a;
+                    font-size: .88rem;
+                    padding: .55rem .75rem;
+                }
+                .inbox-list-wrap .data-table tbody tr.group-header .group-count {
+                    display: inline-block;
+                    margin-left: .45rem;
+                    background: #0d7a8a;
+                    color: #fff;
+                    border-radius: 999px;
+                    padding: .05rem .55rem;
+                    font-size: .7rem;
+                    font-weight: 700;
+                }
+                .inbox-list-wrap .data-table tbody tr.group-header .group-toggle {
+                    display: inline-block;
+                    width: .9rem;
+                    color: #5a6877;
+                    transition: transform .15s;
+                }
+                .inbox-list-wrap .data-table tbody tr.group-header.collapsed .group-toggle {
+                    transform: rotate(-90deg);
+                }
+                .inbox-list-wrap .data-table tbody tr.group-row.hidden {
+                    display: none;
+                }
+                .inbox-list-wrap .data-table tbody tr.group-row td:first-child {
+                    padding-left: 1.5rem; /* visual indent under group header */
+                }
+
+                /* Two-pane Received layout — resizable.
+                   Default split: list 40% / preview 60% (the reading
+                   pane is the wider one because admins spend more
+                   time reading). A draggable divider lets the admin
+                   change the ratio; the chosen value is persisted in
+                   localStorage as 'inboxSplitRatio'. */
+                .inbox-split {
+                    display: grid;
+                    grid-template-columns: minmax(180px, var(--inbox-list-w, 40%)) 6px minmax(220px, 1fr);
+                    gap: 0;
+                    margin-top: 1rem;
+                    align-items: stretch;
+                    height: 78vh;
+                }
+                .inbox-split .inbox-list-wrap,
+                .inbox-split .inbox-preview-wrap {
+                    min-height: 0;        /* allow the inner panel to shrink + scroll */
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                }
+                .inbox-split .inbox-list-wrap .table-responsive {
+                    flex: 1 1 0;
+                    min-height: 0;
+                    overflow-y: auto;
+                }
+                .inbox-divider {
+                    cursor: col-resize;
+                    background: #e3e8ef;
+                    position: relative;
+                    transition: background .15s;
+                }
+                .inbox-divider:hover,
+                .inbox-divider.active {
+                    background: #0d7a8a;
+                }
+                .inbox-divider::before {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 2px;
+                    height: 32px;
+                    background: #b7cdd6;
+                    border-radius: 2px;
+                }
+                .inbox-divider:hover::before,
+                .inbox-divider.active::before {
+                    background: #fff;
+                }
+                @media (max-width: 980px) {
+                    .inbox-split {
+                        grid-template-columns: 1fr;
+                        height: auto;
+                    }
+                    .inbox-divider { display: none; }
+                    .inbox-split .inbox-list-wrap,
+                    .inbox-split .inbox-preview-wrap {
+                        height: auto;
+                    }
+                }
+                .inbox-list-wrap .data-table tbody tr {
+                    cursor: pointer;
+                    transition: background .12s;
+                }
+                .inbox-list-wrap .data-table tbody tr:hover {
+                    background: #f0f8fa;
+                }
+                .inbox-list-wrap .data-table tbody tr.selected {
+                    background: #d6eaee;
+                }
+                .inbox-list-wrap .data-table tbody tr.unread td {
+                    font-weight: 600;
+                    color: #0d2c3a;
+                }
+                .inbox-preview-wrap {
+                    background: #fff;
+                    border: 1px solid #e3e8ef;
+                    border-radius: 12px;
+                    box-shadow: 0 2px 8px rgba(10,31,68,0.04);
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 320px;
+                    max-height: 78vh;
+                }
+                .inbox-preview-empty {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    color: #9aa7b1;
+                    gap: .65rem;
+                    padding: 2rem;
+                    text-align: center;
+                }
+                .inbox-preview-empty i { font-size: 2.6rem; opacity: .55; }
+                .inbox-preview-empty p { margin: 0; font-size: .92rem; }
+                .ipv-head { position: relative;
+                    padding: .85rem 1rem;
+                    border-bottom: 1px solid #e3e8ef;
+                    background: linear-gradient(135deg, #f6fafb 0%, #eef6f8 100%);
+                }
+                .ipv-subject {
+                    margin: 0 0 .35rem;
+                    font-size: 1.02rem;
+                    font-weight: 700;
+                    color: #0d2c3a;
+                    word-break: break-word;
+                }
+                .ipv-meta {
+                    font-size: .82rem;
+                    color: #5a6877;
+                    line-height: 1.5;
+                }
+                .ipv-meta strong { color: #2c3e50; font-weight: 600; }
+                .ipv-meta .ipv-row { margin: .12rem 0; word-break: break-word; }
+                .ipv-actions {
+                    padding: .55rem 1rem;
+                    border-bottom: 1px solid #e3e8ef;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: .4rem;
+                    background: #f9fbfc;
+                }
+                .ipv-actions button {
+                    padding: .4rem .85rem;
+                    border-radius: 6px;
+                    font-family: inherit;
+                    font-size: .82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    border: 1px solid #cfd9df;
+                    background: #fff;
+                    color: #5a6877;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: .35rem;
+                    transition: background .12s, border-color .12s, color .12s;
+                }
+                .ipv-actions button:hover {
+                    background: #eef6f8;
+                    border-color: #0d7a8a;
+                    color: #0d7a8a;
+                }
+                .ipv-actions .ipv-reply {
+                    background: linear-gradient(135deg, #0d7a8a, #16a085);
+                    border-color: transparent;
+                    color: #fff;
+                    box-shadow: 0 2px 6px rgba(13,122,138,.22);
+                }
+                .ipv-actions .ipv-reply:hover {
+                    color: #fff;
+                    filter: brightness(1.05);
+                }
+                .ipv-body {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 1rem 1.1rem;
+                    font-size: .92rem;
+                    line-height: 1.55;
+                    color: #2c3e50;
+                }
+                .ipv-body pre {
+                    white-space: pre-wrap;
+                    word-break: break-word;
+                    font-family: inherit;
+                    margin: 0;
+                }
+                .ipv-attach {
+                    border-top: 1px solid #e3e8ef;
+                    padding: .65rem 1rem;
+                    background: #f9fbfc;
+                    font-size: .82rem;
+                    color: #5a6877;
+                }
+                .ipv-attach ul { margin: .35rem 0 0; padding-left: 1.1rem; }
+                .ipv-spam {
+                    background: #fdedec;
+                    color: #a04000;
+                    padding: .45rem .75rem;
+                    font-size: .82rem;
+                    border-bottom: 1px solid #f5cba7;
+                }
+
+                /* ── Compose modal (Inbox tab) ───────────────── */
+                .inbox-compose-modal {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(15, 32, 39, 0.72);
+                    backdrop-filter: blur(3px);
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                    padding: 1rem;
+                }
+                .inbox-compose-modal.open { display: flex; }
+                .ic-card {
+                    width: 100%;
+                    max-width: 640px;
+                    background: #fff;
+                    border-radius: 14px;
+                    box-shadow: 0 24px 60px rgba(0,0,0,.32);
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                    max-height: 90vh;
+                }
+                .ic-head {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 1rem 1.25rem;
+                    border-bottom: 1px solid #e3e8ef;
+                    background: linear-gradient(135deg, #0d7a8a, #16a085);
+                    color: #fff;
+                }
+                .ic-head h3 {
+                    margin: 0;
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    gap: .5rem;
+                }
+                .ic-close {
+                    background: rgba(255,255,255,.18);
+                    border: 0;
+                    color: #fff;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                }
+                .ic-close:hover { background: rgba(255,255,255,.32); }
+                .ic-body {
+                    padding: 1.1rem 1.25rem;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column;
+                    gap: .75rem;
+                }
+                .ic-body label {
+                    display: flex;
+                    flex-direction: column;
+                    gap: .3rem;
+                    font-size: .82rem;
+                    font-weight: 600;
+                    color: #5a6877;
+                }
+                .ic-req { color: #e74c3c; }
+                .ic-body input,
+                .ic-body textarea,
+                .ic-body select {
+                    padding: .55rem .75rem;
+                    border: 1px solid #cfd9df;
+                    border-radius: 8px;
+                    font-family: inherit;
+                    font-size: .92rem;
+                    color: #2c3e50;
+                    background: #fff;
+                }
+                .ic-body select {
+                    cursor: pointer;
+                    appearance: auto;
+                }
+                .ic-body input:focus,
+                .ic-body textarea:focus,
+                .ic-body select:focus {
+                    outline: none;
+                    border-color: #0d7a8a;
+                    box-shadow: 0 0 0 3px rgba(13,122,138,.18);
+                }
+                .ic-body textarea { resize: vertical; min-height: 160px; font-family: inherit; }
+                .ic-status {
+                    font-size: .88rem;
+                    min-height: 1.2em;
+                }
+                .ic-foot {
+                    padding: .85rem 1.25rem;
+                    border-top: 1px solid #e3e8ef;
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: .5rem;
+                    background: #f9fbfc;
+                }
+                .ic-foot button {
+                    padding: .55rem 1.1rem;
+                    border-radius: 8px;
+                    font-family: inherit;
+                    font-size: .9rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    border: 1px solid transparent;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: .4rem;
+                }
+                .ic-cancel {
+                    background: #fff;
+                    color: #5a6877;
+                    border-color: #cfd9df;
+                }
+                .ic-cancel:hover { background: #f0f3f5; }
+                .ic-send {
+                    background: linear-gradient(135deg, #0d7a8a, #16a085);
+                    color: #fff;
+                    box-shadow: 0 2px 8px rgba(13,122,138,.25);
+                }
+                .ic-send:hover:not(:disabled) { filter: brightness(1.05); }
+                .ic-send:disabled { opacity: .6; cursor: not-allowed; }
+
+                .gd-mgr {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    gap: 1rem;
+                    margin-top: .5rem;
+                }
+                .gd-list {
+                    background: #fff;
+                    border: 1px solid #d6eaee;
+                    border-radius: 10px;
+                    padding: 1rem 1.1rem;
+                }
+                .gd-list h4 {
+                    margin: 0 0 .65rem;
+                    font-size: .95rem;
+                    color: #0d2c3a;
+                    font-weight: 700;
+                }
+                .gd-list ul {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0 0 .85rem;
+                    max-height: 220px;
+                    overflow-y: auto;
+                    border: 1px dashed #cfdde0;
+                    border-radius: 8px;
+                    background: #f9fcfd;
+                }
+                .gd-list li {
+                    display: flex;
+                    align-items: center;
+                    gap: .5rem;
+                    padding: .45rem .65rem;
+                    border-bottom: 1px solid #eef2f4;
+                    font-size: .9rem;
+                    color: #2c3e50;
+                }
+                .gd-list li:last-child { border-bottom: none; }
+                .gd-list li span { flex: 1; word-break: break-word; }
+                .gd-list li button {
+                    background: transparent;
+                    border: 0;
+                    color: #c0392b;
+                    cursor: pointer;
+                    padding: .2rem .4rem;
+                    border-radius: 4px;
+                    font-size: .85rem;
+                    flex-shrink: 0;
+                    transition: background .12s, color .12s;
+                }
+                .gd-list li button:hover { background: #fdedec; }
+                .gd-list li.gd-empty { color: #888; font-style: italic; justify-content: center; }
+                .gd-add-row {
+                    display: flex;
+                    gap: .4rem;
+                }
+                .gd-add-row input {
+                    flex: 1;
+                    padding: .55rem .75rem;
+                    border: 1px solid #cfd9df;
+                    border-radius: 8px;
+                    font: inherit;
+                    font-size: .9rem;
+                }
+                .gd-add-row input:focus {
+                    outline: none;
+                    border-color: #0d7a8a;
+                    box-shadow: 0 0 0 3px rgba(13,122,138,.15);
+                }
+                .gd-add-btn {
+                    background: linear-gradient(135deg, #0d7a8a, #16a085);
+                    color: #fff;
+                    border: 0;
+                    padding: .55rem 1rem;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font: inherit;
+                    font-size: .88rem;
+                    flex-shrink: 0;
+                }
+                .gd-add-btn:hover { filter: brightness(1.05); }
+            </style>
+
+            <!-- Database backup & mirror -->
+            <div class="settings-card" style="margin-top:1.5rem;">
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <h3><i class="fas fa-clone"></i> Database Backup &amp; Mirror</h3>
+                        <p>
+                            Mirror all Firestore data (packages, users, bookings, gallery, settings)
+                            from the <strong>primary</strong> Firebase project to the <strong>secondary</strong>
+                            backup project — and vice-versa. Run this whenever you've made significant
+                            changes (e.g. once a week) so the backup stays fresh. If the primary's free
+                            quota gets exhausted, you can flip <code style="background:#eef3f5;padding:.1rem .35rem;border-radius:4px;">window.FIREBASE_USE</code>
+                            to <code style="background:#eef3f5;padding:.1rem .35rem;border-radius:4px;">'secondary'</code>
+                            in <code style="background:#eef3f5;padding:.1rem .35rem;border-radius:4px;">js/firebase-config.js</code>
+                            and the live site instantly switches to the backup.
+                        </p>
+                    </div>
+                </div>
+                <div id="dbMirrorStatus" style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.85rem;font-size:.88rem;color:#5a6877;">
+                    <span>
+                        <i class="fas fa-server" style="color:#0d7a8a;"></i>
+                        Primary:&nbsp;<code id="dbPriPid" style="background:#e8f8f5;padding:.1rem .4rem;border-radius:4px;color:#0d7a8a;font-weight:600;">…</code>
+                    </span>
+                    <span>
+                        <i class="fas fa-database" style="color:#3498db;"></i>
+                        Secondary:&nbsp;<code id="dbSecPid" style="background:#eaf2f8;padding:.1rem .4rem;border-radius:4px;color:#3498db;font-weight:600;">…</code>
+                    </span>
+                    <span>
+                        <i class="fas fa-bolt" style="color:#16a085;"></i>
+                        Active now:&nbsp;<code id="dbActiveSlot" style="background:#d4edda;padding:.1rem .4rem;border-radius:4px;color:#155724;font-weight:600;">primary</code>
+                    </span>
+                </div>
+                <div class="settings-actions" style="margin-top:1.2rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+                    <a class="btn-save-packages" href="/migrate" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;">
+                        <i class="fas fa-clone"></i> Open Mirror Tool
+                    </a>
+                    <a class="btn-add-package" href="https://console.firebase.google.com/project/andaman-b886d/firestore/usage" target="_blank" rel="noopener" style="background:#3498db;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;">
+                        <i class="fas fa-chart-line"></i> Primary Quota Usage
+                    </a>
+                    <a class="btn-add-package" href="https://console.firebase.google.com/project/andaman-c85f0/firestore/usage" target="_blank" rel="noopener" style="background:#16a085;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;">
+                        <i class="fas fa-chart-line"></i> Secondary Quota Usage
+                    </a>
+                </div>
+                <div id="dbMirrorHint" style="margin-top:.9rem;font-size:.84rem;color:#6b7a99;line-height:1.55;">
+                    <strong style="color:#1c2b48;">Tip:</strong> Free Firestore quota = 50 K reads / 20 K writes
+                    per day per project. The Quota Usage links above let you watch consumption in real time.
+                    When the primary nears its limit, run a final mirror, switch <code>FIREBASE_USE</code> to
+                    <code>'secondary'</code>, push, and the next day's quota becomes available again on the backup.
                 </div>
             </div>
         </section>
@@ -663,11 +2276,72 @@
         </div>
     </div>
 
-    <script src="js/firebase-config.js?v=17"></script>
-    <script src="js/dataStore.js?v=17"></script>
+    <!-- ── Inbox Worker URL ──────────────────────────────────────
+         Paste the URL of your deployed inbox-mail Cloudflare Worker
+         (e.g. https://inbox-mail.<account>.workers.dev). Until set,
+         the Compose modal will surface a clear error so admins know
+         the backend isn't wired up yet. -->
+    <script>
+        window.INBOX_WORKER_URL = 'https://inbox-mail.pittu-das2.workers.dev';
+        // Senders the Compose modal lets the admin pick from. Each address must:
+        //   1) be in the Worker's ALLOWED_SENDERS env var (workers/inbox-mail/wrangler.jsonc)
+        //   2) be a verified sender in your Brevo account.
+        // The first entry is the default selection.
+        window.INBOX_FROM_OPTIONS = [
+            { email: 'booking@andamanvoyages.in',      label: 'Bookings'      },
+            { email: 'info@andamanvoyages.in',         label: 'Info / Sales'  },
+            { email: 'cancellation@andamanvoyages.in', label: 'Cancellations' },
+            { email: 'enquiries@andamanvoyages.in',    label: 'Enquiries'     },
+            { email: 'noreply@andamanvoyages.in',     label: 'No-Reply (auto-replies)' }
+        ];
+
+        // Razorpay refund Worker (workers/refund/). Admin-only — calls
+        // Razorpay's refunds API server-side so the Razorpay key secret
+        // never reaches the browser. Used by the Cancel button in the
+        // Bookings tab to auto-process refunds based on the
+        // sliding-scale policy. Set this AFTER deploying the Worker.
+        window.REFUND_WORKER_URL = 'https://refund.pittu-das2.workers.dev';
+        // TEST worker — deployed with rzp_test_ keys for test-mode bookings
+        // Deploy: cd workers/refund-test && npm install && npx wrangler secret put RAZORPAY_KEY_ID && npx wrangler secret put RAZORPAY_KEY_SECRET && npx wrangler deploy
+        // Then replace the placeholder below with the deployed URL:
+        window.REFUND_TEST_WORKER_URL = 'https://refund-test.pittu-das2.workers.dev';
+
+        // ── AI Assistant worker (Gemini 1.5 Flash) ──────────────
+        // Powers: ✨ Suggest reply in Inbox, AI summary on each opened
+        // email, "AI Daily Report" panel on Overview, and the daily
+        // 8 AM IST cron-triggered email summary.
+        // Deploy:  cd workers/ai-assistant && npm install
+        //          npx wrangler login
+        //          npx wrangler secret put GEMINI_API_KEY
+        //          npx wrangler secret put BREVO_API_KEY
+        //          printf %s '<service-account JSON>' | npx wrangler secret put FIREBASE_SERVICE_ACCOUNT_KEY
+        //          npx wrangler deploy
+        // Then paste the deployed URL below. Until set, all AI features
+        // silently no-op — the rest of the dashboard works normally.
+        // See ai_assistant_setup.md for full setup walkthrough.
+        window.AI_ASSISTANT_WORKER_URL = 'https://ai-assistant.pittu-das2.workers.dev';
+    </script>
+    <!-- firebase-config.js is already loaded once near the top of <head>
+         (line ~27). Loading it a second time here re-runs `const
+         FIREBASE_PROJECTS = …` which throws "Identifier already declared"
+         and HALTS every script that comes after — including dashboard.js,
+         which is why the Refund button + Razorpay-mode toggle previously
+         failed to render. Do NOT add it again. -->
+    <script src="js/dataStore.js?v=30"></script>
     <script src="js/toast.js?v=1"></script>
-    <script src="js/dashboard.js?v=19"></script>
-    <script src="js/gallery.js?v=2"></script>
+    <script src="js/booking-emails.js?v=1"></script>
+    <script src="js/refund.js?v=2"></script>
+    <script src="js/ai-assistant.js?v=4"></script>
+    <script src="js/itinerary-list-editors.js?v=2"></script>
+    <script src="js/ai-package-import.js?v=8"></script>
+    <script src="js/itinerary-blocks.js?v=3"></script>
+    <script src="js/dashboard.js?v=48"></script>
+    <script src="js/gallery.js?v=3"></script>
+    <script src="js/inbox.js?v=8"></script>
+    <script src="js/inbox-receiver.js?v=9"></script>
+    <script src="js/inbox-autoreply.js?v=2"></script>
+    <script src="js/dashboard-chats.js?v=2"></script>
+    <script src="js/dashboard-locks.js?v=1"></script>
     <script src="js/security.js?v=2"></script>
     <script>
         document.getElementById('iteBackBtn').addEventListener('click', () => window._closeItineraryEditor());
@@ -682,6 +2356,9 @@
         const titleEl    = document.getElementById('galTitle');
         const captionEl  = document.getElementById('galCaption');
         const categoryEl = document.getElementById('galCategory');
+        const dateEl     = document.getElementById('galDate');
+        const placeEl    = document.getElementById('galPlace');
+        const packageEl  = document.getElementById('galPackage');
         const orderEl    = document.getElementById('galOrder');
         const uploadBtn  = document.getElementById('galUploadBtn');
         const progress   = document.getElementById('galProgress');
@@ -726,20 +2403,137 @@
 
         function setPendingFiles(files) {
             pendingFiles = files;
+            // The button is enabled as soon as files are picked. The
+            // mandatory-field validation runs ON CLICK and surfaces any
+            // missing fields in a dedicated modal dialog (so the user
+            // gets clear, actionable guidance instead of a silently
+            // disabled button — which previously confused both admin
+            // and staff users).
             uploadBtn.disabled = !files.length;
             const names = files.map(f => f.name).join(', ');
             setStatus(`${files.length} file(s) ready: ${names}`);
+            // Tell the staff-bootstrap script to re-evaluate too, so any
+            // extra UI cues it adds (red borders, tooltip) stay accurate.
+            if (typeof window.__staffMaybeEnableUpload === 'function') {
+                window.__staffMaybeEnableUpload();
+            }
+        }
+
+        // ── Mandatory-field check + dialog ─────────────────────
+        // Every gallery upload (admin AND staff) requires Title, Category,
+        // Date, Place and Package. We check on click and pop a modal
+        // listing the missing fields so the user can fix them quickly.
+        // Caption + Order remain optional.
+        const REQUIRED_UPLOAD_FIELDS = [
+            { id: 'galTitle',    label: 'Title',    el: titleEl    },
+            { id: 'galCategory', label: 'Category', el: categoryEl },
+            { id: 'galDate',     label: 'Date',     el: dateEl     },
+            { id: 'galPlace',    label: 'Place',    el: placeEl    },
+            { id: 'galPackage',  label: 'Package',  el: packageEl  }
+        ];
+
+        function findMissingFields() {
+            return REQUIRED_UPLOAD_FIELDS.filter(f => {
+                const v = f.el && (f.el.value || '');
+                return !String(v).trim();
+            });
+        }
+
+        function showMissingFieldsDialog(missing) {
+            // Lazy-create the modal once
+            let modal = document.getElementById('galRequiredModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'galRequiredModal';
+                modal.className = 'gal-edit-modal';
+                modal.innerHTML = `
+                    <div class="gal-edit-card" style="max-width:480px;">
+                        <div class="gal-edit-head">
+                            <h3 style="color:#a04000;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Missing required fields
+                            </h3>
+                            <button type="button" class="gal-edit-close" aria-label="Close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="gal-edit-body">
+                            <p style="margin:0 0 .75rem;color:#3a4a55;line-height:1.55;">
+                                Please fill the following before uploading. These tags help group photos
+                                on the public gallery (year / place / package) and make them searchable.
+                            </p>
+                            <ul id="galRequiredList" style="margin:0 0 .25rem 1.1rem;padding:0;color:#c0392b;font-weight:600;line-height:1.9;"></ul>
+                        </div>
+                        <div class="gal-edit-foot">
+                            <button type="button" class="gal-edit-cancel">Got it</button>
+                            <button type="button" class="gal-edit-save" id="galRequiredFocusBtn">
+                                <i class="fas fa-edit"></i> Fill them now
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.remove('open');
+                });
+                modal.querySelector('.gal-edit-close').addEventListener('click', () => modal.classList.remove('open'));
+                modal.querySelector('.gal-edit-cancel').addEventListener('click', () => modal.classList.remove('open'));
+            }
+
+            // Repopulate the list each time
+            const list = modal.querySelector('#galRequiredList');
+            list.innerHTML = missing.map(m =>
+                '<li><i class="fas fa-circle-exclamation" style="margin-right:.4rem;"></i>' +
+                escapeHtml(m.label) + '</li>'
+            ).join('');
+
+            // Rebind focus button to jump to the first missing field
+            const focusBtn = modal.querySelector('#galRequiredFocusBtn');
+            const newFocusBtn = focusBtn.cloneNode(true);
+            focusBtn.parentNode.replaceChild(newFocusBtn, focusBtn);
+            newFocusBtn.addEventListener('click', () => {
+                modal.classList.remove('open');
+                const first = missing[0] && missing[0].el;
+                if (first) {
+                    try { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+                    setTimeout(() => { try { first.focus(); } catch (_) {} }, 250);
+                    // Briefly highlight the field so the user can see where to type
+                    if (first.classList) {
+                        first.classList.add('agf-field-flash');
+                        setTimeout(() => first.classList.remove('agf-field-flash'), 1600);
+                    }
+                }
+            });
+
+            modal.classList.add('open');
         }
 
         uploadBtn.addEventListener('click', async () => {
-            if (!pendingFiles.length) return;
+            if (!pendingFiles.length) {
+                setStatus('Please choose one or more images to upload first.', true);
+                return;
+            }
+
+            // Validate mandatory fields BEFORE disabling the button —
+            // otherwise a user who closes the dialog can't try again.
+            const missing = findMissingFields();
+            if (missing.length) {
+                showMissingFieldsDialog(missing);
+                setStatus('Upload blocked — please fill: ' +
+                    missing.map(m => m.label).join(', '), true);
+                return;
+            }
+
             uploadBtn.disabled = true;
 
             const meta = {
-                title:    titleEl.value.trim(),
-                caption:  captionEl.value.trim(),
-                category: categoryEl.value.trim(),
-                order:    orderEl.value !== '' ? parseInt(orderEl.value, 10) : 9999
+                title:      titleEl.value.trim(),
+                caption:    captionEl.value.trim(),
+                category:   categoryEl.value.trim(),
+                date:       (dateEl.value || '').trim(),
+                place:      placeEl.value.trim(),
+                packageRef: packageEl.value.trim(),
+                order:      orderEl.value !== '' ? parseInt(orderEl.value, 10) : 9999
             };
 
             try {
@@ -750,10 +2544,13 @@
                     showProgress(0);
                     await window.GalleryStore.uploadGalleryImage(file, {
                         // If multiple files, append index to title (or leave blank for "")
-                        title: pendingFiles.length > 1 && meta.title ? `${meta.title} (${i})` : meta.title,
-                        caption:  meta.caption,
-                        category: meta.category,
-                        order:    meta.order
+                        title:      pendingFiles.length > 1 && meta.title ? `${meta.title} (${i})` : meta.title,
+                        caption:    meta.caption,
+                        category:   meta.category,
+                        date:       meta.date,
+                        place:      meta.place,
+                        packageRef: meta.packageRef,
+                        order:      meta.order
                     }, (pct) => showProgress(pct));
                 }
                 setStatus(`✓ Uploaded ${pendingFiles.length} image(s) successfully.`);
@@ -761,6 +2558,7 @@
                 pendingFiles = [];
                 fileInput.value = '';
                 titleEl.value = ''; captionEl.value = ''; orderEl.value = '';
+                // Keep date/place/package between uploads — common batches share these
                 await refresh();
             } catch (err) {
                 console.error('Gallery upload error:', err);
@@ -768,6 +2566,11 @@
                 hideProgress();
             } finally {
                 uploadBtn.disabled = pendingFiles.length === 0;
+                // Re-apply staff required-field gating after upload
+                // (we just cleared title/order so the button must lock again).
+                if (typeof window.__staffMaybeEnableUpload === 'function') {
+                    window.__staffMaybeEnableUpload();
+                }
             }
         });
 
@@ -781,12 +2584,18 @@
             allItems.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'admin-gallery-card';
+                const metaParts = [];
+                if (item.category)   metaParts.push(`📂 ${escapeHtml(item.category)}`);
+                if (item.date)       metaParts.push(`📅 ${escapeHtml(item.date)}`);
+                if (item.place)      metaParts.push(`📍 ${escapeHtml(item.place)}`);
+                if (item.packageRef) metaParts.push(`🎫 ${escapeHtml(item.packageRef)}`);
+                metaParts.push(`order: ${item.order}`);
                 card.innerHTML = `
                     <div class="admin-gallery-card-img" style="background-image:url('${escapeHtml(item.thumbUrl || item.url)}');"></div>
                     <div class="admin-gallery-card-body">
                         <h4 class="admin-gallery-card-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title) || '<em style="color:#9aa7b1;">(no title)</em>'}</h4>
                         <div class="admin-gallery-card-meta">
-                            ${item.category ? `<span>📂 ${escapeHtml(item.category)}</span> · ` : ''}<span>order: ${item.order}</span>
+                            ${metaParts.map(p => `<span>${p}</span>`).join(' · ')}
                         </div>
                         <div class="admin-gallery-card-actions">
                             <button class="btn-edit"  data-id="${item.id}">Edit</button>
@@ -819,28 +2628,101 @@
                 const id = b.dataset.id;
                 const item = allItems.find(it => it.id === id);
                 if (!item) return;
-                const newTitle    = prompt('Title:',    item.title    || '');
-                if (newTitle === null) return;
-                const newCaption  = prompt('Caption:',  item.caption  || '');
-                if (newCaption === null) return;
-                const newCategory = prompt('Category:', item.category || '');
-                if (newCategory === null) return;
-                const newOrderStr = prompt('Order (number, lower = first):', String(item.order || 9999));
-                if (newOrderStr === null) return;
-                const newOrder = parseInt(newOrderStr, 10);
+                openEditModal(item);
+            }));
+        }
+
+        // ── Edit modal — multi-field editor (replaces stacked prompts) ──
+        function openEditModal(item) {
+            // Lazy-create the modal once
+            let modal = document.getElementById('galEditModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'galEditModal';
+                modal.className = 'gal-edit-modal';
+                modal.innerHTML = `
+                    <div class="gal-edit-card">
+                        <div class="gal-edit-head">
+                            <h3><i class="fas fa-edit"></i> Edit Photo</h3>
+                            <button type="button" class="gal-edit-close" aria-label="Close"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="gal-edit-body">
+                            <label>Title<input type="text" data-f="title"></label>
+                            <label>Caption<input type="text" data-f="caption"></label>
+                            <label>Category<select data-f="category" data-dropdown="category"><option value="">— Choose category —</option></select></label>
+                            <div class="gal-edit-row2">
+                                <label>Date<input type="date" data-f="date"></label>
+                                <label>Order<input type="number" data-f="order" min="0" step="1"></label>
+                            </div>
+                            <label>Place<select data-f="place" data-dropdown="place"><option value="">— Choose place —</option></select></label>
+                            <label>Package<select data-f="packageRef" data-dropdown="package"><option value="">— Choose package —</option></select></label>
+                        </div>
+                        <div class="gal-edit-foot">
+                            <button type="button" class="gal-edit-cancel">Cancel</button>
+                            <button type="button" class="gal-edit-save"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                `;
+                // Populate the new <select>s from the live SettingsStore options
+                if (typeof window.__populateGalleryDropdowns === 'function') {
+                    window.__populateGalleryDropdowns(modal);
+                }
+                document.body.appendChild(modal);
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.remove('open');
+                });
+                modal.querySelector('.gal-edit-close').addEventListener('click', () => modal.classList.remove('open'));
+                modal.querySelector('.gal-edit-cancel').addEventListener('click', () => modal.classList.remove('open'));
+            }
+
+            // Populate fields
+            const setVal = (f, v) => {
+                const el = modal.querySelector('[data-f="' + f + '"]');
+                if (el) el.value = (v == null ? '' : v);
+            };
+            setVal('title',      item.title);
+            setVal('caption',    item.caption);
+            setVal('category',   item.category);
+            setVal('date',       item.date);
+            setVal('place',      item.place);
+            setVal('packageRef', item.packageRef);
+            setVal('order',      (item.order != null ? item.order : 9999));
+
+            // Save handler (rebind each open so it captures current item)
+            const saveBtn = modal.querySelector('.gal-edit-save');
+            const newSaveBtn = saveBtn.cloneNode(true);
+            saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+            newSaveBtn.addEventListener('click', async () => {
+                const getVal = (f) => {
+                    const el = modal.querySelector('[data-f="' + f + '"]');
+                    return el ? el.value.trim() : '';
+                };
+                const orderRaw = getVal('order');
+                const orderNum = parseInt(orderRaw, 10);
+                newSaveBtn.disabled = true;
+                newSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
                 try {
-                    await window.GalleryStore.updateGalleryItem(id, {
-                        title: newTitle.trim(),
-                        caption: newCaption.trim(),
-                        category: newCategory.trim(),
-                        order: isNaN(newOrder) ? 9999 : newOrder
+                    await window.GalleryStore.updateGalleryItem(item.id, {
+                        title:      getVal('title'),
+                        caption:    getVal('caption'),
+                        category:   getVal('category'),
+                        date:       getVal('date'),
+                        place:      getVal('place'),
+                        packageRef: getVal('packageRef'),
+                        order:      isNaN(orderNum) ? 9999 : orderNum
                     });
                     setStatus('✓ Updated.');
+                    modal.classList.remove('open');
                     await refresh();
                 } catch (err) {
                     setStatus('Update failed: ' + (err && err.message ? err.message : err), true);
+                } finally {
+                    newSaveBtn.disabled = false;
+                    newSaveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
                 }
-            }));
+            });
+
+            modal.classList.add('open');
         }
 
         async function refresh() {
@@ -878,6 +2760,26 @@
     })();
     </script>
 
+    <!-- ── DB Mirror status (Settings) ───────────────────────── -->
+    <script>
+    (function () {
+        try {
+            const pri = (window.FIREBASE_PROJECTS && window.FIREBASE_PROJECTS.primary)   || {};
+            const sec = (window.FIREBASE_PROJECTS && window.FIREBASE_PROJECTS.secondary) || {};
+            const priEl = document.getElementById('dbPriPid');
+            const secEl = document.getElementById('dbSecPid');
+            const actEl = document.getElementById('dbActiveSlot');
+            if (priEl) priEl.textContent = pri.projectId || '(not configured)';
+            if (secEl) secEl.textContent = sec.projectId || '(not configured)';
+            if (actEl) {
+                const slot = window.FIREBASE_USE === 'secondary' ? 'secondary' : 'primary';
+                actEl.textContent = slot + ' \u2192 ' +
+                    (slot === 'primary' ? (pri.projectId || '?') : (sec.projectId || '?'));
+            }
+        } catch (e) {}
+    })();
+    </script>
+
     <!-- ── Analytics tab wiring ─────────────────────────────── -->
     <script>
     (function () {
@@ -886,8 +2788,10 @@
         const streamInput    = document.getElementById('ga4StreamInput');
         const saveBtn        = document.getElementById('ga4SaveBtn');
         const saveStatus     = document.getElementById('ga4SaveStatus');
-        const realtimeCard   = document.getElementById('ga4RealtimeCard');
-        const realtimeFrame  = document.getElementById('ga4RealtimeIframe');
+        // (Realtime iframe widget was removed — Google blocks GA4 embedding via
+        // X-Frame-Options: SAMEORIGIN. The "Realtime" stat card above deep-links
+        // into a new tab instead, and the Looker Studio embed below provides the
+        // inline view.)
         const lookerInput    = document.getElementById('lookerUrlInput');
         const lookerSaveBtn  = document.getElementById('lookerSaveBtn');
         const lookerWrap     = document.getElementById('lookerEmbedWrap');
@@ -903,13 +2807,31 @@
         // and from localStorage overrides (saved by the inline form below).
         let measurementId = (window.GA4_CONFIG && window.GA4_CONFIG.measurementId) || '';
         let streamId      = (window.GA4_CONFIG && window.GA4_CONFIG.streamId) || '';
-        let lookerUrl     = '';
+        // GA4 Property ID + Account ID drive deep-links into the live
+        // analytics.google.com UI. URL convention: /a<accountId>p<propertyId>/...
+        // These are read-only IDs (safe to ship to browsers) — you still
+        // need to be signed into a Google account that has Read access.
+        const propertyId  = (window.GA4_CONFIG && window.GA4_CONFIG.propertyId) || '';
+        const accountId   = (window.GA4_CONFIG && window.GA4_CONFIG.accountId) || '';
+
+        // Pre-configured Looker Studio embed URL for THIS site's GA4 property.
+        // The admin can replace it via the input field below; their choice is
+        // stored in localStorage and overrides this default.
+        // The site owner shared the public Looker Studio report at
+        //   https://datastudio.google.com/s/iF5e78n_lg8
+        // Looker accepts the short URL inside an iframe and follows the redirect
+        // to the underlying /embed/reporting/<id>/page/<pageId> URL. Public-share
+        // links work without auth so any visitor with admin can see the embed.
+        const DEFAULT_LOOKER_URL = 'https://datastudio.google.com/embed/s/iF5e78n_lg8';
+        let lookerUrl = DEFAULT_LOOKER_URL;
 
         try {
             const local = JSON.parse(localStorage.getItem('ga4Override') || 'null');
             if (local) {
                 if (local.measurementId) measurementId = local.measurementId;
                 if (local.streamId)      streamId      = local.streamId;
+                // Only override the default if the admin actually saved a
+                // non-empty Looker URL.
                 if (local.lookerUrl)     lookerUrl     = local.lookerUrl;
             }
         } catch (e) {}
@@ -917,17 +2839,19 @@
         function isPlaceholder(v) { return !v || /REPLACE_WITH_YOUR_GA4/i.test(v); }
 
         // GA4 deep-link generator (works without API access).
-        // GA4 dashboards are filtered via /p<propertyId>/ in the URL but we
-        // don't need that — the property selector in GA4 will pick up the
-        // last used property automatically. We just open the right report.
+        // GA4 URLs encode the active property as `/a<accountId>p<propertyId>/`
+        // BEFORE the report path. When we know both IDs we prefix the URL so
+        // the link opens YOUR property directly (instead of whichever one the
+        // admin had selected last). Falls back gracefully when IDs are blank.
         function gaLink(report) {
-            // Without a known propertyId we just send the user to the GA home
-            // and the right report — they can pick the property at the top.
+            const prefix = (accountId && propertyId)
+                ? `https://analytics.google.com/analytics/web/#/p${encodeURIComponent(propertyId)}/`
+                : 'https://analytics.google.com/analytics/web/#/';
             const map = {
-                realtime:    'https://analytics.google.com/analytics/web/#/reports/realtime/',
-                acquisition: 'https://analytics.google.com/analytics/web/#/reports/lifecycle/acquisition/',
-                engagement:  'https://analytics.google.com/analytics/web/#/reports/lifecycle/engagement/pages-and-screens/',
-                monetization:'https://analytics.google.com/analytics/web/#/reports/lifecycle/monetization/'
+                realtime:    prefix + 'reports/realtime/',
+                acquisition: prefix + 'reports/lifecycle/acquisition/',
+                engagement:  prefix + 'reports/lifecycle/engagement/pages-and-screens/',
+                monetization:prefix + 'reports/lifecycle/monetization/'
             };
             return map[report] || 'https://analytics.google.com';
         }
@@ -948,32 +2872,10 @@
             }
         }
 
-        // Realtime iframe — Google has an embeddable realtime view at
-        // /analytics/web/#/realtime/p<propertyId>/ … we don't have the
-        // propertyId, so we use Google's general /realtime/ page which
-        // requires the admin to be already signed into Google.
-        // For an inline experience, the streamId-keyed embed below works
-        // when the admin is signed into the same Google account.
-        function refreshRealtimeIframe() {
-            if (!realtimeCard || !realtimeFrame) return;
-            if (isPlaceholder(measurementId) || !streamId) {
-                realtimeCard.style.display = 'none';
-                realtimeFrame.src = '';
-                return;
-            }
-            realtimeCard.style.display = '';
-            // GA4 doesn't expose a direct iframe-friendly realtime URL, so
-            // we link out via a wrapper page — Google's realtime view does
-            // not allow X-Frame-Options across origins.
-            // Best we can do: an iframe to the property's quickstart page,
-            // which IS embeddable. If Google blocks, we render a "click to
-            // open" placeholder.
-            const url = `https://analytics.google.com/analytics/web/#/p${encodeURIComponent(streamId)}/realtime/overview`;
-            // We try the iframe first; if X-Frame blocks load, the user
-            // will see Google's "refused to connect" message and can click
-            // the deep-link card above instead.
-            realtimeFrame.src = url;
-        }
+        // (refreshRealtimeIframe was removed alongside the iframe — see
+        // the note where the realtime block used to live in the markup
+        // above. The "Realtime" deep-link card already handles this case
+        // by sending the admin to a new tab.)
 
         // ── Date-range pills ────────────────────────────────────
         // Looker Studio supports overriding the report's date_range via the
@@ -1075,7 +2977,6 @@
                 } catch (e) {}
                 measurementId = m; streamId = s;
                 refreshSetupCard();
-                refreshRealtimeIframe();
                 saveStatus.textContent = '✓ Saved on this device. To deploy site-wide, also paste it into js/firebase-config.js.';
                 saveStatus.style.color = '#0a5a68';
             });
@@ -1105,15 +3006,70 @@
                 const t = document.getElementById('pageTitle');
                 if (t) t.textContent = 'Analytics — Google Analytics 4';
                 refreshSetupCard();
-                refreshRealtimeIframe();
                 refreshLooker();
             });
         });
 
         // Initial render (if user lands directly on this section)
         refreshSetupCard();
-        refreshRealtimeIframe();
         refreshLooker();
+    })();
+    </script>
+
+    <!-- ── Looker compact-grid: dynamic scale + expand toggle ──
+         Each .looker-frame is rendered at its native 1366×768 and we
+         apply a CSS transform: scale(...) so it fits the card's actual
+         pixel width. Recalculated on load + window resize + when the
+         user expands/collapses a card. Also wires the expand button. -->
+    <script>
+    (function () {
+        const NATIVE_W = 1366;   // Looker page native width
+        const NATIVE_H = 768;    // Looker page native height
+        const cards = document.querySelectorAll('.looker-card');
+        if (!cards.length) return;
+
+        function rescale(card) {
+            const shell = card.querySelector('.looker-frame-shell');
+            const frame = card.querySelector('.looker-frame');
+            if (!shell || !frame) return;
+            const w = shell.clientWidth;
+            if (!w) return;
+            const scale = w / NATIVE_W;
+            frame.style.transform = 'scale(' + scale.toFixed(4) + ')';
+            // Make the shell tall enough to host the scaled iframe
+            // (scaled height = NATIVE_H * scale)
+            shell.style.paddingTop = '0px';
+            shell.style.height = (NATIVE_H * scale) + 'px';
+        }
+
+        function rescaleAll() { cards.forEach(rescale); }
+
+        // Initial pass after layout settles (iframes need their card
+        // width to be measurable, so we rAF).
+        requestAnimationFrame(rescaleAll);
+        window.addEventListener('resize', () => requestAnimationFrame(rescaleAll));
+        // Also rescale when the Analytics tab becomes visible — section
+        // toggling is via display:none, so dimensions are 0 until shown.
+        document.querySelectorAll('.sidebar-link[data-section="analytics"]').forEach(link => {
+            link.addEventListener('click', () => setTimeout(rescaleAll, 50));
+        });
+
+        // Expand / collapse toggle
+        cards.forEach(card => {
+            const btn = card.querySelector('.looker-expand-btn');
+            if (!btn) return;
+            btn.addEventListener('click', () => {
+                // Only one card expanded at a time
+                cards.forEach(c => { if (c !== card) c.classList.remove('expanded'); });
+                card.classList.toggle('expanded');
+                // After flip, recalc all cards (their widths change)
+                requestAnimationFrame(rescaleAll);
+                // Smoothly bring the expanded card into view
+                if (card.classList.contains('expanded')) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
     })();
     </script>
 
@@ -1132,6 +3088,132 @@
             0%, 100% { opacity: 1; }
             50%      { opacity: .35; }
         }
+        /* ── Looker compact embed grid ─────────────────────────
+           Renders Looker's 1366×768 native page inside a 3-column
+           responsive grid. The iframe is forced to its native size
+           and CSS-scaled down so the visualisation stays sharp and
+           the whole page fits without scroll. Click "Expand" on any
+           card to flip the .looker-card.expanded class which removes
+           the scale and column constraint. */
+        .looker-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+        .looker-card {
+            background: #fff;
+            border: 1px solid #e3e8ef;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(10,31,68,0.04);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow .15s ease, grid-column .2s ease;
+        }
+        .looker-card:hover {
+            box-shadow: 0 6px 18px rgba(10,31,68,0.10);
+        }
+        .looker-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .55rem .8rem;
+            background: linear-gradient(135deg, #f6fafb 0%, #eef6f8 100%);
+            border-bottom: 1px solid #e3e8ef;
+            min-height: 38px;
+        }
+        .looker-card-head h4 {
+            margin: 0;
+            font-size: .85rem;
+            font-weight: 700;
+            color: #1c2b48;
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .looker-card-head h4 i {
+            color: #0d7a8a;
+            font-size: .9rem;
+        }
+        .looker-card-actions {
+            display: flex;
+            gap: .25rem;
+            flex-shrink: 0;
+        }
+        .looker-expand-btn,
+        .looker-open-btn {
+            background: #fff;
+            border: 1px solid #cfd9df;
+            color: #5a6877;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: .75rem;
+            text-decoration: none;
+            transition: background .12s, border-color .12s, color .12s;
+        }
+        .looker-expand-btn:hover,
+        .looker-open-btn:hover {
+            background: #eef6f8;
+            border-color: #b7cdd6;
+            color: #0d7a8a;
+        }
+        /* The shell sets the visible (compact) box; the iframe inside
+           is forced to its native 1366×768 and scaled to fit. */
+        .looker-frame-shell {
+            position: relative;
+            width: 100%;
+            /* ~16:9-ish but a bit taller because Looker reports usually
+               are. Tweak the aspect ratio if your report is square. */
+            padding-top: 60%;
+            background: #fff;
+            overflow: hidden;
+        }
+        .looker-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1366px;
+            height: 768px;
+            border: 0;
+            transform-origin: 0 0;
+            /* The scale is calculated from the card's actual width
+               (≈ viewport / 3 minus padding). 0.32 fits ~1366px source
+               in a ~437px-wide column at desktop widths and looks crisp
+               on retina. JS below recalculates per-card on resize. */
+            transform: scale(.32);
+        }
+        /* Expanded state — single full-width row, taller, scale ↑ */
+        .looker-card.expanded {
+            grid-column: 1 / -1;
+        }
+        .looker-card.expanded .looker-frame-shell {
+            padding-top: 50%;
+        }
+        .looker-card.expanded .looker-expand-btn i::before {
+            content: "\f066"; /* fa-compress */
+        }
+
+        /* Tablet — 2 columns */
+        @media (max-width: 1100px) {
+            .looker-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .looker-frame { transform: scale(.42); }
+        }
+        /* Phone — 1 column, larger scale so it's still readable */
+        @media (max-width: 720px) {
+            .looker-grid { grid-template-columns: 1fr; }
+            .looker-frame { transform: scale(.55); }
+            .looker-card.expanded .looker-frame { transform: scale(.7); }
+        }
+
         /* Looker date-range pills */
         .looker-range-pills {
             display: flex;
@@ -1185,5 +3267,461 @@
             .looker-range-label { width: 100%; margin-bottom: .25rem; }
         }
     </style>
+    <!-- ── Staff role bootstrap ──────────────────────────────
+         Runs after dashboard.js / gallery.js so it can override their
+         behaviour. For staff users:
+           • Default-selected sidebar tab becomes "Packages" (since
+             Overview is hidden).
+           • The per-package delete callback is short-circuited (the
+             button is also CSS-hidden, but this is belt-and-braces
+             in case the page state is restored from cache).
+           • Gallery upload form fields are marked `required` so the
+             native form validation prevents submission unless every
+             field is filled. Caption + Order remain optional. -->
+    <script>
+    (function () {
+        if (window.__dashRole !== 'staff') return;
+
+        // 1) Default to the Packages tab on first paint
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                document.querySelectorAll('.sidebar-link.active').forEach(function (el) {
+                    el.classList.remove('active');
+                });
+                document.querySelectorAll('.dashboard-section.active').forEach(function (el) {
+                    el.classList.remove('active');
+                });
+                var pkgLink = document.querySelector('.sidebar-link[data-section="packages"]');
+                var pkgSection = document.getElementById('section-packages');
+                if (pkgLink) pkgLink.classList.add('active');
+                if (pkgSection) pkgSection.classList.add('active');
+                var pageTitle = document.getElementById('pageTitle');
+                if (pageTitle) pageTitle.textContent = 'Manage Packages';
+            } catch (e) {}
+        });
+
+        // 2) Block the per-package delete callback as defence-in-depth.
+        //    js/dashboard.js exposes window._pkgDelete for inline onclick.
+        function patchPkgDelete() {
+            if (typeof window._pkgDelete === 'function' && !window._pkgDelete.__staffPatched) {
+                var orig = window._pkgDelete;
+                window._pkgDelete = function () {
+                    alert('Staff users cannot delete packages.\n\nPlease ask an admin to remove a package on your behalf.');
+                    return false;
+                };
+                window._pkgDelete.__staffPatched = true;
+            }
+        }
+        // dashboard.js runs at DOMContentLoaded; patch immediately and
+        // again on next tick to cover both load orders.
+        patchPkgDelete();
+        document.addEventListener('DOMContentLoaded', patchPkgDelete);
+        setTimeout(patchPkgDelete, 200);
+
+        // 3) Mark gallery upload-form fields required for staff so the
+        //    metadata is always populated before the photo lands in
+        //    the public gallery. Caption + Order stay optional.
+        document.addEventListener('DOMContentLoaded', function () {
+            var REQUIRED_FOR_STAFF = ['galTitle', 'galCategory', 'galDate', 'galPlace', 'galPackage'];
+            REQUIRED_FOR_STAFF.forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) {
+                    el.required = true;
+                    el.classList.add('staff-required');
+                    // Re-validate the upload button on input
+                    el.addEventListener('input', maybeEnableUpload);
+                    el.addEventListener('change', maybeEnableUpload);
+                }
+            });
+            // Initial pass
+            setTimeout(maybeEnableUpload, 100);
+        });
+
+        function maybeEnableUpload() {
+            var btn = document.getElementById('galUploadBtn');
+            var fileInput = document.getElementById('galFileInput');
+            if (!btn) return;
+            // Button policy (post-2026 dialog refactor):
+            //   The Upload button is enabled the moment files are chosen.
+            //   When the user clicks it without filling the required tags,
+            //   the inline gallery wiring shows a modal listing exactly
+            //   which fields are missing — no more silently-disabled
+            //   buttons that confused staff.
+            //   We still set a tooltip + visual cue here so the user
+            //   knows what they need to fill before clicking.
+            var hasFiles = !!(fileInput && fileInput.files && fileInput.files.length);
+            var allFilled = ['galTitle', 'galCategory', 'galDate', 'galPlace', 'galPackage']
+                .every(function (id) {
+                    var el = document.getElementById(id);
+                    return el && String(el.value || '').trim() !== '';
+                });
+            btn.disabled = !hasFiles;
+            btn.title = !hasFiles
+                ? 'Choose one or more images to upload'
+                : !allFilled
+                    ? 'Click to see which required fields are still empty (Title, Category, Date, Place, Package).'
+                    : 'Upload selected images';
+            // Add a subtle warning class while fields are still missing
+            // (used by CSS to colour the button amber, not red).
+            if (hasFiles && !allFilled) {
+                btn.classList.add('upload-needs-fields');
+            } else {
+                btn.classList.remove('upload-needs-fields');
+            }
+        }
+        // Expose so the inline gallery wiring can call it after a file is chosen
+        window.__staffMaybeEnableUpload = maybeEnableUpload;
+    })();
+    </script>
+
+    <!-- ── Gallery dropdowns (admin manages, staff picks from them) ──
+         Populates the Category / Place / Package <select>s in the
+         gallery upload form (and in the per-photo edit modal) from
+         the SettingsStore-backed lists on /settings/site. Admins also
+         get the "Manage Gallery Dropdowns" panel in Settings to add /
+         remove options on the fly. -->
+    <script>
+    (function () {
+        var FIELDS = [
+            { key: 'category', settingsKey: 'galleryCategoryOptions' },
+            { key: 'place',    settingsKey: 'galleryPlaceOptions'    },
+            { key: 'package',  settingsKey: 'galleryPackageOptions'  }
+        ];
+        var DEFAULTS = {
+            galleryCategoryOptions: ['Beaches', 'Islands', 'Activities', 'Resorts', 'Sunsets'],
+            galleryPlaceOptions:    ['Port Blair', 'Havelock Island', 'Neil Island', 'Ross Island', 'Baratang', 'Diglipur', 'Radhanagar Beach', 'Elephant Beach', 'Cellular Jail'],
+            galleryPackageOptions:  ['Budget', 'Standard', 'Luxury', 'Honeymoon', 'Family', 'Adventure']
+        };
+
+        // Pull the currently-cached settings (or fall back to defaults).
+        // This is sync — page renders the dropdowns instantly, and we
+        // re-render once Firestore returns fresh data below.
+        function getOptions(key) {
+            try {
+                var s = (window.SettingsStore && window.SettingsStore.cached && window.SettingsStore.cached()) || {};
+                var v = s[key];
+                if (Array.isArray(v) && v.length) return v.slice();
+            } catch (_) {}
+            return (DEFAULTS[key] || []).slice();
+        }
+
+        // Populate ALL <select data-dropdown="..."> within `root` (defaults
+        // to document). Safe to call repeatedly — the placeholder and the
+        // currently-selected value are preserved across rerenders.
+        function populate(root) {
+            root = root || document;
+            FIELDS.forEach(function (field) {
+                var opts = getOptions(field.settingsKey);
+                root.querySelectorAll('select[data-dropdown="' + field.key + '"]').forEach(function (sel) {
+                    var current = sel.value;
+                    var placeholder = sel.querySelector('option[value=""]');
+                    var placeholderHTML = placeholder ? placeholder.outerHTML
+                        : '<option value="">— Choose ' + field.key + ' —</option>';
+                    sel.innerHTML = placeholderHTML +
+                        opts.map(function (o) {
+                            var safe = String(o).replace(/[&<>"']/g, function (c) {
+                                return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+                            });
+                            return '<option value="' + safe + '">' + safe + '</option>';
+                        }).join('');
+                    // Restore previously chosen value (works for legacy
+                    // photos whose value isn't in the list any more —
+                    // we add it as an extra trailing option).
+                    if (current) {
+                        var found = Array.prototype.some.call(sel.options, function (op) {
+                            return op.value === current;
+                        });
+                        if (!found) {
+                            var safeCur = String(current).replace(/[&<>"']/g, function (c) {
+                                return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+                            });
+                            sel.insertAdjacentHTML('beforeend',
+                                '<option value="' + safeCur + '" data-legacy="1">' + safeCur + ' (legacy)</option>');
+                        }
+                        sel.value = current;
+                    }
+                });
+            });
+        }
+        // Expose so other scripts (the edit-modal code above) can call it
+        // when they construct their own DOM tree on demand.
+        window.__populateGalleryDropdowns = populate;
+
+        // First paint
+        populate();
+
+        // ── Manage panel (admin-only) ──────────────────────────
+        // Render the three lists in Settings → Manage Gallery Dropdowns,
+        // wire add/remove buttons. Each click writes the full list to
+        // Firestore via SettingsStore.save(); the local cache updates
+        // immediately so the upload-form selects stay in sync.
+        function renderManager() {
+            if (window.__dashRole !== 'admin') return; // panel hidden for staff
+            var mgr = document.getElementById('gdMgr');
+            if (!mgr) return;
+            FIELDS.forEach(function (field) {
+                var listEl = mgr.querySelector('.gd-list[data-list="' + field.key + '"] ul');
+                if (!listEl) return;
+                var opts = getOptions(field.settingsKey);
+                if (!opts.length) {
+                    listEl.innerHTML = '<li class="gd-empty">(no options yet — add one below)</li>';
+                    return;
+                }
+                listEl.innerHTML = opts.map(function (o) {
+                    var safe = String(o).replace(/[&<>"']/g, function (c) {
+                        return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+                    });
+                    return '<li><span>' + safe + '</span>' +
+                        '<button type="button" data-remove="' + safe + '" title="Remove"><i class="fas fa-times"></i></button></li>';
+                }).join('');
+            });
+        }
+
+        function showStatus(msg, isError) {
+            var el = document.getElementById('gdSaveStatus');
+            if (!el) return;
+            el.textContent = msg || '';
+            el.style.color = isError ? '#c0392b' : '#0d7a8a';
+        }
+
+        async function saveList(field, opts) {
+            if (!window.SettingsStore || !window.SettingsStore.save) {
+                throw new Error('SettingsStore not available');
+            }
+            var patch = {};
+            patch[field.settingsKey] = opts;
+            await window.SettingsStore.save(patch);
+        }
+
+        function wireMgr() {
+            if (window.__dashRole !== 'admin') return;
+            var mgr = document.getElementById('gdMgr');
+            if (!mgr) return;
+
+            // Add button (for each list)
+            mgr.querySelectorAll('.gd-list').forEach(function (listCard) {
+                var key = listCard.dataset.list;
+                var field = FIELDS.find(function (f) { return f.key === key; });
+                if (!field) return;
+                var input  = listCard.querySelector('.gd-add-row input');
+                var addBtn = listCard.querySelector('.gd-add-btn');
+                if (!input || !addBtn) return;
+
+                async function add() {
+                    var val = (input.value || '').trim();
+                    if (!val) return;
+                    var current = getOptions(field.settingsKey);
+                    if (current.indexOf(val) >= 0) {
+                        showStatus('"' + val + '" is already in the list.', true);
+                        return;
+                    }
+                    var next = current.concat([val]);
+                    addBtn.disabled = true;
+                    showStatus('Saving…');
+                    try {
+                        await saveList(field, next);
+                        input.value = '';
+                        showStatus('✓ Added "' + val + '"');
+                        renderManager();
+                        populate();
+                    } catch (err) {
+                        console.error('Gallery dropdown add failed:', err);
+                        showStatus('Failed: ' + (err && err.message || err), true);
+                    } finally {
+                        addBtn.disabled = false;
+                    }
+                }
+                addBtn.addEventListener('click', add);
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') { e.preventDefault(); add(); }
+                });
+            });
+
+            // Remove (delegated)
+            mgr.addEventListener('click', async function (e) {
+                var btn = e.target.closest('button[data-remove]');
+                if (!btn) return;
+                var listCard = btn.closest('.gd-list');
+                if (!listCard) return;
+                var key = listCard.dataset.list;
+                var field = FIELDS.find(function (f) { return f.key === key; });
+                if (!field) return;
+                var val = btn.dataset.remove;
+                if (!confirm('Remove "' + val + '" from the ' + key + ' list?')) return;
+                var current = getOptions(field.settingsKey);
+                var next = current.filter(function (o) { return o !== val; });
+                showStatus('Saving…');
+                try {
+                    await saveList(field, next);
+                    showStatus('✓ Removed "' + val + '"');
+                    renderManager();
+                    populate();
+                } catch (err) {
+                    console.error('Gallery dropdown remove failed:', err);
+                    showStatus('Failed: ' + (err && err.message || err), true);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            renderManager();
+            wireMgr();
+        });
+
+        // Pull fresh settings from Firestore. Once the load resolves,
+        // re-populate the upload-form selects + manager UI so any admin
+        // changes made on a different device show up here too.
+        if (window.SettingsStore && window.SettingsStore.load) {
+            window.SettingsStore.load().then(function () {
+                populate();
+                renderManager();
+            }).catch(function () {});
+        }
+    })();
+    </script>
+
+    <!-- ── Chat Widget settings wiring ─────────────────────────
+         Wires the Settings → Chat Widget card. Pulls the current
+         provider + WhatsApp bridge config from /settings/site,
+         lets the admin pick a different provider, and saves the
+         choice back via SettingsStore.save(). The provider is read
+         on every public page-load by js/brevo.js + js/chat.js so the
+         change takes effect instantly for any new visitor. -->
+    <script>
+    (function () {
+        var providerSel       = document.getElementById('chatProviderSelect');
+        var waBlock           = document.getElementById('chatWhatsappBlock');
+        var waToggle          = document.getElementById('whatsappBridgeToggle');
+        var waUrl             = document.getElementById('whatsappBridgeWorkerUrl');
+        var waPhone           = document.getElementById('whatsappBridgeAdminPhone');
+        var waPhoneNumberId   = document.getElementById('whatsappBridgePhoneNumberId');
+        // Telegram bridge fields (mirrors WhatsApp; both bridges fire
+        // independently from js/chat.js + js/live-chat.js when enabled).
+        var tgBlock           = document.getElementById('chatTelegramBlock');
+        var tgToggle          = document.getElementById('telegramBridgeToggle');
+        var tgUrl             = document.getElementById('telegramBridgeWorkerUrl');
+        var tgChatId          = document.getElementById('telegramBridgeChatId');
+        var tgBotUsername     = document.getElementById('telegramBridgeBotUsername');
+        var tgOpenBotLink     = document.getElementById('telegramBridgeOpenBot');
+        // Auto-reply text shown when a customer sends their first message
+        // in a LIVE chat session. Read by js/live-chat.js → getAutoReplyText().
+        var autoReplyEl       = document.getElementById('liveChatAutoReplyInput');
+        var saveBtn           = document.getElementById('saveChatWidgetBtn');
+        var statusEl          = document.getElementById('chatWidgetStatus');
+
+        if (!providerSel || !saveBtn) return; // Not on this page
+
+        function setStatus(msg, isError) {
+            if (!statusEl) return;
+            statusEl.textContent = msg || '';
+            statusEl.style.color = isError ? '#c0392b' : '#0a5a68';
+        }
+
+        // The WhatsApp + Telegram blocks are only relevant when provider === 'custom'.
+        // When the admin picks 'brevo' or 'none', the bridges are dead-code regardless
+        // (the LIVE chat widget that talks to them only renders for 'custom').
+        function refreshVisibility() {
+            var isCustom = (providerSel.value === 'custom');
+            if (waBlock) waBlock.style.display = isCustom ? '' : 'none';
+            if (tgBlock) tgBlock.style.display = isCustom ? '' : 'none';
+        }
+        providerSel.addEventListener('change', refreshVisibility);
+        refreshVisibility();
+
+        // Live-update the "Open bot in Telegram" deep-link as the admin
+        // types the bot username — saves a roundtrip vs. requiring a save first.
+        function refreshOpenBotLink() {
+            if (!tgOpenBotLink) return;
+            var u = String((tgBotUsername && tgBotUsername.value) || '').trim().replace(/^@/, '');
+            if (!u) {
+                tgOpenBotLink.href = 'https://t.me';
+                tgOpenBotLink.removeAttribute('data-ready');
+            } else {
+                tgOpenBotLink.href = 'https://t.me/' + encodeURIComponent(u);
+                tgOpenBotLink.setAttribute('data-ready', '1');
+            }
+        }
+        if (tgBotUsername) tgBotUsername.addEventListener('input', refreshOpenBotLink);
+
+        // Hydrate fields from SettingsStore
+        function hydrate() {
+            if (!window.SettingsStore || !window.SettingsStore.load) return;
+            window.SettingsStore.load().then(function (s) {
+                if (!s) return;
+                if (s.chatProvider) providerSel.value = s.chatProvider;
+                if (waToggle)        waToggle.checked     = !!s.whatsappBridgeEnabled;
+                if (waUrl)           waUrl.value          = s.whatsappBridgeWorkerUrl || '';
+                if (waPhone)         waPhone.value        = s.whatsappBridgeAdminPhone || '';
+                if (waPhoneNumberId) waPhoneNumberId.value = s.whatsappBridgePhoneNumberId || '';
+                if (tgToggle)        tgToggle.checked      = !!s.telegramBridgeEnabled;
+                if (tgUrl)           tgUrl.value           = s.telegramBridgeWorkerUrl || '';
+                if (tgChatId)        tgChatId.value        = s.telegramBridgeChatId || '';
+                if (tgBotUsername)   tgBotUsername.value   = s.telegramBridgeBotUsername || '';
+                if (autoReplyEl)     autoReplyEl.value     = s.liveChatAutoReply || '';
+                refreshVisibility();
+                refreshOpenBotLink();
+            }).catch(function () {});
+        }
+        // Defer until Firebase is ready so SettingsStore can read.
+        if (window.__firebaseReady) {
+            window.__firebaseReady.then(hydrate).catch(function () {});
+        } else {
+            setTimeout(hydrate, 800);
+        }
+
+        saveBtn.addEventListener('click', async function () {
+            if (!window.SettingsStore || !window.SettingsStore.save) {
+                setStatus('SettingsStore not available.', true);
+                return;
+            }
+            saveBtn.disabled = true;
+            var orig = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+            setStatus('Saving…');
+            try {
+                var patch = {
+                    chatProvider:                providerSel.value || 'brevo',
+                    whatsappBridgeEnabled:       !!(waToggle && waToggle.checked),
+                    whatsappBridgeWorkerUrl:     (waUrl && waUrl.value || '').trim(),
+                    whatsappBridgeAdminPhone:    (waPhone && waPhone.value || '').replace(/\D/g, ''),
+                    whatsappBridgePhoneNumberId: (waPhoneNumberId && waPhoneNumberId.value || '').replace(/\D/g, ''),
+                    // Telegram bridge — same shape as WhatsApp; the telegram-bridge
+                    // Worker reads these from /settings/site at request time.
+                    telegramBridgeEnabled:       !!(tgToggle && tgToggle.checked),
+                    telegramBridgeWorkerUrl:     (tgUrl && tgUrl.value || '').trim(),
+                    telegramBridgeChatId:        (tgChatId && tgChatId.value || '').replace(/\s+/g, ''),
+                    telegramBridgeBotUsername:   (tgBotUsername && tgBotUsername.value || '').trim().replace(/^@/, ''),
+                    // Auto-reply text — empty string means "use built-in default"
+                    // when js/live-chat.js renders the bubble.
+                    liveChatAutoReply:           (autoReplyEl && autoReplyEl.value || '').trim()
+                };
+                // Validate: if WhatsApp bridge is enabled, the URL + phone fields must be filled.
+                if (patch.chatProvider === 'custom' && patch.whatsappBridgeEnabled) {
+                    if (!patch.whatsappBridgeWorkerUrl) throw new Error('Worker URL is required when WhatsApp bridge is enabled.');
+                    if (!patch.whatsappBridgeAdminPhone) throw new Error('Admin WhatsApp phone is required when bridge is enabled.');
+                    if (!patch.whatsappBridgePhoneNumberId) throw new Error('Meta Phone Number ID is required when bridge is enabled.');
+                }
+                // Same validation for Telegram bridge — both URL and chat-id
+                // are mandatory or the worker has nothing to send the digest to.
+                if (patch.chatProvider === 'custom' && patch.telegramBridgeEnabled) {
+                    if (!patch.telegramBridgeWorkerUrl) throw new Error('Worker URL is required when Telegram bridge is enabled.');
+                    if (!patch.telegramBridgeChatId)    throw new Error('Telegram chat-id is required when bridge is enabled. Send /chatid to your bot to retrieve it.');
+                    if (!/^-?\d{5,}$/.test(patch.telegramBridgeChatId)) throw new Error('Telegram chat-id must be a numeric id (e.g. 123456789). Send /chatid to your bot to retrieve it.');
+                }
+                await window.SettingsStore.save(patch);
+                setStatus('✓ Chat widget settings saved. New visitors see the change immediately.');
+                if (window.Toast) window.Toast.success('Chat widget updated');
+            } catch (err) {
+                console.error('[chat-widget-save] failed:', err);
+                setStatus('❌ ' + (err && err.message || 'Save failed'), true);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = orig;
+            }
+        });
+    })();
+    </script>
+
+    <script src="js/user-menu.js?v=14"></script>
 </body>
 </html>

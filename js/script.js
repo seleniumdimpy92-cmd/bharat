@@ -61,13 +61,72 @@ function pkgRoute(pkg) {
         test:      ['Test Package']
     }[pkg.id] || ['Andaman Tour']);
 }
+// Map a package to its filter-tab category (lower-case slug).
+//
+// Phase 1 of the package redesign added an explicit `pkg.category` field
+// in the dashboard editor — values: Budget / Standard / Deluxe / Luxury /
+// Royal / Honeymoon. The MMT-style tab strip on the homepage uses six
+// matching slugs (all-packages / budget / standard / deluxe / luxury /
+// royal / honeymoon).
+//
+// Order of resolution:
+//   1) explicit pkg.category (new field, admin-set)
+//   2) name-based heuristic (catches existing un-tagged packages so the
+//      filter pills still group them sensibly without a backfill)
+//   3) legacy hard-coded id mapping (back-compat with the original
+//      budget / standard / luxury / honeymoon ids)
+//   4) fall back to "standard"
 function pkgCategory(pkg) {
-    if (pkg.id === 'test') return 'budget';
-    if (pkg.id === 'budget') return 'budget';
+    if (!pkg) return 'standard';
+    // 1. Explicit category from the dashboard editor
+    var cat = String(pkg.category || '').trim().toLowerCase();
+    if (cat) {
+        if (cat === 'budget')    return 'budget';
+        if (cat === 'standard')  return 'standard';
+        if (cat === 'deluxe')    return 'deluxe';
+        if (cat === 'luxury')    return 'luxury';
+        if (cat === 'royal')     return 'royal';
+        if (cat === 'honeymoon') return 'honeymoon';
+    }
+    // 2. Name-based heuristic for un-tagged packages
+    var name = String(pkg.name || '').toLowerCase();
+    if (/honeymoon/.test(name))                  return 'honeymoon';
+    if (/royal/.test(name))                      return 'royal';
+    if (/luxury|premium|5[\s-]?star/.test(name)) return 'luxury';
+    if (/deluxe/.test(name))                     return 'deluxe';
+    if (/budget|backpack|saver|economy/.test(name)) return 'budget';
+    // 3. Legacy id mapping
+    if (pkg.id === 'test')      return 'budget';
+    if (pkg.id === 'budget')    return 'budget';
     if (pkg.id === 'honeymoon') return 'honeymoon';
-    if (pkg.id === 'luxury') return 'premium';
-    if (pkg.id === 'standard') return 'standard';
+    if (pkg.id === 'luxury')    return 'luxury';
+    if (pkg.id === 'standard')  return 'standard';
+    // 4. Fallback
     return 'standard';
+}
+
+// Display label + colour for the category pill on each public card.
+// Pure helpers — kept in script.js so the renderer below can reach them
+// without a separate util file.
+function pkgCategoryLabel(slug) {
+    return ({
+        budget:    'Budget',
+        standard:  'Standard',
+        deluxe:    'Deluxe',
+        luxury:    'Luxury',
+        royal:     'Royal',
+        honeymoon: 'Honeymoon'
+    }[slug] || 'Standard');
+}
+function pkgCategoryColor(slug) {
+    return ({
+        budget:    '#3498db',
+        standard:  '#0d7a8a',
+        deluxe:    '#16a085',
+        luxury:    '#9b59b6',
+        royal:     '#d4ac0d',
+        honeymoon: '#e74c3c'
+    }[slug] || '#0d7a8a');
 }
 function pkgHotelCategory(pkg) {
     return ({ budget: 3, standard: 3, luxury: 5, honeymoon: 4, test: 3 }[pkg.id] || 3);
@@ -133,11 +192,24 @@ function sortPackages(arr) {
 }
 
 function updateTabCounts(packages) {
-    const counts = { all: 0, budget: 0, honeymoon: 0, premium: 0, standard: 0 };
+    // Phase 1.4 — counts for the six new category pills (plus the
+    // legacy 'premium' alias kept for back-compat with any cached
+    // index.html that still uses it).
+    const counts = {
+        all: 0,
+        budget: 0,
+        standard: 0,
+        deluxe: 0,
+        luxury: 0,
+        royal: 0,
+        honeymoon: 0,
+        premium: 0      // legacy alias = sum of luxury + royal
+    };
     packages.filter(p => p.visible !== false).forEach(p => {
         counts.all += 1;
         const c = pkgCategory(p);
         if (counts[c] != null) counts[c] += 1;
+        if (c === 'luxury' || c === 'royal') counts.premium += 1;
     });
     Object.keys(counts).forEach(k => {
         const el = document.querySelector(`[data-count="${k}"]`);
@@ -179,10 +251,16 @@ function renderSitePackages() {
             : (pkg.id === 'standard' ? 'Deal of the day' : (pkg.id === 'luxury' ? 'AD Premium' : ''));
         const tagClass = isSoldOut ? 'mmt-card-tag mmt-card-tag-soldout' : 'mmt-card-tag';
 
+        // Phase 1.3 — category pill on every card
+        const catSlug  = pkgCategory(pkg);
+        const catLabel = pkgCategoryLabel(catSlug);
+        const catColor = pkgCategoryColor(catSlug);
+
         return `
-        <div class="mmt-card${isSoldOut ? ' mmt-card-soldout' : ''}" data-pkgid="${pkg.id}" data-name="${pkg.id}">
+        <div class="mmt-card${isSoldOut ? ' mmt-card-soldout' : ''}" data-pkgid="${pkg.id}" data-name="${pkg.id}" data-category="${catSlug}">
             <div class="mmt-card-img" data-nav="${pkg.id}" style="background-image:url('${pkg.image}');">
                 ${tag ? `<span class="${tagClass}">${tag}</span>` : ''}
+                <span class="mmt-cat-pill" style="background:${catColor};">${catLabel}</span>
                 <span class="mmt-more-options">${perks.length} More Options Available</span>
             </div>
             <div class="mmt-card-body">
@@ -302,7 +380,7 @@ window.confirmBooking = async function() {
         key: 'rzp_live_SLfG8nnKN3tXPC', // Live key
         amount: price * 100, // Amount in paise
         currency: 'INR',
-        name: 'Bharat Tours & Travels',
+        name: 'Bharat Transport & Tourism',
         description: `${window.currentPackage} Package - Travel Booking`,
         image: 'https://andamanvoyages.in/images/logo.png',
         handler: async function(response) {
@@ -347,22 +425,39 @@ window.confirmBooking = async function() {
         }
     };
     
-    // Check if Razorpay is loaded
-    if (typeof Razorpay === 'undefined') {
-        alert('❌ Payment system not loaded. Please refresh the page and try again.');
-        console.error('Razorpay script not found');
-        return;
+    // Lazy-load Razorpay's checkout.js. The SDK self-loads dozens of
+    // payment-method chunks so we deferred the <script src=...> tag
+    // out of the public pages. window.RazorpayReady is defined inline
+    // in index.html / package.html (and a no-op fallback for any page
+    // that already has Razorpay loaded eagerly, eg checkout.html).
+    function ensureRazorpay() {
+        if (typeof Razorpay !== 'undefined') return Promise.resolve();
+        if (typeof window.RazorpayReady === 'function') return window.RazorpayReady();
+        // Last-ditch fallback — inject the script directly. Should never
+        // be hit in practice because every page that calls this has
+        // either the loader or the SDK already in <head>.
+        return new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            s.onload  = function () { resolve(); };
+            s.onerror = function () { reject(new Error('Razorpay failed to load')); };
+            document.head.appendChild(s);
+        });
     }
 
-    
-    const rzp1 = new Razorpay(options);
-    
-    rzp1.on('payment.failed', function (response) {
-        alert('❌ Payment failed!\n\nError: ' + response.error.description + '\n\nPlease try again or contact support.');
-        console.error('Payment error:', response);
+    ensureRazorpay().then(function () {
+        const rzp1 = new Razorpay(options);
+
+        rzp1.on('payment.failed', function (response) {
+            alert('❌ Payment failed!\n\nError: ' + response.error.description + '\n\nPlease try again or contact support.');
+            console.error('Payment error:', response);
+        });
+
+        rzp1.open();
+    }).catch(function (err) {
+        alert('❌ Payment system not loaded. Please check your internet connection and try again.');
+        console.error('Razorpay load error:', err);
     });
-    
-    rzp1.open();
 };
 
 // ── Site-settings cache + payments-disabled helper ──────────
@@ -464,7 +559,7 @@ window.bookPackage = function(pkg) {
             meals: ''
         };
         try { sessionStorage.setItem('checkoutCart', JSON.stringify(cart)); } catch (e) {}
-        window.location.href = 'checkout.html';
+        window.location.href = '/checkout';
     } catch (e) {
         console.error('Error in bookPackage:', e);
         if (window.Toast) window.Toast.error('Could not start booking: ' + e.message);
@@ -643,6 +738,70 @@ document.addEventListener('DOMContentLoaded', function() {
     if (hamburgerBtn) hamburgerBtn.addEventListener('click', () => {
         document.body.classList.toggle('nav-open');
     });
+
+    // Topbar scroll state — adds .scrolled when the page is scrolled past 30px,
+    // bumping the translucent header to a more opaque look so text stays legible.
+    (function () {
+        const tb = document.querySelector('.topbar');
+        if (!tb) return;
+        const apply = () => {
+            if (window.scrollY > 30) tb.classList.add('scrolled');
+            else                     tb.classList.remove('scrolled');
+        };
+        apply();
+        window.addEventListener('scroll', apply, { passive: true });
+    })();
+
+    // Wrap every letter of the brand name in <span class="bl"> so we can
+    // animate them one-by-one on hover (sequential wave + tilt + colour).
+    (function wrapBrandLetters() {
+        document.querySelectorAll('.brand-line1, .brand-line2').forEach(line => {
+            const text = line.textContent;
+            line.innerHTML = '';
+            for (const ch of text) {
+                if (ch === ' ') {
+                    // Preserve normal spacing — empty span won't animate but keeps gap
+                    const sp = document.createElement('span');
+                    sp.className = 'bl';
+                    sp.style.width = '.35em';
+                    sp.innerHTML = '&nbsp;';
+                    line.appendChild(sp);
+                } else {
+                    const sp = document.createElement('span');
+                    sp.className = 'bl';
+                    sp.textContent = ch;
+                    line.appendChild(sp);
+                }
+            }
+        });
+    })();
+
+    // ── Move .topbar-contact (phone+email) BELOW the search bar ─
+    // On the home page we drop it just under the .mmt-searchbar in the
+    // hero section. On every other page we drop it just below the topbar
+    // so users can still see the numbers without crowding the header.
+    (function relocateContactStrip() {
+        const tc = document.querySelector('.topbar > .topbar-contact');
+        if (!tc) return;
+        const parent = tc.parentElement;
+        // Pull it out of the topbar
+        parent.removeChild(tc);
+        tc.classList.add('contact-strip-floating');
+        const searchBar = document.querySelector('.mmt-searchbar');
+        if (searchBar && searchBar.parentElement) {
+            // Place AFTER the search bar in the hero
+            searchBar.parentElement.insertBefore(tc, searchBar.nextSibling);
+        } else {
+            // Fallback: pin it just under the topbar
+            tc.style.position = 'fixed';
+            tc.style.top      = 'calc(var(--tb-h) - 0.4rem)';
+            tc.style.right    = '1rem';
+            tc.style.zIndex   = '88';
+            document.body.appendChild(tc);
+        }
+    })();
+
+    // User menu is now built by js/user-menu.js (loaded from every page)
     document.addEventListener('click', (e) => {
         if (!document.body.classList.contains('nav-open')) return;
         const topnav = document.getElementById('topnav');
@@ -716,7 +875,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sessionStorage.removeItem('postLoginIntent');
             if (intent.type === 'checkout') {
                 if (window.Toast) window.Toast.success('Welcome back! Redirecting to checkout…');
-                setTimeout(() => { window.location.href = 'checkout.html'; }, 600);
+                setTimeout(() => { window.location.href = '/checkout'; }, 600);
                 return;
             }
             if (intent.type === 'book' && intent.pkg && typeof window.bookPackage === 'function') {
@@ -875,6 +1034,152 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Search button (top navy bar) — captures search criteria
+    // ── Phase 3 — MMT-style hero search ─────────────────────────
+    // Default the travel date to today + 30 days so the field is never empty
+    // when a visitor lands on the homepage. Pre-applies any existing query
+    // string (?from=…&date=…&adults=…&children=…&category=…) so a search
+    // result URL can be shared / bookmarked.
+    (function initMmtSearchDefaults() {
+        const dateEl = document.getElementById('mmtDate');
+        if (dateEl && !dateEl.value) {
+            const d = new Date();
+            d.setDate(d.getDate() + 30);
+            dateEl.value = d.toISOString().slice(0, 10);
+        }
+        // Min date = today (no past trips)
+        if (dateEl) dateEl.min = new Date().toISOString().slice(0, 10);
+
+        // Read query params and hydrate fields. Honoured: from, date, adults,
+        // children, category. Unknown values are quietly ignored.
+        let params;
+        try { params = new URLSearchParams(location.search); } catch (e) { return; }
+        const setVal = (id, v) => {
+            if (v == null || v === '') return;
+            const el = document.getElementById(id);
+            if (!el) return;
+            // For <select>, only set if the option exists
+            if (el.tagName === 'SELECT') {
+                const has = Array.prototype.some.call(el.options, o => o.value === v);
+                if (has) el.value = v;
+            } else {
+                el.value = v;
+            }
+        };
+        setVal('mmtFrom',     params.get('from'));
+        setVal('mmtDate',     params.get('date'));
+        setVal('mmtAdults',   params.get('adults'));
+        setVal('mmtChildren', params.get('children'));
+        const cat = (params.get('category') || '').toLowerCase();
+        if (cat) {
+            setVal('mmtCategory', cat);
+            // Apply to mmtState immediately so the first render filters
+            const allowed = ['all', 'budget', 'standard', 'deluxe', 'luxury', 'royal', 'honeymoon'];
+            if (allowed.indexOf(cat) >= 0) {
+                mmtState.cat = cat;
+                document.querySelectorAll('#mmtTabs .mmt-tab').forEach(t => {
+                    t.classList.toggle('active', t.dataset.cat === cat);
+                });
+            }
+        }
+    })();
+
+    // ── Combined Travellers picker (Adults 12y+ / Children <12) ──
+    // Replaces the previous separate <select>s on the homepage hero.
+    // Maintains the hidden #mmtAdults / #mmtChildren mirrors so the
+    // SEARCH handler + URL prefill logic keeps working unchanged.
+    (function wireTravellersPicker() {
+        const field    = document.getElementById('mmtTravellersField');
+        const trigger  = document.getElementById('mmtTravellersTrigger');
+        const pop      = document.getElementById('mmtTravellersPop');
+        const txt      = document.getElementById('mmtTravellersText');
+        const adultsIn = document.getElementById('mmtAdults');
+        const childrIn = document.getElementById('mmtChildren');
+        const adultsNm = document.getElementById('mmtTrvAdultsNum');
+        const childrNm = document.getElementById('mmtTrvChildrenNum');
+        const doneBtn  = document.getElementById('mmtTrvDone');
+        if (!field || !trigger || !pop || !adultsIn || !childrIn) return;
+
+        const MAX_ADULTS   = 9;
+        const MAX_CHILDREN = 6;
+
+        function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n | 0)); }
+        function getCounts() {
+            return {
+                adults:   clamp(parseInt(adultsIn.value, 10) || 0, 1, MAX_ADULTS),
+                children: clamp(parseInt(childrIn.value, 10) || 0, 0, MAX_CHILDREN)
+            };
+        }
+        function render() {
+            const c = getCounts();
+            adultsIn.value = c.adults;
+            childrIn.value = c.children;
+            if (adultsNm) adultsNm.textContent = c.adults;
+            if (childrNm) childrNm.textContent = c.children;
+
+            // Visible label — "2 Adults" or "2 Adults, 1 Child"
+            let label = c.adults + ' Adult' + (c.adults === 1 ? '' : 's');
+            if (c.children > 0) {
+                label += ', ' + c.children + ' Child' + (c.children === 1 ? '' : 'ren');
+            }
+            if (txt) txt.textContent = label;
+
+            // Disable +/- when at limits
+            pop.querySelectorAll('.mmt-trv-btn').forEach(btn => {
+                const target = btn.dataset.target;
+                const act    = btn.dataset.act;
+                const cur    = target === 'adults' ? c.adults : c.children;
+                const lo     = target === 'adults' ? 1 : 0;
+                const hi     = target === 'adults' ? MAX_ADULTS : MAX_CHILDREN;
+                btn.disabled = (act === 'dec' && cur <= lo) || (act === 'inc' && cur >= hi);
+            });
+        }
+
+        function open() {
+            pop.hidden = false;
+            field.classList.add('is-open');
+            trigger.setAttribute('aria-expanded', 'true');
+        }
+        function close() {
+            pop.hidden = true;
+            field.classList.remove('is-open');
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+        function toggle() { pop.hidden ? open() : close(); }
+
+        trigger.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            toggle();
+        });
+        pop.addEventListener('click', function (ev) { ev.stopPropagation(); });
+        document.addEventListener('click', function (ev) {
+            if (pop.hidden) return;
+            if (!field.contains(ev.target)) close();
+        });
+        document.addEventListener('keydown', function (ev) {
+            if (ev.key === 'Escape' && !pop.hidden) close();
+        });
+
+        pop.querySelectorAll('.mmt-trv-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const target = btn.dataset.target;
+                const act    = btn.dataset.act;
+                const c      = getCounts();
+                if (target === 'adults') {
+                    c.adults = clamp(c.adults + (act === 'inc' ? 1 : -1), 1, MAX_ADULTS);
+                    adultsIn.value = c.adults;
+                } else if (target === 'children') {
+                    c.children = clamp(c.children + (act === 'inc' ? 1 : -1), 0, MAX_CHILDREN);
+                    childrIn.value = c.children;
+                }
+                render();
+            });
+        });
+
+        if (doneBtn) doneBtn.addEventListener('click', close);
+
+        render();
+    })();
+
     const mmtSearchBtn = document.getElementById('mmtSearchBtn');
     if (mmtSearchBtn) {
         mmtSearchBtn.addEventListener('click', () => {
@@ -882,11 +1187,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const dateEl = document.getElementById('mmtDate');
             const adultsEl = document.getElementById('mmtAdults');
             const childrenEl = document.getElementById('mmtChildren');
+            const categoryEl = document.getElementById('mmtCategory');
 
             const from = fromEl ? fromEl.value.trim() : '';
             const date = dateEl ? dateEl.value : '';
             const adults = adultsEl ? parseInt(adultsEl.value, 10) : 2;
             const children = childrenEl ? parseInt(childrenEl.value, 10) : 0;
+            const category = categoryEl ? (categoryEl.value || 'all').toLowerCase() : 'all';
 
             if (!from) {
                 alert('Please enter your travelling-from city.');
@@ -901,20 +1208,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Persist search context for downstream use (booking/customize flow)
             window.searchContext = {
-                from, to: 'Andaman', date, adults, children,
+                from, to: 'Andaman', date, adults, children, category,
                 totalPersons: adults + children
             };
             try { sessionStorage.setItem('searchContext', JSON.stringify(window.searchContext)); } catch (e) {}
 
             // GA4 — search event
             try {
-                window.Analytics && window.Analytics.search(`${from} → Andaman | ${date} | ${adults}A${children}C`);
+                window.Analytics && window.Analytics.search(`${from} → Andaman | ${date} | ${adults}A${children}C | ${category}`);
             } catch (e) {}
 
-            // Reset to ALL and refresh, then scroll into view
-            mmtState.cat = 'all';
+            // Push the search params to the URL so the result is shareable
+            // and survives reload. We use replaceState so the back button
+            // still goes to wherever the visitor came from.
+            try {
+                const next = new URLSearchParams();
+                if (from)     next.set('from', from);
+                if (date)     next.set('date', date);
+                if (adults)   next.set('adults', String(adults));
+                if (children) next.set('children', String(children));
+                if (category && category !== 'all') next.set('category', category);
+                const qs = next.toString();
+                history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + '#packages');
+            } catch (e) {}
+
+            // Apply category filter and refresh, then scroll into view
+            mmtState.cat = category || 'all';
             document.querySelectorAll('#mmtTabs .mmt-tab').forEach(t => {
-                t.classList.toggle('active', t.dataset.cat === 'all');
+                t.classList.toggle('active', t.dataset.cat === mmtState.cat);
             });
             renderSitePackages();
             const grid = document.getElementById('packagesGrid');
@@ -946,7 +1267,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const custBtn = e.target.closest('[data-action="customize"]');
             if (custBtn) { e.stopPropagation(); window.openCustomize(custBtn.dataset.pkg); return; }
             const navEl = e.target.closest('[data-nav]');
-            if (navEl) { window.location.href = 'package.html?id=' + navEl.dataset.nav; return; }
+            if (navEl) { window.location.href = '/package?id=' + navEl.dataset.nav; return; }
         });
     }
 

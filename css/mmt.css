@@ -433,6 +433,27 @@ select.mmt-field-value option {
   font-weight: 600;
   backdrop-filter: blur(4px);
 }
+
+/* Phase 1.3 — category pill on every package card.
+   Sits in the top-right corner of the card image, just below the
+   "More Options" pill. The background colour is set inline on the
+   element by js/script.js → pkgCategoryColor() so each category
+   gets its own brand colour. */
+.mmt-cat-pill {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  background: #0d7a8a;       /* fallback — overridden by inline style */
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  z-index: 2;
+}
 .mmt-card-body {
   padding: 1.1rem 1.25rem;
   display: flex;
@@ -684,3 +705,156 @@ select.mmt-field-value option {
 .mmt-card-cta-soldout{background:#fdedec !important;color:#c0392b !important;cursor:not-allowed;border:1px solid #f5b7b1;box-shadow:none !important}
 .mmt-card-cta-soldout:hover{filter:brightness(.97);transform:none !important;background:#f9e0dd !important}
 .mmt-card-cta-soldout i{margin-right:.4rem}
+
+/* ── Bookings page (My Bookings) cards ───────────────────────── */
+.bookings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin-top:1rem}
+.bk-card{background:#fff;border:1px solid #e3e8ef;border-radius:12px;box-shadow:0 2px 8px rgba(10,31,68,.04);overflow:hidden;transition:box-shadow .15s,transform .12s}
+.bk-card:hover{box-shadow:0 6px 18px rgba(10,31,68,.10);transform:translateY(-1px)}
+.bk-card-cancelled{opacity:.78}
+.bk-head{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1rem;background:linear-gradient(135deg,#f6fafb,#eef6f8);border-bottom:1px solid #e3e8ef;gap:.5rem}
+.bk-pkg{font-size:.95rem;color:#0d2c3a;display:flex;align-items:center;gap:.4rem;flex:1;min-width:0}
+.bk-pkg strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk-status{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:.18rem .55rem;border-radius:999px;flex-shrink:0}
+.bk-status-confirmed{background:#d4edda;color:#155724}
+.bk-status-completed{background:#cfe2ff;color:#0d4a8a}
+.bk-status-cancelled{background:#fdedec;color:#c0392b}
+.bk-body{padding:.85rem 1rem;font-size:.85rem}
+.bk-row{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;padding:.25rem 0}
+.bk-k{color:#7a8b96;font-size:.8rem}
+.bk-v{color:#2c3e50;font-weight:600;text-align:right;word-break:break-word}
+.bk-sep{border:none;border-top:1px dashed #cfd9df;margin:.5rem 0}
+.bk-foot{display:flex;gap:.5rem;padding:.6rem 1rem;background:#f9fbfc;border-top:1px solid #e3e8ef}
+.bk-action{flex:1;text-align:center;padding:.45rem .8rem;border-radius:6px;font-size:.82rem;font-weight:600;text-decoration:none;border:1px solid #cfd9df;color:#5a6877;background:#fff;display:inline-flex;align-items:center;justify-content:center;gap:.35rem;transition:background .12s,color .12s,border-color .12s}
+.bk-action:hover{background:#eef6f8;color:#0d7a8a;border-color:#0d7a8a}
+.bk-action-cancel:hover{background:#fdedec;color:#c0392b;border-color:#c0392b}
+.bookings-empty-inline{grid-column:1/-1;text-align:center;padding:2.5rem 1rem;color:#5a6877;background:#fff;border-radius:12px;border:1px dashed #cfd9df}
+.bookings-empty-inline i{font-size:2.4rem;color:#0d7a8a;opacity:.55;margin-bottom:.5rem}
+.bookings-empty-inline h3{margin:.4rem 0 .3rem;color:#0d2c3a}
+@media(max-width:600px){.bookings-grid{grid-template-columns:1fr}}
+
+/* ── Combined Travellers picker (replaces separate Adults + Kids selects) ──
+   Trigger looks identical to a regular .mmt-field-value so it lines up
+   inside the .mmt-search-fields grid; the popup floats below it on a
+   higher z-index. Hidden #mmtAdults / #mmtChildren <input>s are
+   updated by js/script.js so the rest of the search/booking pipeline
+   keeps working unchanged. */
+.mmt-field-travellers { position: relative; }
+.mmt-travellers-trigger {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+.mmt-travellers-trigger i { font-size: .7rem; color: #5a6877; flex-shrink: 0; }
+.mmt-field-travellers.is-open .mmt-travellers-trigger i { transform: rotate(180deg); }
+
+.mmt-travellers-pop {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 50;
+    background: #fff;
+    border: 1px solid #e3e8ef;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(10, 31, 68, .15);
+    padding: .9rem 1rem;
+    min-width: 280px;
+    width: max-content;
+    max-width: 90vw;
+}
+.mmt-travellers-pop[hidden] { display: none; }
+
+.mmt-trv-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .55rem 0;
+}
+.mmt-trv-row + .mmt-trv-row { border-top: 1px dashed #eef0f3; }
+.mmt-trv-text { display: flex; flex-direction: column; }
+.mmt-trv-text strong {
+    font-size: .92rem;
+    font-weight: 700;
+    color: #0d2c3a;
+    line-height: 1.2;
+}
+.mmt-trv-text small {
+    font-size: .75rem;
+    color: #7a8b96;
+    margin-top: .15rem;
+}
+
+.mmt-trv-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+}
+.mmt-trv-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid #cfdde1;
+    background: #fff;
+    color: #0d7a8a;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .12s, border-color .12s, color .12s, opacity .12s;
+}
+.mmt-trv-btn:hover:not(:disabled) {
+    background: #0d7a8a;
+    color: #fff;
+    border-color: #0d7a8a;
+}
+.mmt-trv-btn:disabled { opacity: .35; cursor: not-allowed; }
+.mmt-trv-num {
+    min-width: 22px;
+    text-align: center;
+    font-weight: 700;
+    font-size: .95rem;
+    color: #0d2c3a;
+}
+
+.mmt-trv-foot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: .5rem;
+    padding-top: .5rem;
+    border-top: 1px solid #f0f3f5;
+}
+.mmt-trv-done {
+    background: #0d7a8a;
+    color: #fff;
+    border: none;
+    padding: .42rem 1.1rem;
+    border-radius: 6px;
+    font: inherit;
+    font-size: .85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .12s;
+}
+.mmt-trv-done:hover { background: #0a5a68; }
+
+/* Mobile: pop opens full-width below the trigger */
+@media (max-width: 600px) {
+    .mmt-travellers-pop {
+        left: 0;
+        right: 0;
+        min-width: 0;
+        max-width: 100%;
+    }
+}

@@ -1,0 +1,71 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "customize-email",
+    "main": "worker.js",
+    "compatibility_date": "2025-05-01",
+    "compatibility_flags": ["nodejs_compat"],
+    "observability": {
+        "enabled": true
+    },
+
+    // ── Variables ───────────────────────────────────────────────
+    // CORS allow-list (only this Origin can POST to the worker).
+    //
+    // FROM_EMAIL / FROM_NAME — visible "From:" on the enquiry email.
+    //   FROM_EMAIL MUST be one of ALLOWED_SENDERS, otherwise worker.js
+    //   silently falls back to enquiries@ (never impersonates an
+    //   outside address).
+    //
+    // ALLOWED_SENDERS — strict whitelist of OUR five official mailboxes.
+    //   No outgoing email may use any other From address, even if
+    //   FROM_EMAIL env var or wrangler config is misconfigured.
+    //
+    // TO_EMAIL — destination of the enquiry email. Must be a verified
+    //   destination address in Cloudflare → Email Routing → Destination
+    //   Addresses, otherwise SEND_EMAIL.send() throws.
+    "vars": {
+        "ALLOWED_ORIGIN":      "https://andamanvoyages.in",
+        "ALLOWED_SENDERS":     "info@andamanvoyages.in,booking@andamanvoyages.in,cancellation@andamanvoyages.in,enquiries@andamanvoyages.in,noreply@andamanvoyages.in",
+        "FROM_EMAIL":          "enquiries@andamanvoyages.in",
+        "FROM_NAME":            "Andaman Voyages Enquiries",
+        // Firebase project ID for the dashboard mirror — must match the
+        // project hosting receivedEmails. The Firestore service-account
+        // JSON is set as a secret (see below); the project_id field of
+        // the JSON should agree with this var.
+        "FIREBASE_PROJECT_ID": "andaman-b886d"
+    },
+
+    // ── send_email binding ──────────────────────────────────────
+    // The destination_address is intentionally omitted. The worker
+    // sends to `body.traveller.email` indirectly (via fromEmail/toEmail
+    // resolved at runtime), and Cloudflare validates the FROM is a
+    // verified Email Routing address on your account.
+    //
+    // After deploy, in the Cloudflare dashboard:
+    //   Workers & Pages → customize-email → Settings → Bindings
+    //   Add binding → Send email
+    //     Variable name: SEND_EMAIL
+    //     Destination address: booking@andamanvoyages.in
+    //     (or leave blank to allow any verified address)
+    "send_email": [
+        {
+            "name": "SEND_EMAIL"
+        }
+    ],
+
+    // ── Service binding to email-router ────────────────────────
+    // Lets us call email-router's /mirror endpoint as
+    // env.EMAIL_ROUTER.fetch(...) — Cloudflare handles the
+    // intra-zone routing internally (no error 1042).
+    "services": [
+        {
+            "binding": "EMAIL_ROUTER",
+            "service": "email-router"
+        }
+    ]
+
+    // ── Optional: secret for extra abuse defence ────────────────
+    // After deploy, set with:
+    //   npx wrangler secret put SHARED_TOKEN
+    // Then put the same value in customize.html → window.CZ_WORKER_TOKEN.
+}

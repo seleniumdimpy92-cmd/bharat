@@ -85,6 +85,29 @@ body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; bac
 }
 .co-field small { display:block; color:var(--muted); font-size:.78rem; margin-top:.3rem; }
 
+/* Locked-in meal plan chip — replaces the old <select id="mealPlan">.
+   The plan is determined by the package tier and not customer-editable.
+   Read-only visual: matches input height + mutes the background so it's
+   clearly informational, not interactive. */
+.meal-plan-locked {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    width: 100%;
+    padding: .65rem .85rem;
+    border: 1.5px solid #e3e8ef;
+    border-radius: 8px;
+    background: #f6fafb;
+    color: #1c2b48;
+    font-size: .94rem;
+    font-weight: 500;
+    line-height: 1.3;
+    cursor: not-allowed;
+    user-select: none;
+}
+.meal-plan-locked i.fa-utensils { color: #0d7a8a; }
+.meal-plan-locked strong { font-weight: 700; color: #0d2c3a; }
+
 /* Add-on chips */
 .addons { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.6rem; margin-top:.5rem; }
 .addon {
@@ -109,6 +132,50 @@ body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; bac
 }
 .summary .row.total .val { color:var(--teal); }
 
+/* T&C / Cancellation acceptance row — sits between the advance-split
+   block and the Pay button. Has to be visually obvious (has a tinted
+   border) so admin can see it was missed if a customer complains the
+   Pay button is greyed out. */
+.tnc-accept {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    padding: .65rem .8rem;
+    margin: .85rem 0 0;
+    background: #fff8e7;
+    border: 1px solid #f0d685;
+    border-radius: 8px;
+    font-size: .85rem;
+    color: #5a4500;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.tnc-accept:hover {
+    background: #fff3d3;
+}
+.tnc-accept input[type="checkbox"] {
+    margin: .2rem 0 0;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--teal);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.tnc-accept span { flex: 1; }
+.tnc-accept a {
+    color: var(--teal-d);
+    font-weight: 600;
+    text-decoration: underline;
+}
+.tnc-accept a:hover { color: var(--teal); }
+/* Subtle "all good" visual once ticked — turns the row green/quiet. */
+.tnc-accept:has(input:checked) {
+    background: #e8f8f5;
+    border-color: #a0d8c8;
+    color: #0a5a68;
+}
+
 .btn-pay {
     width:100%; background:var(--teal); color:#fff; border:0;
     padding:.95rem 1rem; border-radius:8px; font-weight:700; font-size:1rem;
@@ -116,7 +183,14 @@ body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; bac
     font-weight:700;
 }
 .btn-pay:hover { background:var(--teal-d); }
-.btn-pay:disabled { background:#bdc3c7; cursor:not-allowed; }
+.btn-pay:disabled {
+    background:#bdc3c7;
+    cursor:not-allowed;
+    opacity: .7;
+}
+.btn-pay:disabled:hover {
+    background:#bdc3c7;
+}
 
 .btn-secondary {
     width:100%; background:#ecf0f1; color:var(--ink); border:0;
@@ -223,7 +297,12 @@ body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; bac
     font-size: 0.85rem;
     color: #5a6877;
 }
-.cxl-policy strong {
+/* Header label only — the > combinator targets the <strong> that's a
+   *direct* child of .cxl-policy, leaving any <strong> tags inside the
+   list items below as inline text. Without this scope the rule
+   `display:block` would fragment every bolded phrase inside the
+   policy bullets onto its own line and the bullets visually disappear. */
+.cxl-policy > strong {
     display: block;
     margin-bottom: 0.45rem;
     color: #2c3e50;
@@ -235,8 +314,12 @@ body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; bac
     list-style: disc;
 }
 .cxl-policy ul li {
-    margin: 0.18rem 0;
-    line-height: 1.5;
+    margin: 0.35rem 0;
+    line-height: 1.55;
+}
+.cxl-policy ul li strong {
+    color: #2c3e50;
+    font-weight: 700;
 }
 .cxl-policy ul li em {
     color: #888;
@@ -249,4 +332,272 @@ body { font-family:'Poppins',system-ui,Segoe UI,Roboto,sans-serif; margin:0; bac
     font-size: 0.8rem;
     margin-top: 0.4rem;
     line-height: 1.5;
+}
+
+/* ── Inline Terms / Cancellation policy modal ────────────────────
+   Triggered by the two links inside the .tnc-accept row. We render
+   the policy summary inside an overlay so the customer never leaves
+   the cart page (avoids losing form state + the cached cart). */
+.policy-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 31, 68, 0.62);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 9999;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 4vh 1rem;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .18s ease, visibility .18s ease;
+}
+.policy-modal.open {
+    opacity: 1;
+    visibility: visible;
+}
+.policy-modal-card {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 92vh;
+    box-shadow: 0 30px 80px rgba(10,31,68,.35);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(.96);
+    transition: transform .18s ease;
+}
+.policy-modal.open .policy-modal-card {
+    transform: scale(1);
+}
+.policy-modal-close {
+    position: absolute;
+    top: .55rem;
+    right: .8rem;
+    background: transparent;
+    border: 0;
+    color: #5a6877;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: .2rem .55rem;
+    border-radius: 8px;
+    transition: background .12s, color .12s;
+    z-index: 2;
+}
+.policy-modal-close:hover {
+    background: #eef2f5;
+    color: #0d2c3a;
+}
+.policy-modal-body {
+    padding: 1.4rem 1.6rem .25rem;
+    overflow-y: auto;
+    color: #2c3e50;
+    line-height: 1.6;
+    font-size: .92rem;
+}
+.policy-modal-body h3 {
+    margin: 0 0 .15rem;
+    color: var(--teal-d);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.policy-modal-body h3 i {
+    color: var(--teal);
+}
+.policy-modal-body h4 {
+    margin: 1.1rem 0 .35rem;
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 700;
+}
+.policy-modal-body p {
+    margin: 0 0 .65rem;
+}
+.policy-modal-body ul {
+    margin: 0 0 .65rem;
+    padding-left: 1.25rem;
+}
+.policy-modal-body ul li {
+    margin: .25rem 0;
+}
+.policy-modal-body ul ul {
+    margin-top: .25rem;
+    margin-bottom: 0;
+    padding-left: 1.1rem;
+}
+.policy-modal-body strong {
+    color: #0d2c3a;
+}
+.policy-modal-foot {
+    padding: 1rem 1.6rem 1.4rem;
+    border-top: 1px solid #eef2f5;
+    background: #fafbfc;
+    display: flex;
+    justify-content: flex-end;
+    gap: .75rem;
+}
+.policy-modal-foot .btn-pay {
+    width: auto;
+    padding: .65rem 1.4rem;
+    margin: 0;
+    font-size: .92rem;
+}
+@media (max-width: 600px) {
+    .policy-modal { padding: 2vh .5rem; }
+    .policy-modal-card { max-height: 95vh; }
+    .policy-modal-body { padding: 1.1rem 1.1rem .15rem; font-size: .9rem; }
+    .policy-modal-foot { padding: .8rem 1.1rem 1.1rem; }
+    .policy-modal-foot .btn-pay { width: 100%; }
+}
+
+/* ── Price-Lock UI ────────────────────────────────────────────────
+   Customers can pay ₹500/head NOW to lock today's price for 10 days
+   instead of paying the full booking advance. The fee is non-refundable.
+   The lock button appears below the main "Pay Advance" CTA, separated
+   by an "OR" divider so the two options read as alternatives. When
+   the customer has an active lock, we hide the lock button and show
+   an "active-lock-banner" instead, which surfaces credit + countdown.
+   ─────────────────────────────────────────────────────────────── */
+
+/* "OR" divider between Pay-Advance and Lock-Price buttons. The line
+   sits just behind the centred OR pill, giving a clear visual split. */
+.lock-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.1rem 0 .6rem;
+    color: #94a3b3;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+.lock-divider::before,
+.lock-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px dashed #d6dee5;
+}
+.lock-divider span {
+    padding: 0 .85rem;
+    background: #fff;
+    color: #7a8b96;
+}
+
+/* Secondary CTA — softer than the primary teal Pay button. Same
+   shape so they sit naturally in a vertical stack. The amber accent
+   is intentional: signals "wait / hold" rather than "buy now". */
+.btn-lock {
+    width: 100%;
+    background: #fff;
+    color: #b8860b;
+    border: 2px solid #f4c98a;
+    padding: .85rem 1rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .18s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    flex-wrap: wrap;
+    line-height: 1.35;
+}
+.btn-lock:hover:not(:disabled) {
+    background: #fffbf0;
+    border-color: #d68910;
+    color: #8a6308;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(214, 137, 16, .18);
+}
+.btn-lock:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+.btn-lock i.fa-stopwatch { color: #d68910; font-size: 1.05rem; }
+.btn-lock small {
+    font-weight: 500;
+    font-size: .78rem;
+    color: #8a6d3b;
+    letter-spacing: .1px;
+}
+
+/* Helper text under the lock button — explains how the deduction
+   works on conversion and why the fee is non-refundable. Same
+   typographic key as the cancellation-policy block below. */
+.lock-help {
+    display: block;
+    margin: .55rem .15rem 1rem;
+    font-size: .78rem;
+    line-height: 1.5;
+    color: #5a6877;
+    background: #fffbf0;
+    border-left: 3px solid #f4c98a;
+    border-radius: 6px;
+    padding: .6rem .8rem;
+}
+.lock-help i.fa-info-circle { color: #d68910; margin-right: .25rem; }
+
+/* Active-lock banner — shown above the advance/balance split when
+   the customer already has a paid, unexpired lock against the cart's
+   package. Uses the same amber palette as the lock button so the
+   relationship is immediately obvious. The "Cancel lock" link sits
+   at the bottom right (small, low-contrast) — destructive but rare. */
+.active-lock-banner {
+    position: relative;
+    background: linear-gradient(135deg, #fff8e7 0%, #fffbf0 100%);
+    border: 1px solid #f4c98a;
+    border-left: 4px solid #d68910;
+    border-radius: 8px;
+    padding: .85rem 1rem .75rem;
+    margin: .9rem 0;
+    color: #5a4413;
+    font-size: .9rem;
+    line-height: 1.55;
+}
+.active-lock-head {
+    font-weight: 700;
+    font-size: .82rem;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    color: #8a6308;
+    margin-bottom: .35rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+.active-lock-head i.fa-stopwatch { color: #d68910; }
+.active-lock-body strong { color: #0a5a68; font-weight: 700; }
+.active-lock-expiry {
+    margin-top: .25rem;
+    font-size: .82rem;
+    color: #6b5320;
+}
+.active-lock-expiry i.fa-clock { color: #d68910; margin-right: .2rem; }
+.active-lock-cancel {
+    display: inline-block;
+    margin-top: .5rem;
+    font-size: .76rem;
+    color: #a04000;
+    text-decoration: underline;
+    opacity: .7;
+}
+.active-lock-cancel:hover { opacity: 1; color: #c0392b; }
+
+@media (max-width: 600px) {
+    .btn-lock { font-size: .92rem; padding: .75rem .8rem; }
+    .btn-lock small { display: block; width: 100%; margin-top: .15rem; }
+    .lock-divider { margin: .9rem 0 .5rem; }
+    .active-lock-banner { padding: .75rem .9rem .65rem; font-size: .85rem; }
 }

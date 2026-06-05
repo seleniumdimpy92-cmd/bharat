@@ -1,0 +1,14 @@
+{
+    "name": "refund",
+    "version": "1.0.0",
+    "description": "Cloudflare Worker that processes Razorpay refunds for cancelled bookings. Admin-only (Firebase ID token).",
+    "private": true,
+    "scripts": {
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy",
+        "tail": "wrangler tail"
+    },
+    "devDependencies": {
+        "wrangler": "^3.78.0"
+    }
+}

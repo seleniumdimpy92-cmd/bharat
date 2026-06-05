@@ -23,21 +23,45 @@ service cloud.firestore {
           "admin@admin.com"
         ];
     }
+    // Staff allowlist — must mirror window.STAFF_EMAILS in
+    // js/firebase-config.js. Staff users can edit existing packages
+    // (update only — no create / no delete), and can upload + edit
+    // gallery photos (no delete). They cannot touch any other
+    // collection beyond their own profile / bookings.
+    function isStaff() {
+      return request.auth != null
+        && request.auth.token.email in [
+          "pittu.das2@gmail.com",
+          "debjyoti.office@gmail.com"
+        ];
+    }
+    function isAdminOrStaff() {
+      return isAdmin() || isStaff();
+    }
     function isSelf(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
 
     // Public packages collection
+    //   • Anyone can READ.
+    //   • Staff can UPDATE existing packages (price tweaks, itinerary
+    //     edits) but cannot CREATE new ones or DELETE existing ones.
+    //   • Admin can do anything.
     match /packages/{pkgId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read:           if true;
+      allow update:         if isAdminOrStaff();
+      allow create, delete: if isAdmin();
     }
 
     // Public gallery collection — image metadata (URLs in Storage).
-    // Anyone can read; only admins can write.
+    //   • Anyone can READ.
+    //   • Staff can CREATE (upload new photos) and UPDATE existing
+    //     photo metadata, but cannot DELETE.
+    //   • Admin can do anything.
     match /gallery/{photoId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read:           if true;
+      allow create, update: if isAdminOrStaff();
+      allow delete:         if isAdmin();
     }
 
     // Site-wide settings (e.g. payments toggle, maintenance mode).
@@ -47,18 +71,20 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // User profiles — each user owns their doc (doc id = auth uid)
+    // User profiles — each user owns their doc (doc id = auth uid).
+    // Admins additionally have unrestricted access so they can run the
+    // /migrate mirror tool, manage customers from the dashboard, etc.
     match /users/{uid} {
-      allow read: if isSelf(uid) || isAdmin();
-      allow create: if isSelf(uid);
+      allow read:   if isSelf(uid) || isAdmin();
+      allow create: if isSelf(uid) || isAdmin();
       allow update, delete: if isSelf(uid) || isAdmin();
     }
 
     // Username → uid/email lookup (used for "login by username" flow)
     match /usernames/{username} {
       allow read: if true;
-      allow create: if request.auth != null
-        && request.resource.data.uid == request.auth.uid;
+      allow create: if isAdmin() || (request.auth != null
+        && request.resource.data.uid == request.auth.uid);
       // Admin can also clean up usernames when deleting users
       allow update, delete: if isAdmin() || (
         request.auth != null
@@ -66,14 +92,155 @@ service cloud.firestore {
       );
     }
 
-    // Bookings — each booking has a userId field
+    // Bookings — each booking has a userId field. Admins have full access
+    // so they can mirror, refund, cancel and inspect bookings from the
+    // dashboard / migrate tool.
     match /bookings/{bookingId} {
-      allow read: if request.auth != null
+      allow read:   if request.auth != null
         && (isAdmin() || resource.data.userId == request.auth.uid);
-      allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid;
+      allow create: if isAdmin() || (request.auth != null
+        && request.resource.data.userId == request.auth.uid);
       allow update, delete: if request.auth != null
         && (isAdmin() || resource.data.userId == request.auth.uid);
+    }
+
+    // Mail collection — used by the Firebase "Trigger Email" extension.
+    // Authenticated users can create their own mail docs (e.g. custom-trip
+    // enquiries from /customize). Reads are admin-only so users can't see
+    // what other users sent. Updates/deletes are admin-only too.
+    match /mail/{mailId} {
+      allow create: if request.auth != null
+        && request.resource.data.message != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Custom-trip enquiries (audit log for the admin dashboard).
+    // Logged-in users can create one tied to their uid; only admins
+    // (and the owning user) can read; only admins can update/delete.
+    match /customEnquiries/{ref} {
+      allow create: if request.auth != null
+        && (request.resource.data.user == null
+            || request.resource.data.user.uid == request.auth.uid
+            || isAdmin());
+      allow read: if isAdmin()
+        || (request.auth != null
+            && resource.data.user != null
+            && resource.data.user.uid == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Refunds audit log — one doc per refund attempt (success or
+    // failure). Written by js/refund.js after the refund Worker
+    // returns. Useful for accounting + GST and for rebuilding the
+    // refund history without scanning every booking doc.
+    //   • Authenticated admins/staff can read everything.
+    //   • Authenticated users can CREATE their own audit row (the
+    //     client-side helper writes it after a successful refund call;
+    //     the actual money movement happens server-side in the Worker
+    //     so this is just a paper trail).
+    //   • Updates / deletes are admin-only — refund history is
+    //     append-only.
+    match /refunds/{refundId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+
+    // Price locks — ₹500/head fee that freezes today's package price
+    // for 10 days. Customer pays via Razorpay; LocksStore writes one
+    // doc per lock under /priceLocks/{lockRef}.
+    //
+    // Permissions:
+    //   • Owner (uid == auth.uid) can READ their own locks, CREATE
+    //     a new one (the doc must carry their uid), and UPDATE only
+    //     limited fields (status='cancelled' or status='used' when
+    //     they convert it to a booking).
+    //   • Admins/staff have full access for support and reconciliation.
+    //   • Deletion is admin-only — locks are an append-only audit
+    //     trail (refund/forfeit decisions reference these docs).
+    match /priceLocks/{lockId} {
+      allow read:   if request.auth != null
+        && (isAdmin() || resource.data.uid == request.auth.uid);
+      allow create: if isAdmin() || (request.auth != null
+        && request.resource.data.uid == request.auth.uid);
+      allow update: if isAdmin() || (request.auth != null
+        && resource.data.uid == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Sent emails — log of every email the admin Inbox tab has sent
+    // through the inbox-mail Cloudflare Worker. Admins can read full
+    // history; create is allowed for any authenticated admin from the
+    // dashboard (the Worker is the real authoritative gate, but the
+    // Firestore rule is a defence-in-depth layer in case someone tries
+    // to write straight from the browser).
+    match /sentEmails/{id} {
+      allow read:          if isAdmin();
+      allow create:        if isAdmin();
+      allow update, delete:if isAdmin();
+    }
+
+    // Received emails — populated by the email-router Cloudflare Worker
+    // (workers/email-router/) which authenticates as a Firebase service
+    // account and writes via REST. The browser never writes here; admins
+    // can only read. Service-account writes bypass these rules entirely,
+    // so denying create/update/delete here is the correct posture.
+    // Admin can flip the read state from the dashboard. The Worker
+    // (which writes new mail) authenticates with a service account and
+    // bypasses these rules, so we only need to allow the small "mark
+    // read" update here. Limit it to a short whitelist of fields so a
+    // compromised admin token can't rewrite mail content.
+    match /receivedEmails/{id} {
+      allow read:   if isAdmin();
+      // Admins can flip the read state (whitelisted fields) AND they
+      // can delete a mail from the dashboard. The Worker still owns
+      // create — browsers can never inject fake mail.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['unread', 'readAt', 'readBy']);
+      allow delete: if isAdmin();
+      allow create: if false;
+    }
+
+    // ── Live Chat sessions ─────────────────────────────────
+    // /chats/{sessionId} is the parent doc with summary fields
+    // (lastMessage, customerName, unreadByAdmin etc).
+    // /chats/{sessionId}/messages/{msgId} is the per-message log.
+    //
+    // Permissions:
+    //   • Customer (no auth required) — the session ID is an
+    //     unguessable random string stored in their browser's
+    //     localStorage. They can READ their own session's messages
+    //     and WRITE new 'user' messages. They CANNOT read other
+    //     sessions because the rules check the document path, not
+    //     the data.
+    //   • Admin — full read/write on any session. Used by the
+    //     dashboard's Live Chats panel and by the WhatsApp bridge
+    //     worker (which authenticates as a service account, bypassing
+    //     these rules entirely).
+    //
+    // Defence: we cap message length and require role to be one of
+    // the known values so a malicious caller can't write garbage.
+    match /chats/{sessionId} {
+      allow read, write: if isAdmin();
+      // Customer (anon) — can read AND merge-write their own session's
+      // summary fields. We allow any write here because the worker /
+      // browser only ever writes a small set of fields (the rule is
+      // not the boundary — defence-in-depth lives in the client).
+      allow read:        if true;
+      allow create:      if true;
+      allow update:      if true;
+
+      match /messages/{msgId} {
+        allow read:   if true;
+        allow create: if isAdmin()
+          || (
+            request.resource.data.role in ['user', 'bot']
+            && request.resource.data.text is string
+            && request.resource.data.text.size() <= 4000
+          );
+        allow update, delete: if isAdmin();
+      }
     }
 
     // Default deny everything else

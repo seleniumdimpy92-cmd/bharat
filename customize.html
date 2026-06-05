@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>(function(){try{var p=location.pathname;if(/\/index(\.html)?$/i.test(p)){history.replaceState(null,"",p.replace(/\/index(\.html)?$/i,"/")+location.search+location.hash);}else if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Your Andaman Trip — Build Your Own Package | Bharat Transport &amp; Tourism</title>
+    <meta name="description" content="Build your dream Andaman holiday from scratch — pick islands, hotels, dates and activities. Send us an enquiry and our Port Blair team replies with a personalised quote within 2 hours.">
+    <meta name="robots" content="noindex, follow">
+    <meta name="theme-color" content="#0d7a8a">
+    <link rel="canonical" href="https://andamanvoyages.in/customize">
+    <meta property="og:title" content="Customize Your Andaman Trip — Build Your Own Package">
+    <meta property="og:description" content="Build your dream Andaman holiday from scratch and get a personalised quote within 2 hours.">
+    <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg">
+    <link rel="icon" type="image/png" href="images/logo-white.png">
+    <link rel="apple-touch-icon" href="images/logo-white.png">
+    <link rel="stylesheet" href="css/style.css?v=56">
+    <link rel="stylesheet" href="css/conversion-kit.css?v=3">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/firebase-config.js?v=21"></script>
+    <script src="js/analytics.js?v=1"></script>
+    <!-- ── Email send config (4-tier failover) ──────────────────────
+         The /customize page will try senders in this order:
+           1. Cloudflare Worker  (window.CZ_WORKER_URL)
+           2. EmailJS            (window.EMAILJS_CONFIG)
+           3. Firestore mail     (Firebase Trigger Email extension)
+           4. mailto:            (last resort — opens user's mail app)
+         Configure ONE of the first three to send silently. The page
+         still works without any of them via the mailto fallback.
+         Full setup steps: see /customize_email_setup.md ─────────── -->
+    <script>
+      // ── Option 1: Cloudflare Email Worker (recommended) ──
+      // Deploy /workers/customize-email/ to Cloudflare. Once deployed,
+      // paste the Worker URL here. The worker uses Cloudflare Email
+      // Routing's send_email binding — no SMTP creds needed.
+      window.CZ_WORKER_URL   = "https://customize-email.pittu-das2.workers.dev";
+      window.CZ_WORKER_TOKEN = "";   // optional, must match SHARED_TOKEN secret on the worker
+
+      // ── Option 2: EmailJS (browser-only, no backend) ──
+      // Sign up at https://www.emailjs.com/ → create a Gmail/SMTP service
+      // and a template that uses {{to_email}} {{reply_to}} {{cc}}
+      // {{subject}} {{{message_html}}}. Paste the 3 IDs below.
+      window.EMAILJS_CONFIG = {
+        publicKey:  "",   // e.g. "abCDef123ghIJKlMno"
+        serviceId:  "",   // e.g. "service_abc123"
+        templateId: ""    // e.g. "template_xyz456"
+      };
+    </script>
+    <!-- ── Google AdSense loader (publisher pub-8154901590978667) ── -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8154901590978667" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header class="topbar">
+        <a href="/" class="topbar-logo" style="text-decoration:none">
+            <img src="images/logo-white.png" alt="Bharat Transport and Tourism logo">
+            <span class="brand-text"><span class="brand-line1">Bharat Transport &amp; Tourism</span><span class="brand-line2">Andaman Specialists</span></span>
+        </a>
+        <nav class="topnav" id="topnav">
+            <a href="/" class="topnav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="/#packages" class="topnav-item"><i class="fas fa-suitcase-rolling"></i><span>Packages</span></a>
+            <a href="/customize" class="topnav-item active"><i class="fas fa-sliders-h"></i><span>Customize</span></a>
+            <a href="/flights" class="topnav-item"><i class="fas fa-plane"></i><span>Flights</span></a>
+            <a href="/cabs" class="topnav-item"><i class="fas fa-taxi"></i><span>Cabs</span></a>
+            <a href="/gallery" class="topnav-item"><i class="fas fa-images"></i><span>Gallery</span></a>
+            <a href="/about" class="topnav-item"><i class="fas fa-info-circle"></i><span>About</span></a>
+            <a href="/#contact" class="topnav-item"><i class="fas fa-phone-alt"></i><span>Contact</span></a>
+        </nav>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </header>
+
+    <main class="main-content">
+        <section class="cz-hero">
+            <div class="cz-hero-inner">
+                <div class="cz-hero-eyebrow">Build your trip · Free quote in 2 hours</div>
+                <h1>Design your <em>perfect</em> Andaman holiday</h1>
+                <p>Pick your islands, dates, hotel category and activities — our Port Blair team will craft a tailored itinerary and send you a personalised quote within 2 working hours. <strong>No payment now</strong> — just an enquiry.</p>
+                <div class="cz-hero-trust">
+                    <span><i class="fas fa-stopwatch"></i> 2-hour reply</span>
+                    <span><i class="fas fa-rupee-sign"></i> No payment yet</span>
+                    <span><i class="fas fa-headset"></i> Real humans</span>
+                    <span><i class="fas fa-shield-halved"></i> No spam, ever</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Login gate (shown only for guests) ─────────── -->
+        <section id="czGate" class="cz-gate" style="display:none;">
+            <div class="cz-gate-icon"><i class="fas fa-lock"></i></div>
+            <h2>Log in to start customizing</h2>
+            <p>Customizing a trip is a free service — but we ask you to log in first so we can save your draft and follow up on WhatsApp/email.</p>
+            <div class="cz-gate-btns">
+                <button class="cz-btn-primary" id="czGateLoginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+                <a class="cz-btn-secondary" href="/#packages"><i class="fas fa-suitcase-rolling"></i> Browse ready-made packages</a>
+            </div>
+        </section>
+
+        <!-- ── Builder ────────────────────────────────────── -->
+        <section id="czBuilder" class="cz-wrap" style="display:none;">
+            <div class="cz-form-col">
+                <div class="cz-step">
+                    <div class="cz-step-head"><span class="cz-step-num">1</span><h2><i class="fas fa-calendar-alt"></i> Trip basics</h2></div>
+                    <p class="cz-step-help">When are you going, and how many travellers?</p>
+                    <div class="cz-grid">
+                        <div class="cz-field"><label for="czStart">Start date</label><input type="date" id="czStart"></div>
+                        <div class="cz-field"><label for="czEnd">End date</label><input type="date" id="czEnd"></div>
+                        <div class="cz-field"><label for="czAdults">Adults</label><select id="czAdults"><option value="1">1 Adult</option><option value="2" selected>2 Adults</option><option value="3">3 Adults</option><option value="4">4 Adults</option><option value="5">5 Adults</option><option value="6">6 Adults</option><option value="8">8 Adults</option><option value="10">10+ Adults</option></select></div>
+                        <div class="cz-field"><label for="czChildren">Children (under 12)</label><select id="czChildren"><option value="0" selected>0 Children</option><option value="1">1 Child</option><option value="2">2 Children</option><option value="3">3 Children</option><option value="4">4 Children</option></select></div>
+                    </div>
+                </div>
+
+                <div class="cz-step">
+                    <div class="cz-step-head"><span class="cz-step-num">2</span><h2><i class="fas fa-map-marked-alt"></i> Islands you want to visit</h2></div>
+                    <p class="cz-step-help">Pick one or more — we'll plan ferries between them.</p>
+                    <div class="cz-chips" data-cz-group="islands">
+                        <span class="cz-chip" data-value="Port Blair"><i class="fas fa-circle-check"></i> Port Blair</span>
+                        <span class="cz-chip" data-value="Havelock"><i class="fas fa-circle-check"></i> Havelock</span>
+                        <span class="cz-chip" data-value="Neil Island"><i class="fas fa-circle-check"></i> Neil Island</span>
+                        <span class="cz-chip" data-value="Baratang"><i class="fas fa-circle-check"></i> Baratang</span>
+                        <span class="cz-chip" data-value="Diglipur / North Andaman"><i class="fas fa-circle-check"></i> Diglipur</span>
+                        <span class="cz-chip" data-value="Ross & Smith Islands"><i class="fas fa-circle-check"></i> Ross &amp; Smith</span>
+                        <span class="cz-chip" data-value="Ross Island"><i class="fas fa-circle-check"></i> Ross Island</span>
+                    </div>
+                </div>
+
+                <div class="cz-step">
+                    <div class="cz-step-head"><span class="cz-step-num">3</span><h2><i class="fas fa-bed"></i> Hotel category</h2></div>
+                    <p class="cz-step-help">Pick the category that matches your budget and comfort level.</p>
+                    <div class="cz-chips" data-cz-group="hotel" data-cz-single="1">
+                        <span class="cz-chip" data-value="3-star"><i class="fas fa-star"></i> 3-star</span>
+                        <span class="cz-chip" data-value="4-star"><i class="fas fa-star"></i> 4-star</span>
+                        <span class="cz-chip" data-value="5-star / Luxury"><i class="fas fa-star"></i> 5-star / Luxury</span>
+                        <span class="cz-chip" data-value="Beach / Pool villa"><i class="fas fa-star"></i> Beach / Pool villa</span>
+                        <span class="cz-chip" data-value="Budget / Hostel"><i class="fas fa-star"></i> Budget / Hostel</span>
+                    </div>
+                </div>
+
+                <div class="cz-step">
+                    <div class="cz-step-head"><span class="cz-step-num">4</span><h2><i class="fas fa-heart"></i> Trip vibe</h2></div>
+                    <p class="cz-step-help">Pick the moods that fit your group.</p>
+                    <div class="cz-chips" data-cz-group="vibe">
+                        <span class="cz-chip" data-value="Honeymoon"><i class="fas fa-heart"></i> Honeymoon</span>
+                        <span class="cz-chip" data-value="Family"><i class="fas fa-people-roof"></i> Family</span>
+                        <span class="cz-chip" data-value="Friends / Group"><i class="fas fa-people-group"></i> Friends</span>
+                        <span class="cz-chip" data-value="Solo / Backpacker"><i class="fas fa-person-hiking"></i> Solo</span>
+                        <span class="cz-chip" data-value="Adventure"><i class="fas fa-mountain"></i> Adventure</span>
+                        <span class="cz-chip" data-value="Relaxation"><i class="fas fa-umbrella-beach"></i> Relaxation</span>
+                        <span class="cz-chip" data-value="Photography"><i class="fas fa-camera"></i> Photography</span>
+                        <span class="cz-chip" data-value="Senior-friendly"><i class="fas fa-heart-pulse"></i> Senior-friendly</span>
+                    </div>
+                </div>
+
+                <div class="cz-step">
+                    <div class="cz-step-head"><span class="cz-step-num">5</span><h2><i class="fas fa-water"></i> Activities &amp; add-ons</h2></div>
+                    <p class="cz-step-help">Tick whatever interests you — final pricing is shared in the quote.</p>
+                    <div class="cz-acts" data-cz-group="acts">
+                        <label class="cz-act"><input type="checkbox" data-name="Scuba Diving (Beginner)"><span><span class="cz-act-name">Scuba Diving (Beginner)</span><span class="cz-act-price">₹ 2,000–3,500 / dive</span></span></label>
+                        <label class="cz-act"><input type="checkbox" data-name="PADI Open Water Certification"><span><span class="cz-act-name">PADI Certification</span><span class="cz-act-price">₹ 22,000 / person</span></span></label>
+                        <label class="cz-act"><input type="checkbox" data-name="Snorkeling"><span><span class="cz-act-name">Snorkeling</span><span class="cz-act-price">₹ 1,000–1,500 / person</span></span></label>
+                        <label class="cz-act"><input type="checkbox" data-name="Sea-walking"><span><span class="cz-act-name">Sea-walking</span><span class="cz-act-price">₹ 3,500 / person</span></span></label>
+<label class="cz-act"><input type="checkbox" data-name="Glass-bottom boat"><span><span class="cz-act-name">Glass-bottom boat</span><span class="cz-act-price">₹ 800 / person</span></span></label>
+                        <label class="cz-act"><input type="checkbox" data-name="Parasailing"><span><span class="cz-act-name">Parasailing</span><span class="cz-act-price">₹ 3,500 / person</span></span></label>
+                        <label class="cz-act"><input type="checkbox" data-name="Jet Ski"><span><span class="cz-act-name">Jet Ski</span><span class="cz-act-price">₹ 1,500 / 15 min</span></span></label>
+                        <label class="cz-act"><input type="checkbox" data-name="Sea Kayaking"><span><span class="cz-act-name">Sea Kayaking</span><span class="cz-act-price">₹ 2,000 / person</span></span></label>
+                        <label class="cz-act"><input type="checkbox" data-name="Candlelight beach dinner"><span><span class="cz-act-name">Candlelight dinner</span><span class="cz-act-price">₹ 3,000 / couple</span></span></label>
+                        <label class="cz-act"><input type="checkbox" data-name="Couple / Family photoshoot"><span><span class="cz-act-name">Photoshoot</span><span class="cz-act-price">₹ 5,000+</span></span></label>
+                        <label class="cz-act"><input type="checkbox" data-name="Spa &amp; massage"><span><span class="cz-act-name">Spa &amp; massage</span><span class="cz-act-price">₹ 1,500+ / session</span></span></label>
+                        <label class="cz-act"><input type="checkbox" data-name="Drone permits"><span><span class="cz-act-name">Drone permits</span><span class="cz-act-price">₹ 2,000 / day</span></span></label>
+                    </div>
+                </div>
+
+                <div class="cz-step">
+                    <div class="cz-step-head"><span class="cz-step-num">6</span><h2><i class="fas fa-circle-check"></i> What should we include?</h2></div>
+                    <p class="cz-step-help">Default packages include hotels, ferries and breakfast. Anything else you need?</p>
+                    <div class="cz-chips" data-cz-group="inclusions">
+                        <span class="cz-chip" data-value="Airport pickup &amp; drop"><i class="fas fa-circle-check"></i> Airport pickup &amp; drop</span>
+                        <span class="cz-chip" data-value="All meals"><i class="fas fa-circle-check"></i> All meals</span>
+                        <span class="cz-chip" data-value="Private cab for sightseeing"><i class="fas fa-circle-check"></i> Private cab</span>
+                        <span class="cz-chip" data-value="Premium cruise (Makruzz / Nautika)"><i class="fas fa-circle-check"></i> Premium cruise</span>
+                        <span class="cz-chip" data-value="Flights from your city"><i class="fas fa-circle-check"></i> Flights from city</span>
+                        <span class="cz-chip" data-value="Travel insurance"><i class="fas fa-circle-check"></i> Travel insurance</span>
+                        <span class="cz-chip" data-value="Local SIM / Wi-Fi"><i class="fas fa-circle-check"></i> Local SIM</span>
+                    </div>
+                </div>
+
+                <div class="cz-step">
+                    <div class="cz-step-head"><span class="cz-step-num">7</span><h2><i class="fas fa-rupee-sign"></i> Budget &amp; notes</h2></div>
+                    <p class="cz-step-help">An indicative budget helps us suggest the right options.</p>
+                    <div class="cz-grid">
+                        <div class="cz-field"><label for="czBudget">Indicative budget (per person)</label><select id="czBudget"><option value="">Show me everything</option><option>Under ₹15,000</option><option>₹15,000 – ₹22,000</option><option>₹22,000 – ₹30,000</option><option>₹30,000 – ₹45,000</option><option>Above ₹45,000 (luxury)</option></select></div>
+                        <div class="cz-field"><label for="czCity">Your departure city</label><input type="text" id="czCity" placeholder="e.g. Bangalore, Mumbai"></div>
+                    </div>
+                    <div class="cz-field" style="margin-top:1rem;"><label for="czNotes">Anything specific to mention?</label><textarea id="czNotes" placeholder="e.g. Anniversary trip, vegetarian only, ground-floor rooms for parents…"></textarea></div>
+                </div>
+
+                <div class="cz-step">
+                    <div class="cz-step-head"><span class="cz-step-num">8</span><h2><i class="fas fa-comments"></i> How should we reach you?</h2></div>
+                    <p class="cz-step-help">We'll send the quote to your email + WhatsApp. Verify your contact details.</p>
+                    <div class="cz-grid">
+                        <div class="cz-field"><label for="czName">Full name</label><input type="text" id="czName" placeholder="As per ID"></div>
+                        <div class="cz-field"><label for="czEmail">Email</label><input type="email" id="czEmail" placeholder="you@example.com"></div>
+                        <div class="cz-field"><label for="czPhone">Phone / WhatsApp</label><input type="tel" id="czPhone" placeholder="+91 88801 95191"></div>
+                        <div class="cz-field"><label for="czPreferred">Preferred channel</label><select id="czPreferred"><option>WhatsApp (fastest)</option><option>Phone call</option><option>Email</option></select></div>
+                    </div>
+                </div>
+            </div>
+
+            <aside>
+                <div class="cz-summary">
+                    <h3><i class="fas fa-receipt"></i> Your trip summary</h3>
+                    <div class="cz-summary-row"><span>Travellers</span><span id="sumTravellers">2 Adults</span></div>
+                    <div class="cz-summary-row"><span>Dates</span><span id="sumDates" class="cz-summary-empty">— pick dates —</span></div>
+                    <div class="cz-summary-row"><span>Islands</span><span id="sumIslands" class="cz-summary-empty">— none yet —</span></div>
+                    <div class="cz-summary-row"><span>Hotel</span><span id="sumHotel" class="cz-summary-empty">— not chosen —</span></div>
+                    <div class="cz-summary-row"><span>Vibe</span><span id="sumVibe" class="cz-summary-empty">— any —</span></div>
+                    <div class="cz-summary-row"><span>Activities</span><span id="sumActs" class="cz-summary-empty">— none —</span></div>
+                    <div class="cz-summary-row"><span>Inclusions</span><span id="sumIncl" class="cz-summary-empty">— defaults —</span></div>
+                    <div class="cz-summary-row"><span>Budget</span><span id="sumBudget" class="cz-summary-empty">— flexible —</span></div>
+                    <div class="cz-summary-cta">
+                        <button class="cz-submit-btn" id="czSubmitBtn"><i class="fas fa-paper-plane"></i> Send Enquiry</button>
+                        <p class="cz-summary-note"><strong>No payment required.</strong> We email <a href="mailto:booking@andamanvoyages.in" style="color:#0d7a8a">booking@andamanvoyages.in</a> with your details, and our team replies within 2 working hours.</p>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <!-- ── Success state ────────────────────────────── -->
+        <section id="czSuccess" class="cz-success" style="display:none;">
+            <div class="cz-success-icon"><i class="fas fa-paper-plane"></i></div>
+            <h2>Enquiry sent!</h2>
+            <p>Thanks <strong id="czSuccessName">there</strong> — we've forwarded your custom-trip details to our Port Blair team. You'll get a personalised quote in your inbox within 2 working hours.</p>
+            <div>Reference: <span class="cz-success-ref" id="czSuccessRef">CUST-XXXXX</span></div>
+            <p style="margin-top:1.2rem;font-size:.9rem;">We've also CC'd you on the email so you have a copy in your inbox.</p>
+            <div class="cz-success-actions">
+                <a class="cz-btn-primary" href="/"><i class="fas fa-home"></i> Back to Home</a>
+                <a class="cz-btn-secondary" href="https://wa.me/918880195191" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Continue on WhatsApp</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="ft">
+        <div class="ft-inner">
+            <div>
+                <div class="ft-brand"><span class="ft-mark"><i class="fas fa-umbrella-beach"></i></span><span class="ft-brand-name">Bharat Transport &amp; Tourism</span></div>
+                <p class="ft-about">Andaman specialists since 2013. We are a small, on-ground team in Port Blair — every booking is handled by humans, not bots.</p>
+                <div class="ft-social">
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://wa.me/918880195191" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="ft-col"><h4>Explore</h4><ul><li><a href="/#packages">All packages</a></li><li><a href="/customize">Customize trip</a></li><li><a href="/cabs">Cabs</a></li><li><a href="/flights">Flights</a></li></ul></div>
+            <div class="ft-col"><h4>Company</h4><ul><li><a href="/about">About us</a></li><li><a href="/gallery">Gallery</a></li><li><a href="/bookings">Bookings</a></li><li><a href="/privacy">Privacy</a></li><li><a href="/terms">Terms</a></li></ul></div>
+            <div class="ft-col">
+                <h4>Get in touch</h4>
+                <div class="ft-contact"><i class="fas fa-phone"></i><a href="tel:+918880195191">+91-88801-95191</a></div>
+                <div class="ft-contact"><i class="fas fa-envelope"></i><a href="mailto:booking@andamanvoyages.in">booking@andamanvoyages.in</a></div>
+                <div class="ft-contact"><i class="fas fa-location-dot"></i><span>15, Air Road, Delanipur,<br>Sri Vijaya Puram, A&amp;N 744102</span></div>
+            </div>
+        </div>
+        <div class="ft-bottom">
+            <div>© 2026 Bharat Transport &amp; Tourism. All rights reserved.</div>
+            <div class="ft-bottom-links"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/#contact">Contact</a></div>
+        </div>
+    </footer>
+
+    <script src="js/dataStore.js?v=25"></script>
+    <script src="js/toast.js?v=1"></script>
+    <script src="js/auth.js?v=16"></script>
+    <script src="js/script.js?v=30"></script>
+    <script src="js/security.js?v=2"></script>
+    <script src="js/user-menu.js?v=14"></script>
+    <script src="js/customize.js?v=5"></script>
+    <script src="js/conversion-kit.js?v=1"></script>
+    <script src="js/brevo.js?v=3" async></script>
+    <script src="js/live-chat.js?v=8"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  // ── whatsapp-bridge Worker ─────────────────────────────────
+  // Bridges the website's custom live-chat with the admin's WhatsApp
+  // via Meta's WhatsApp Cloud API.
+  //
+  //   POST /notify          — called by js/chat.js when a customer sends
+  //                            a new chat message. We look up the chat
+  //                            session, format a digest, DM the admin's
+  //                            WhatsApp.
+  //   GET/POST /webhook     — called by Meta when the admin replies on
+  //                            WhatsApp. We verify the signature, find
+  //                            the related chat session (by reply-to
+  //                            metadata), and append the admin's text
+  //                            into /chats/{sessionId}/messages.
+  //
+  // Setup walkthrough: whatsapp_setup.md
+  // Secrets needed (set via `npx wrangler secret put NAME`):
+  //   META_ACCESS_TOKEN              — Permanent / system-user access token
+  //   META_APP_SECRET                — App secret (for HMAC signature)
+  //   META_WEBHOOK_VERIFY_TOKEN      — Random string for webhook verification
+  //   FIREBASE_SERVICE_ACCOUNT_KEY   — JSON of the service account
+  //
+  // Plain env vars (in this file):
+  //   FIREBASE_PROJECT_ID
+  //   ALLOWED_ORIGIN          — comma list, for /notify CORS
+  "$schema":         "node_modules/wrangler/config-schema.json",
+  "name":            "whatsapp-bridge",
+  "main":            "worker.js",
+  "compatibility_date": "2024-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "vars": {
+    "FIREBASE_PROJECT_ID": "andaman-b886d",
+    "ALLOWED_ORIGIN":      "https://andamanvoyages.in,https://www.andamanvoyages.in"
+  }
+}

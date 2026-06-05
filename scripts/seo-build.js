@@ -16,8 +16,9 @@
  */
 'use strict';
 
-const fs   = require('fs');
-const path = require('path');
+const fs    = require('fs');
+const path  = require('path');
+const https = require('https');
 
 const ROOT      = path.resolve(__dirname, '..');
 const PKG_FILE  = path.join(ROOT, 'data', 'packages.json');
@@ -26,15 +27,17 @@ const SITE      = 'https://andamanvoyages.in';
 
 const today = new Date().toISOString().split('T')[0];
 
-// Static pages that should always appear in the sitemap with their
-// crawl priority + change frequency.
+// Static pages — use the clean canonical URLs (no .html), matching the
+// canonical tags inside each HTML page. These are the URLs Google should
+// index, NOT the .html variants (which would create duplicate-content).
 const STATIC_URLS = [
-    { loc: '/',             priority: '1.0', changefreq: 'weekly',  image: 'images/beach1.jpg', imageTitle: 'Andaman Holiday Packages' },
-    { loc: '/flights.html', priority: '0.9', changefreq: 'weekly',  image: 'images/neil2.jpg',  imageTitle: 'Flights to Andaman' },
-    { loc: '/gallery.html', priority: '0.8', changefreq: 'weekly',  image: 'images/beach2.jpg', imageTitle: 'Andaman Photo Gallery' },
-    { loc: '/about.html',   priority: '0.6', changefreq: 'monthly', image: 'images/logo.png',   imageTitle: 'About Bharat Tours and Travels' },
-    { loc: '/privacy.html', priority: '0.3', changefreq: 'yearly' },
-    { loc: '/terms.html',   priority: '0.3', changefreq: 'yearly' }
+    { loc: '/',         priority: '1.0', changefreq: 'weekly',  image: 'images/beach1.jpg', imageTitle: 'Andaman Holiday Packages' },
+    { loc: '/flights',  priority: '0.9', changefreq: 'weekly',  image: 'images/neil2.jpg',  imageTitle: 'Flights to Andaman' },
+    { loc: '/cabs',     priority: '0.9', changefreq: 'weekly',  image: 'images/beach1.jpg', imageTitle: 'Andaman Cab Hire' },
+    { loc: '/gallery',  priority: '0.8', changefreq: 'weekly',  image: 'images/beach2.jpg', imageTitle: 'Andaman Photo Gallery' },
+    { loc: '/about',    priority: '0.6', changefreq: 'monthly', image: 'images/logo.png',   imageTitle: 'About Bharat Transport and Tourism' },
+    { loc: '/privacy',  priority: '0.3', changefreq: 'yearly' },
+    { loc: '/terms',    priority: '0.3', changefreq: 'yearly' }
 ];
 
 // ── Load packages ─────────────────────────────────────────────
@@ -93,7 +96,10 @@ const blocks = [];
 // 1. Static
 STATIC_URLS.forEach(s => blocks.push(urlBlock(s)));
 
-// 2. Packages
+// 2. Packages — only include the clean canonical URL.
+// We deliberately do NOT add the .html variant: every package.html page
+// already has <link rel="canonical" href=".../package?id=..."> pointing
+// at the clean URL, so adding both would create duplicate-content noise.
 visiblePackages.forEach(p => {
     blocks.push(urlBlock({
         loc:        `/package?id=${encodeURIComponent(p.id)}`,
@@ -101,12 +107,6 @@ visiblePackages.forEach(p => {
         changefreq: 'weekly',
         image:      p.image || 'images/beach1.jpg',
         imageTitle: p.name || 'Andaman Tour Package'
-    }));
-    // Also include the .html variant so direct hits still get indexed
-    blocks.push(urlBlock({
-        loc:        `/package.html?id=${encodeURIComponent(p.id)}`,
-        priority:   '0.8',
-        changefreq: 'weekly'
     }));
 });
 
@@ -123,4 +123,75 @@ ${blocks.join('\n\n')}
 `;
 
 fs.writeFileSync(OUT_FILE, xml, 'utf8');
-console.log(`[seo-build] sitemap.xml regenerated with ${STATIC_URLS.length + visiblePackages.length * 2} URLs (${visiblePackages.length} packages × 2 variants + ${STATIC_URLS.length} static)`);
+console.log(`[seo-build] sitemap.xml regenerated with ${STATIC_URLS.length + visiblePackages.length} URLs (${visiblePackages.length} packages + ${STATIC_URLS.length} static)`);
+
+// ─────────────────────────────────────────────────────────────────────
+// IndexNow ping (Bing, Yandex, Seznam, Naver) — instant discovery without
+// waiting for the next crawl. Google does NOT use IndexNow but it doesn't
+// hurt; for Google we rely on the sitemap submitted in Search Console.
+//
+// 1. Place a key file at /<KEY>.txt in the repo root (the file's content
+//    must be exactly the same key).
+// 2. Set INDEXNOW_KEY env var to that key value, OR drop a file named
+//    `.indexnow-key` in the repo root with the key on a single line.
+// 3. The script then POSTs the full URL list to api.indexnow.org.
+//
+// Skipped silently when no key is configured.
+// ─────────────────────────────────────────────────────────────────────
+function loadIndexNowKey() {
+    if (process.env.INDEXNOW_KEY) return String(process.env.INDEXNOW_KEY).trim();
+    try {
+        const k = fs.readFileSync(path.join(ROOT, '.indexnow-key'), 'utf8').trim();
+        if (k) return k;
+    } catch (_) {}
+    return null;
+}
+
+function pingIndexNow(key) {
+    const urlList = [
+        ...STATIC_URLS.map(s => SITE + s.loc),
+        ...visiblePackages.map(p => `${SITE}/package?id=${encodeURIComponent(p.id)}`)
+    ];
+    const payload = JSON.stringify({
+        host: 'andamanvoyages.in',
+        key,
+        keyLocation: `${SITE}/${key}.txt`,
+        urlList
+    });
+    const req = https.request({
+        hostname: 'api.indexnow.org',
+        path: '/IndexNow',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Content-Length': Buffer.byteLength(payload)
+        }
+    }, res => {
+        console.log(`[seo-build] IndexNow ping → HTTP ${res.statusCode} for ${urlList.length} URLs`);
+        res.resume();
+    });
+    req.on('error', err => console.warn('[seo-build] IndexNow ping failed:', err.message));
+    req.write(payload);
+    req.end();
+}
+
+const indexNowKey = loadIndexNowKey();
+if (indexNowKey) {
+    pingIndexNow(indexNowKey);
+} else {
+    console.log('[seo-build] (skipping IndexNow ping — no INDEXNOW_KEY env or .indexnow-key file)');
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Google sitemap ping (legacy but still works)
+// ─────────────────────────────────────────────────────────────────────
+function pingGoogleSitemap() {
+    const sm = encodeURIComponent(`${SITE}/sitemap.xml`);
+    https.get(`https://www.google.com/ping?sitemap=${sm}`, res => {
+        console.log(`[seo-build] Google sitemap ping → HTTP ${res.statusCode}`);
+        res.resume();
+    }).on('error', err => console.warn('[seo-build] Google ping failed:', err.message));
+}
+if (process.env.PING_GOOGLE === '1' || process.env.SEO_PING === '1') {
+    pingGoogleSitemap();
+}

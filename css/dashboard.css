@@ -6,6 +6,36 @@
     padding: 0;
     background: #f0f2f5;
     min-height: 100vh;
+    font-size: 13px !important;   /* compact dashboard (slightly larger for readability) */
+    line-height: 1.45 !important;
+}
+
+/* Force compact font everywhere inside the dashboard */
+.dashboard-body *,
+.dashboard-body *::before,
+.dashboard-body *::after {
+    box-sizing: border-box;
+}
+
+.dashboard-main,
+.dashboard-section,
+.dashboard-section * {
+    font-size: inherit;
+}
+
+/* Specifically reset table text that browsers / style.css may override */
+.data-table,
+.data-table th,
+.data-table td,
+.data-table td * {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+}
+
+.badge {
+    font-size: 11px !important;
+    padding: 0.2rem 0.55rem !important;
+    line-height: 1.3 !important;
 }
 
 /* Override .topbar-logo on dashboard so the brand reads "Admin Dashboard" in teal */
@@ -30,20 +60,29 @@
     color: var(--primary-teal, #0d7a8a);
 }
 
-/* Main content sits under the fixed topbar */
+/* Main content sits under the fixed topbar (topbar is position:fixed at --tb-h = 62px) */
 .dashboard-main {
     margin-left: 0;
     min-height: 100vh;
     padding: 0;
+    padding-top: var(--tb-h, 62px);
+    font-size: 13px;
+}
+
+/* Nuclear option: zoom the whole dashboard content area down.
+   This is the most reliable cross-browser way to scale a UI that has
+   mixed rem/px/em values being overridden by a parent stylesheet. */
+@supports not (zoom: 1) {
+    .dashboard-main { transform-origin: top left; }
 }
 .dashboard-page-title {
     background: #fff;
-    padding: 1rem 2rem;
+    padding: 0.5rem 1.25rem;
     border-bottom: 1px solid #e6e9f0;
 }
 .dashboard-page-title .topbar-title {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #333;
 }
@@ -64,7 +103,8 @@
 /* Dashboard Sections */
 .dashboard-section {
     display: none;
-    padding: 2rem;
+    padding: 1rem 1.25rem 1.5rem;
+    overflow: visible;
 }
 
 .dashboard-section.active {
@@ -75,30 +115,30 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
 .section-header h2 {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     color: #333;
     font-weight: 700;
 }
 
 .section-actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.4rem;
     flex-wrap: wrap;
 }
 
 .search-input {
-    padding: 0.6rem 1rem;
+    padding: 0.35rem 0.7rem;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 6px;
     font-family: inherit;
-    font-size: 0.9rem;
-    min-width: 200px;
+    font-size: 0.85rem;
+    min-width: 160px;
     outline: none;
     transition: border-color 0.2s;
 }
@@ -108,11 +148,11 @@
 }
 
 .filter-select {
-    padding: 0.6rem 1rem;
+    padding: 0.35rem 0.7rem;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 6px;
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     outline: none;
     background: #fff;
     cursor: pointer;
@@ -121,35 +161,35 @@
 /* Stats Grid */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .stat-card {
     background: #fff;
-    border-radius: 12px;
-    padding: 1.5rem;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    gap: 0.65rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .stat-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     flex-shrink: 0;
 }
 
@@ -159,14 +199,14 @@
 }
 
 .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #333;
     line-height: 1.2;
 }
 
 .stat-label {
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     color: #888;
     font-weight: 500;
 }
@@ -175,25 +215,25 @@
 .charts-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .chart-card {
     background: #fff;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .chart-title {
-    font-size: 1rem;
+    font-size: 0.88rem;
     font-weight: 600;
     color: #333;
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.75rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .chart-title i {
@@ -203,8 +243,8 @@
 .chart-empty {
     color: #aaa;
     text-align: center;
-    padding: 2rem;
-    font-size: 0.95rem;
+    padding: 1rem;
+    font-size: 0.85rem;
 }
 
 /* Donut Chart */
@@ -357,22 +397,26 @@
 
 .data-table th {
     background: #f8f9fa;
-    padding: 0.85rem 1rem;
+    padding: 0.4rem 0.7rem;
     text-align: left;
-    font-size: 0.8rem;
+    font-size: 12px;
     font-weight: 600;
     color: #666;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     border-bottom: 2px solid #eee;
     white-space: nowrap;
 }
 
 .data-table td {
-    padding: 0.85rem 1rem;
-    font-size: 0.9rem;
+    padding: 0.4rem 0.7rem;
+    font-size: 13px;
     color: #444;
     border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .data-table tbody tr:hover {
@@ -405,6 +449,18 @@
     background: #f8d7da;
     color: #721c24;
 }
+.badge-failed {
+    background: #f8d7da;
+    color: #c0392b;
+}
+.badge-authorized {
+    background: #eef1f4;
+    color: #4a5568;
+}
+.badge-captured {
+    background: #d4edda;
+    color: #155724;
+}
 
 /* Action Buttons */
 .action-btn {
@@ -428,6 +484,101 @@
 .action-btn-cancel:hover {
     background: #e74c3c;
     color: #fff;
+}
+
+/* Refund button — orange-tinted to clearly distinguish from Cancel.
+   Same shape as the cancel button so they line up neatly side-by-side
+   in the bookings table action cell. The amount is rendered inside the
+   button so the admin sees what they're sending before clicking. */
+.action-btn-refund {
+    background: #fff5e6;
+    color: #a04000;
+    border: 1px solid #f1c27d;
+}
+.action-btn-refund:hover {
+    background: #e67e22;
+    color: #fff;
+    border-color: #e67e22;
+}
+.action-btn-refund:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+}
+
+/* ── Booking status filter pills (mirrors inbox-mailbox-tabs) ── */
+.booking-status-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    padding: .65rem 1.25rem .4rem;
+    background: #fff;
+    border-bottom: 1px solid #e8ecf0;
+    margin-bottom: 0;
+}
+
+.bk-status-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: .38rem;
+    padding: .32rem .85rem;
+    border: 1.5px solid #d5dce5;
+    border-radius: 999px;
+    background: #f7f9fb;
+    color: #5a6877;
+    font-family: inherit;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+    white-space: nowrap;
+}
+
+.bk-status-tab:hover {
+    background: #edf5f7;
+    border-color: #0d7a8a;
+    color: #0d7a8a;
+}
+
+.bk-status-tab.active {
+    background: #0d7a8a;
+    border-color: #0d7a8a;
+    color: #fff;
+}
+
+.bk-status-tab.active .bk-status-count {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+}
+
+.bk-status-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    padding: 0 .35rem;
+    border-radius: 999px;
+    background: #e3eaef;
+    color: #3a4a55;
+    font-size: .72rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* "Refunded ₹X" pill that replaces the Refund button after a successful
+   refund. Greyed out so it's obviously a passive status, not an action. */
+.badge-refunded {
+    display: inline-block;
+    background: #ecf0f1;
+    color: #5a6877;
+    border: 1px solid #cfd9df;
+    padding: .25rem .55rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .2px;
+    margin-left: .25rem;
+    cursor: help;
 }
 
 /* Package Performance Cards */
@@ -596,19 +747,32 @@
     border-color: #0d7a8a;
 }
 
+/* Header strip across the top of every editor card.
+   The plan_redesign_plan.md → Phase 1.1 bug: in some dashboard themes
+   (hacker / midnight / cyberpunk) the header text rendered white-on-white
+   because the `color` was inherited from the page-level theme override
+   while the background stayed light. Locking explicit colours here keeps
+   the row legible under every theme. */
 .pkg-edit-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 1.25rem;
     background: #f8f9fa;
+    color: #1c2b48;          /* explicit fallback so themes can't blank it */
     border-bottom: 1px solid #eee;
+}
+
+.pkg-edit-header * {
+    /* Belt-and-braces: every descendant inherits a usable colour even when
+       the parent theme tries to recolour the whole dashboard. */
+    color: inherit;
 }
 
 .pkg-edit-num {
     font-size: 0.8rem;
     font-weight: 700;
-    color: #888;
+    color: #555 !important;  /* dark grey label, always readable on #e9ecef */
     background: #e9ecef;
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
@@ -616,13 +780,28 @@
 }
 
 .pkg-visible-toggle {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.4rem;
     font-size: 0.85rem;
-    color: #555;
+    color: #1c2b48 !important;    /* force-readable on the light header */
+    background: #f7f9fc;
+    border: 1px solid #e1e6ef;
+    border-radius: 6px;
+    padding: 0.25rem 0.55rem;
     cursor: pointer;
-    flex: 1;
+    flex: 0 0 auto;
+}
+
+.pkg-visible-toggle:hover {
+    background: #eef3fb;
+    border-color: #c9d4e6;
+}
+
+.pkg-visible-toggle span {
+    color: #1c2b48 !important;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .pkg-visible-toggle input {
@@ -630,6 +809,17 @@
     width: 16px;
     height: 16px;
     cursor: pointer;
+}
+
+/* Sold-out variant overrides the ambient toggle styling without losing
+   contrast — soft red surface + dark red text. */
+.pkg-visible-toggle.is-soldout {
+    background: #fdedec;
+    border-color: #f3c5c0;
+    color: #7a1f15 !important;
+}
+.pkg-visible-toggle.is-soldout span {
+    color: #7a1f15 !important;
 }
 
 .btn-del-pkg {
@@ -729,13 +919,13 @@ select.pkg-input {
 
 /* Toolbar buttons */
 .btn-add-package {
-    padding: 0.6rem 1.1rem;
+    padding: 0.4rem 0.8rem;
     background: #fff;
     border: 2px solid #0d7a8a;
     color: #0d7a8a;
-    border-radius: 8px;
+    border-radius: 6px;
     font-family: inherit;
-    font-size: 0.88rem;
+    font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
     display: flex;
@@ -825,7 +1015,11 @@ select.pkg-input {
 .ite-overlay {
     position: fixed;
     inset: 0;
-    z-index: 500;
+    /* z-index must beat the dashboard topbar (z-index: 999 on main site,
+       can be higher on dashboard pages depending on theme), the chat
+       widget, the toast container, and any sticky elements created by
+       the theme. 100000 is overkill but unambiguous. */
+    z-index: 100000;
     background: #f4f6f8;
     flex-direction: column;
     overflow: hidden;
@@ -1055,6 +1249,322 @@ select.pkg-input {
     border-style: solid;
 }
 
+/* ── Per-day photo strip (inside Edit Itinerary) ─────────── */
+.ite-day-gallery {
+    margin-top: .5rem;
+    padding-top: .85rem;
+    border-top: 1px dashed #cfdde1;
+}
+.ite-day-gallery-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .55rem;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+.ite-day-gallery-head label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin: 0;
+}
+.ite-day-gallery-head label small {
+    color: #aaa;
+    text-transform: none;
+    font-weight: 400;
+    letter-spacing: 0;
+    margin-left: .3rem;
+}
+.ite-day-gallery-actions {
+    display: flex;
+    gap: .35rem;
+}
+.btn-day-pick,
+.btn-day-upload {
+    background: #f0faf8;
+    border: 1px solid #c8f0e8;
+    color: #0a5a68;
+    padding: .35rem .75rem;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    transition: all .15s;
+}
+.btn-day-pick:hover,
+.btn-day-upload:hover {
+    background: #0d7a8a;
+    color: #fff;
+    border-color: #0d7a8a;
+}
+.ite-day-gallery-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    min-height: 60px;
+}
+.ite-day-gallery-empty {
+    width: 100%;
+    color: #999;
+    font-size: .85rem;
+    text-align: center;
+    padding: .6rem .75rem;
+    background: #fafbfc;
+    border: 1px dashed #ddd;
+    border-radius: 6px;
+    margin: 0;
+}
+.ite-day-thumb {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f0f2f5;
+    border: 2px solid #e0e6ea;
+    transition: border-color .15s, transform .15s;
+}
+.ite-day-thumb:hover {
+    border-color: #0d7a8a;
+    transform: scale(1.03);
+}
+.ite-day-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.ite-day-thumb-loading {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 1.1rem;
+}
+.ite-day-thumb-rm {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(231, 76, 60, .92);
+    border: none;
+    color: #fff;
+    font-size: .65rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity .15s;
+}
+.ite-day-thumb:hover .ite-day-thumb-rm {
+    opacity: 1;
+}
+.ite-day-gallery-status {
+    margin-top: .5rem;
+    font-size: .82rem;
+    color: #0d7a8a;
+    min-height: 1em;
+}
+
+/* ── Gallery picker modal (Pick existing photos for a day) ── */
+.ite-gpicker-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100001;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.ite-gpicker-modal.open {
+    display: flex;
+}
+.ite-gpicker-card {
+    background: #fff;
+    border-radius: 12px;
+    width: min(900px, 95vw);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .35);
+    overflow: hidden;
+}
+.ite-gpicker-head {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fbfa;
+}
+.ite-gpicker-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #1c2b48;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+}
+.ite-gpicker-head h3 i {
+    color: #0d7a8a;
+}
+.ite-gpicker-close {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+.ite-gpicker-close:hover {
+    background: #eee;
+}
+.ite-gpicker-toolbar {
+    padding: .75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    border-bottom: 1px solid #f3f3f3;
+    flex-wrap: wrap;
+}
+.ite-gpicker-search {
+    flex: 1 1 240px;
+    padding: .55rem .85rem;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    font-size: .92rem;
+    font-family: inherit;
+    outline: none;
+}
+.ite-gpicker-search:focus {
+    border-color: #0d7a8a;
+}
+.ite-gpicker-count {
+    color: #666;
+    font-size: .85rem;
+}
+.ite-gpicker-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: .85rem;
+}
+.ite-gpicker-empty {
+    grid-column: 1 / -1;
+    color: #888;
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: .95rem;
+}
+.ite-gpicker-tile {
+    position: relative;
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    transition: border-color .15s, transform .12s;
+    user-select: none;
+}
+.ite-gpicker-tile:hover {
+    transform: translateY(-2px);
+    border-color: #cfe2e6;
+}
+.ite-gpicker-tile.is-selected {
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13, 122, 138, .18);
+}
+.ite-gpicker-tile input[type="checkbox"] {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #0d7a8a;
+    z-index: 2;
+}
+.ite-gpicker-tile img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    display: block;
+}
+.ite-gpicker-tile-cap {
+    padding: .45rem .6rem;
+    font-size: .82rem;
+    color: #1c2b48;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+}
+.ite-gpicker-tile-cap strong {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+.ite-gpicker-tile-cap small {
+    display: block;
+    color: #999;
+    font-size: .7rem;
+    margin-top: .15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ite-gpicker-foot {
+    padding: .85rem 1.25rem;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: .6rem;
+    background: #fafafa;
+}
+.ite-gpicker-cancel,
+.ite-gpicker-save {
+    padding: .55rem 1.1rem;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #555;
+    transition: all .15s;
+}
+.ite-gpicker-cancel:hover {
+    background: #f0f0f0;
+}
+.ite-gpicker-save {
+    background: #0d7a8a;
+    color: #fff;
+    border-color: #0d7a8a;
+}
+.ite-gpicker-save:hover {
+    background: #0a5a68;
+}
+
 /* Publish status banner */
 .publish-status {
     padding: 0.85rem 1.25rem;
@@ -1146,3 +1656,685 @@ select.pkg-input {
 .toggle-switch input:checked + .toggle-slider{background:#0d7a8a}
 .toggle-switch input:checked + .toggle-slider::before{transform:translateX(24px)}
 .toggle-switch input:focus + .toggle-slider{box-shadow:0 0 0 3px rgba(26,188,156,.25)}
+
+/* ── Admin Packages section: dark-blue background ───────────────
+   Per user request, ONLY the Packages section of the admin dashboard
+   gets a dark-blue panel — every other section (Overview, Bookings,
+   Inbox, Gallery, etc.) keeps the default light look.
+   Scope is strictly #section-packages so this rule cannot leak onto
+   any other dashboard section or any public page.                 */
+#section-packages {
+    background: #0a1929;
+    color: #e6eef8;
+    border-radius: 14px;
+    padding: 1.25rem 1.25rem 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+#section-packages .section-header h2,
+#section-packages .section-header h2 i {
+    color: #e6eef8;
+}
+#section-packages .publish-status {
+    color: #e6eef8;
+}
+/* Lift package editor cards so they remain visible on the dark bg */
+#section-packages .packages-editor-grid > * {
+    background: #142b47;
+    color: #e6eef8;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+#section-packages .packages-editor-grid input[type="text"],
+#section-packages .packages-editor-grid input[type="number"],
+#section-packages .packages-editor-grid input[type="url"],
+#section-packages .packages-editor-grid textarea,
+#section-packages .packages-editor-grid select {
+    background: #1b3556;
+    color: #e6eef8;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+#section-packages .packages-editor-grid label,
+#section-packages .packages-editor-grid h3,
+#section-packages .packages-editor-grid h4 {
+    color: #e6eef8;
+}
+
+/* ── Phase 2 — Typed trip-blocks editor (admin dashboard) ──
+ * Inserted by buildDayCard() inside .ite-day-card. Self-contained
+ * so it works in every dashboard theme. */
+
+.ite-blocks-section {
+    margin-top: 1rem;
+    padding-top: .85rem;
+    border-top: 1px dashed #cfd9df;
+}
+.ite-blocks-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .55rem;
+}
+.ite-blocks-head label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: #5a6877;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.ite-blocks-head label small {
+    text-transform: none;
+    font-weight: 400;
+    color: #888;
+    margin-left: .35rem;
+}
+.ite-blocks-count {
+    display: inline-block;
+    background: #0d7a8a;
+    color: #fff;
+    padding: .05rem .5rem;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+.ite-blocks-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin-bottom: .65rem;
+    padding: .5rem;
+    background: #f6fafb;
+    border: 1px solid #e3e8ef;
+    border-radius: 8px;
+}
+.btn-block-add {
+    background: #fff;
+    border: 1px solid #cfd9df;
+    color: #2c3e50;
+    padding: .4rem .75rem;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    transition: background .12s, border-color .12s, color .12s;
+}
+.btn-block-add:hover {
+    background: linear-gradient(135deg, #0d7a8a, #16a085);
+    border-color: transparent;
+    color: #fff;
+}
+.btn-block-add i { font-size: .85rem; }
+
+.ite-blocks-list {
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+}
+.ite-blocks-empty {
+    margin: 0;
+    padding: 1rem;
+    background: #f9fbfc;
+    border: 1px dashed #d6dfe5;
+    border-radius: 8px;
+    color: #888;
+    font-size: .85rem;
+    line-height: 1.55;
+    text-align: center;
+}
+
+.ite-block-card {
+    background: #fff;
+    border: 1px solid #e3e8ef;
+    border-radius: 8px;
+    padding: .65rem .8rem;
+    transition: border-color .15s, box-shadow .15s;
+}
+.ite-block-card:hover {
+    border-color: #cfd9df;
+    box-shadow: 0 2px 6px rgba(10, 31, 68, 0.04);
+}
+.ite-block-card.ite-block-activity     { border-left: 3px solid #0d7a8a; }
+.ite-block-card.ite-block-transfer     { border-left: 3px solid #3498db; }
+.ite-block-card.ite-block-hotel        { border-left: 3px solid #9b59b6; }
+.ite-block-card.ite-block-sightseeing  { border-left: 3px solid #16a085; }
+.ite-block-card.ite-block-meal         { border-left: 3px solid #e67e22; }
+.ite-block-card.ite-block-flight       { border-left: 3px solid #e74c3c; }
+.ite-block-card.ite-block-hotel-checkout { border-left: 3px solid #95a5a6; }
+
+.ite-block-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .5rem;
+    padding-bottom: .35rem;
+    border-bottom: 1px solid #f0f3f5;
+}
+.ite-block-type {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .75rem;
+    font-weight: 700;
+    color: #0d7a8a;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+.ite-block-actions {
+    display: flex;
+    gap: .25rem;
+}
+.btn-block-act {
+    background: transparent;
+    border: 1px solid #e0e6ea;
+    color: #5a6877;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: .75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .12s, color .12s, border-color .12s;
+}
+.btn-block-act:hover:not(:disabled) {
+    background: #eef6f8;
+    border-color: #0d7a8a;
+    color: #0d7a8a;
+}
+.btn-block-act:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+.btn-block-act .fa-trash:hover { color: #c0392b; }
+
+.ite-block-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem .65rem;
+}
+.ite-block-field {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    font-size: .78rem;
+}
+.ite-block-field-label {
+    font-weight: 600;
+    color: #5a6877;
+}
+.ite-block-field-input {
+    padding: .4rem .6rem;
+    border: 1px solid #cfd9df;
+    border-radius: 6px;
+    font: inherit;
+    font-size: .85rem;
+    color: #2c3e50;
+    background: #fff;
+}
+.ite-block-field-input:focus {
+    outline: none;
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13, 122, 138, .15);
+}
+textarea.ite-block-field-input {
+    resize: vertical;
+    min-height: 56px;
+    font-family: inherit;
+}
+/* Fields that span the full row (textarea-style) */
+.ite-block-field:has(textarea) {
+    grid-column: 1 / -1;
+}
+
+/* ── Collapsible state ─────────────────────────────────────── */
+.ite-block-card.is-collapsed .ite-block-body {
+    display: none;
+}
+.ite-block-card.is-collapsed {
+    padding-bottom: .35rem;
+}
+.ite-block-type-summary {
+    color: #5a6877;
+    font-weight: 400;
+    font-size: .82rem;
+    margin-left: .25rem;
+}
+.ite-block-card.is-collapsed .ite-block-type-summary {
+    color: #2c3e50;
+    font-weight: 500;
+}
+.btn-block-collapse {
+    transition: transform .15s ease;
+}
+
+@media (max-width: 700px) {
+    .ite-block-body { grid-template-columns: 1fr; }
+    .ite-block-type-summary {
+        display: block;
+        margin-left: 0;
+        margin-top: .15rem;
+        font-size: .75rem;
+    }
+}
+
+/* Dark themes — keep summary readable */
+body.theme-hacker .ite-block-type-summary,
+body.theme-midnight .ite-block-type-summary,
+body.theme-cyberpunk .ite-block-type-summary {
+    color: rgba(255, 255, 255, 0.65);
+}
+body.theme-hacker .ite-block-card.is-collapsed .ite-block-type-summary,
+body.theme-midnight .ite-block-card.is-collapsed .ite-block-type-summary,
+body.theme-cyberpunk .ite-block-card.is-collapsed .ite-block-type-summary {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Hacker / dark-theme overrides — mirror the rest of dashboard.css */
+body.theme-hacker .ite-blocks-section,
+body.theme-midnight .ite-blocks-section,
+body.theme-cyberpunk .ite-blocks-section {
+    border-top-color: rgba(255,255,255,.18);
+}
+body.theme-hacker .ite-blocks-toolbar,
+body.theme-midnight .ite-blocks-toolbar,
+body.theme-cyberpunk .ite-blocks-toolbar {
+    background: rgba(255,255,255,.05);
+    border-color: rgba(255,255,255,.18);
+}
+body.theme-hacker .btn-block-add,
+body.theme-midnight .btn-block-add,
+body.theme-cyberpunk .btn-block-add {
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.22);
+    color: #e6eef8;
+}
+body.theme-hacker .ite-block-card,
+body.theme-midnight .ite-block-card,
+body.theme-cyberpunk .ite-block-card {
+    background: rgba(255,255,255,.05);
+    border-color: rgba(255,255,255,.18);
+}
+body.theme-hacker .ite-block-field-input,
+body.theme-midnight .ite-block-field-input,
+body.theme-cyberpunk .ite-block-field-input {
+    background: rgba(0,0,0,.25);
+    color: #e6eef8;
+    border-color: rgba(255,255,255,.22);
+}
+body.theme-hacker .ite-block-field-label,
+body.theme-midnight .ite-block-field-label,
+body.theme-cyberpunk .ite-block-field-label,
+body.theme-hacker .ite-blocks-head label,
+body.theme-midnight .ite-blocks-head label,
+body.theme-cyberpunk .ite-blocks-head label {
+    color: #c5d3df;
+}
+body.theme-hacker .ite-blocks-empty,
+body.theme-midnight .ite-blocks-empty,
+body.theme-cyberpunk .ite-blocks-empty {
+    background: rgba(255,255,255,.04);
+    border-color: rgba(255,255,255,.18);
+    color: #b8c5d3;
+}
+
+/* ── Line-by-line list editor (window.IteListEditors.wireStringList) ──
+ * Used by the dashboard's itinerary day-card editor (Inclusions /
+ * Exclusions / Highlights) and by the AI Package Import dialog
+ * (Inclusions / Exclusions / Places). One <input> + 3 action buttons
+ * per line, with a dashed "+ Add Item" button at the bottom.
+ */
+.il-list {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    padding: .5rem;
+    background: #f9fbfc;
+    border: 1px solid #e3e8ef;
+    border-radius: 8px;
+}
+.il-empty {
+    margin: .35rem 0 .15rem;
+    padding: .5rem .65rem;
+    color: #888;
+    font-size: .82rem;
+    font-style: italic;
+    text-align: center;
+}
+.il-row {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+}
+.il-row-input {
+    flex: 1;
+    min-width: 0;
+    padding: .42rem .65rem;
+    border: 1px solid #cfd9df;
+    border-radius: 6px;
+    font: inherit;
+    font-size: .88rem;
+    color: #2c3e50;
+    background: #fff;
+}
+.il-row-input:focus {
+    outline: none;
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13, 122, 138, .15);
+}
+.btn-il-act {
+    background: #fff;
+    border: 1px solid #cfd9df;
+    color: #5a6877;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: .75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background .12s, border-color .12s, color .12s;
+}
+.btn-il-act:hover:not(:disabled) {
+    background: #eef6f8;
+    border-color: #0d7a8a;
+    color: #0d7a8a;
+}
+.btn-il-act:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+.btn-il-act .fa-trash:hover { color: #c0392b; }
+
+.btn-il-add {
+    align-self: flex-start;
+    margin-top: .25rem;
+    background: #fff;
+    border: 1.5px dashed #cfd9df;
+    color: #0d7a8a;
+    padding: .42rem .9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: .82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    transition: background .12s, border-color .12s, color .12s, border-style .12s;
+}
+.btn-il-add:hover {
+    background: #0d7a8a;
+    color: #fff;
+    border-color: #0d7a8a;
+    border-style: solid;
+}
+
+/* Dark themes */
+body.theme-hacker .il-list,
+body.theme-midnight .il-list,
+body.theme-cyberpunk .il-list {
+    background: rgba(255, 255, 255, .04);
+    border-color: rgba(255, 255, 255, .18);
+}
+body.theme-hacker .il-row-input,
+body.theme-midnight .il-row-input,
+body.theme-cyberpunk .il-row-input {
+    background: rgba(0, 0, 0, .25);
+    color: #e6eef8;
+    border-color: rgba(255, 255, 255, .22);
+}
+body.theme-hacker .btn-il-act,
+body.theme-midnight .btn-il-act,
+body.theme-cyberpunk .btn-il-act,
+body.theme-hacker .btn-il-add,
+body.theme-midnight .btn-il-add,
+body.theme-cyberpunk .btn-il-add {
+    background: rgba(255, 255, 255, .08);
+    color: #e6eef8;
+    border-color: rgba(255, 255, 255, .22);
+}
+
+/* Scope inside the AI import modal — the modal's font-size is 14px so
+   the editor inherits a slightly larger feel; trim padding so rows
+   stay compact next to the surrounding mini-form. */
+.aipkg-overlay .il-list {
+    padding: .4rem;
+    gap: .3rem;
+}
+.aipkg-overlay .il-row-input {
+    font-size: .85rem;
+    padding: .38rem .6rem;
+}
+
+/* ── Trip-block image picker (Upload + Pick from gallery) ──
+ * Renders inside a .ite-block-card body for fields with t === 'image'.
+ * Replaces the old "Image URL" text input. Two action buttons + a
+ * preview thumbnail; Cloudinary upload uses GalleryStore.
+ */
+.ite-block-field-image {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+}
+.ite-img-picker {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: .65rem;
+    align-items: start;
+}
+.ite-img-thumb {
+    width: 96px;
+    height: 96px;
+    border-radius: 8px;
+    border: 2px dashed #cfd9df;
+    background: #f9fbfc center / cover no-repeat;
+    flex-shrink: 0;
+    transition: border-color .12s;
+}
+.ite-img-thumb.has-img {
+    border-style: solid;
+    border-color: #0d7a8a;
+    background-color: transparent;
+}
+.ite-img-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    align-items: center;
+}
+.ite-img-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .42rem .75rem;
+    border-radius: 6px;
+    font: inherit;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #cfd9df;
+    color: #2c3e50;
+    transition: background .12s, border-color .12s, color .12s, opacity .12s;
+}
+.ite-img-btn:hover:not(:disabled) {
+    background: #eef6f8;
+    border-color: #0d7a8a;
+    color: #0d7a8a;
+}
+.ite-img-btn:disabled { opacity: .55; cursor: not-allowed; }
+.ite-img-btn-primary {
+    background: linear-gradient(135deg, #0d7a8a, #16a085);
+    border-color: transparent;
+    color: #fff;
+}
+.ite-img-btn-primary:hover:not(:disabled) {
+    color: #fff;
+    filter: brightness(1.05);
+}
+.ite-img-btn-danger {
+    background: #fdedec;
+    border-color: #f5b7b1;
+    color: #c0392b;
+}
+.ite-img-btn-danger:hover:not(:disabled) {
+    background: #c0392b;
+    color: #fff;
+    border-color: #c0392b;
+}
+.ite-img-status {
+    grid-column: 1 / -1;
+    font-size: .78rem;
+    color: #0d7a8a;
+    min-height: 1em;
+}
+
+/* ── Picker modal (single-select gallery grid) ── */
+.ite-img-picker-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 32, 39, .6);
+    backdrop-filter: blur(3px);
+    z-index: 100002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+.ite-img-picker-modal.open { opacity: 1; }
+.ite-img-picker-card {
+    background: #fff;
+    border-radius: 12px;
+    width: min(880px, 95vw);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .35);
+    overflow: hidden;
+}
+.ite-img-picker-head {
+    padding: .9rem 1.1rem;
+    background: linear-gradient(135deg, #0d7a8a, #16a085);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.ite-img-picker-head h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+}
+.ite-img-picker-close {
+    background: rgba(255, 255, 255, .18);
+    border: 0;
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.ite-img-picker-close:hover { background: rgba(255, 255, 255, .32); }
+.ite-img-picker-search {
+    margin: .85rem 1.1rem 0;
+    padding: .55rem .8rem;
+    border: 1px solid #cfd9df;
+    border-radius: 7px;
+    font: inherit;
+    font-size: .9rem;
+}
+.ite-img-picker-search:focus {
+    outline: none;
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13, 122, 138, .15);
+}
+.ite-img-picker-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: .75rem;
+}
+.ite-img-picker-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #888;
+    padding: 2rem 1rem;
+    font-size: .92rem;
+}
+.ite-img-picker-tile {
+    cursor: pointer;
+    background: #f8f9fa;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color .12s, transform .1s;
+}
+.ite-img-picker-tile:hover {
+    border-color: #0d7a8a;
+    transform: translateY(-1px);
+}
+.ite-img-picker-tile img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    display: block;
+}
+.ite-img-picker-cap {
+    padding: .42rem .55rem;
+    font-size: .8rem;
+    background: #fff;
+    border-top: 1px solid #f0f3f5;
+}
+.ite-img-picker-cap strong {
+    display: block;
+    color: #1c2b48;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ite-img-picker-cap small {
+    display: block;
+    color: #888;
+    font-size: .7rem;
+    margin-top: .12rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Mobile — stack thumb + buttons vertically */
+@media (max-width: 600px) {
+    .ite-img-picker {
+        grid-template-columns: 1fr;
+    }
+    .ite-img-thumb { width: 100%; height: 160px; }
+}
+
+/* Dark themes */
+body.theme-hacker .ite-img-thumb,
+body.theme-midnight .ite-img-thumb,
+body.theme-cyberpunk .ite-img-thumb {
+    background-color: rgba(255, 255, 255, .04);
+    border-color: rgba(255, 255, 255, .22);
+}
+body.theme-hacker .ite-img-btn,
+body.theme-midnight .ite-img-btn,
+body.theme-cyberpunk .ite-img-btn {
+    background: rgba(255, 255, 255, .08);
+    color: #e6eef8;
+    border-color: rgba(255, 255, 255, .22);
+}

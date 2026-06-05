@@ -1,39 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- ── Firebase auth-action redirect ─────────────────────────────
+         When a user clicks the "Reset password" or "Verify email"
+         link in a Firebase email, the link points at our domain
+         root with ?mode=resetPassword&oobCode=… (or mode=verifyEmail).
+         We don't render a reset form on the homepage, so detect
+         those params and redirect to /auth-action.html which DOES
+         have the form. Must run BEFORE any other script (analytics,
+         ads, history rewrite) so we never paint the homepage first. -->
+    <script>(function(){try{var qs=location.search||'';if(/[?&]mode=(resetPassword|verifyEmail|recoverEmail|signIn)\b/i.test(qs)&&/[?&]oobCode=/i.test(qs)){location.replace('/auth-action.html'+qs+location.hash);}}catch(e){}})();</script>
+
+    <!-- Hide .html and /index from the URL bar without re-loading the page -->
+    <script>(function(){try{var p=location.pathname;if(/\/index(\.html)?$/i.test(p)){history.replaceState(null,'',p.replace(/\/index(\.html)?$/i,'/')+location.search+location.hash);}else if(/\.html$/i.test(p)){history.replaceState(null,'',p.replace(/\.html$/i,'')+location.search+location.hash);}}catch(e){}})();</script>
+
+    <!-- ── EzoicAds: privacy + header (must load BEFORE any other ad/analytics) ──
+         Ezoic auto-rotates AdSense / Media.net / 9 other networks per visitor and
+         is our display-ad layer while AdSense approval is in progress. The privacy
+         scripts (Gatekeeper Consent) MUST come before the Ezoic header script so
+         GDPR/CCPA consent state is established first. data-cfasync="false" stops
+         Cloudflare's Rocket Loader from re-ordering them. -->
+    <script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js" defer></script>
+    <script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js" defer></script>
+    <script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
+    <script>
+        window.ezstandalone = window.ezstandalone || {};
+        ezstandalone.cmd = ezstandalone.cmd || [];
+    </script>
+    <script src="//ezoicanalytics.com/analytics.js" defer></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Andaman Holiday Packages from ₹15,999 | Bharat Tours &amp; Travels</title>
-
+    <title>Andaman Holiday Packages from ₹15,999 | Bharat Transport &amp; Tourism</title>
+    <meta name="agd-partner-manual-verification" />
     <!-- ── SEO ─────────────────────────────────────────────────── -->
     <meta name="description" content="Book customizable Andaman tour packages from ₹15,999/person. Port Blair, Havelock & Neil Island trips with hotels, ferries, scuba diving and instant secure Razorpay payments. 50,000+ happy travelers.">
-    <meta name="keywords" content="Andaman holiday packages, Andaman tour package, Port Blair tour, Havelock Island package, Neil Island package, scuba diving Andaman, honeymoon Andaman, cheap Andaman tour, Bharat Tours Andaman, Andaman travel agency">
-    <meta name="author" content="Bharat Tours and Travels">
-    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="keywords" content="Andaman holiday packages, Andaman tour package, Port Blair tour, Havelock Island package, Neil Island package, scuba diving Andaman, honeymoon Andaman, cheap Andaman tour, Bharat Transport Andaman, Andaman travel agency">
+    <meta name="author" content="Bharat Transport and Tourism">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="bingbot" content="index, follow">
     <meta name="theme-color" content="#0d7a8a">
     <meta name="google-adsense-account" content="ca-pub-8154901590978667">
+    <meta name="rating" content="general">
+    <meta name="distribution" content="global">
+    <meta name="language" content="English">
+    <!-- Geo / location signals (helps "near me" + Google Maps) -->
+    <meta name="geo.region" content="IN-AN">
+    <meta name="geo.placename" content="Port Blair, Andaman and Nicobar Islands">
+    <meta name="geo.position" content="11.6234;92.7265">
+    <meta name="ICBM" content="11.6234, 92.7265">
     <link rel="canonical" href="https://andamanvoyages.in/">
+    <link rel="alternate" hreflang="en-in" href="https://andamanvoyages.in/">
+    <link rel="alternate" hreflang="en" href="https://andamanvoyages.in/">
+    <link rel="alternate" hreflang="x-default" href="https://andamanvoyages.in/">
+
+    <!-- Performance / Core-Web-Vitals hints (faster paint = higher rank) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://checkout.razorpay.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    <link rel="dns-prefetch" href="https://cdn.trustindex.io">
+    <link rel="preload" as="image" href="images/beach1.jpg" fetchpriority="high">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Bharat Tours &amp; Travels">
+    <meta property="og:site_name" content="Bharat Transport &amp; Tourism">
     <meta property="og:url" content="https://andamanvoyages.in/">
-    <meta property="og:title" content="Andaman Holiday Packages from ₹15,999 | Bharat Tours &amp; Travels">
+    <meta property="og:title" content="Andaman Holiday Packages from ₹15,999 | Bharat Transport &amp; Tourism">
     <meta property="og:description" content="Customizable Andaman tour packages: Port Blair, Havelock & Neil Island. Hotels, ferries, scuba diving included. Secure Razorpay payment.">
     <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg">
+    <meta property="og:image:secure_url" content="https://andamanvoyages.in/images/beach1.jpg">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Radhanagar Beach, Havelock Island — Andaman holiday packages">
     <meta property="og:locale" content="en_IN">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="business:contact_data:street_address" content="15, Air Road, Delanipur">
+    <meta property="business:contact_data:locality" content="Sri Vijaya Puram">
+    <meta property="business:contact_data:region" content="Andaman and Nicobar Islands">
+    <meta property="business:contact_data:postal_code" content="744102">
+    <meta property="business:contact_data:country_name" content="India">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Andaman Holiday Packages from ₹15,999 | Bharat Tours &amp; Travels">
+    <meta name="twitter:site" content="@andamanvoyages">
+    <meta name="twitter:creator" content="@andamanvoyages">
+    <meta name="twitter:title" content="Andaman Holiday Packages from ₹15,999 | Bharat Transport &amp; Tourism">
     <meta name="twitter:description" content="Book Andaman tour packages: Port Blair, Havelock & Neil Island with hotels, ferries & scuba diving from ₹15,999.">
     <meta name="twitter:image" content="https://andamanvoyages.in/images/beach1.jpg">
+    <meta name="twitter:image:alt" content="Radhanagar Beach, Havelock — Andaman holiday packages">
+    <meta name="twitter:label1" content="Starting Price">
+    <meta name="twitter:data1" content="₹15,999 per person">
+    <meta name="twitter:label2" content="Booking">
+    <meta name="twitter:data2" content="Instant · Razorpay">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="images/logo.png">
-    <link rel="apple-touch-icon" href="images/logo.png">
+    <!-- Favicon + PWA manifest -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo-white.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/logo-white.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/logo-white.png">
+    <link rel="mask-icon" href="images/logo-white.png" color="#0d7a8a">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="application-name" content="Andaman Voyages">
+    <meta name="apple-mobile-web-app-title" content="Andaman Voyages">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=yes">
+    <meta name="msapplication-TileColor" content="#0d7a8a">
 
     <!-- Schema.org structured data: TravelAgency / LocalBusiness -->
     <script type="application/ld+json">
@@ -41,10 +117,10 @@
         "@context": "https://schema.org",
         "@type": ["TravelAgency", "LocalBusiness"],
         "@id": "https://andamanvoyages.in/#organization",
-        "name": "Bharat Tours and Travels",
+        "name": "Bharat Transport and Tourism",
         "alternateName": "Andaman Voyages",
         "url": "https://andamanvoyages.in/",
-        "logo": "https://andamanvoyages.in/images/logo.png",
+        "logo": "https://andamanvoyages.in/images/logo-white.png",
         "image": [
             "https://andamanvoyages.in/images/beach1.jpg",
             "https://andamanvoyages.in/images/beach2.jpg",
@@ -70,9 +146,11 @@
         ],
         "address": {
             "@type": "PostalAddress",
+            "streetAddress": "15, Air Road, Delanipur",
             "addressCountry": "IN",
             "addressRegion": "Andaman and Nicobar Islands",
-            "addressLocality": "Port Blair"
+            "addressLocality": "Sri Vijaya Puram",
+            "postalCode": "744102"
         },
         "aggregateRating": {
             "@type": "AggregateRating",
@@ -92,7 +170,7 @@
         "@type": "WebSite",
         "@id": "https://andamanvoyages.in/#website",
         "url": "https://andamanvoyages.in/",
-        "name": "Bharat Tours and Travels",
+        "name": "Bharat Transport and Tourism",
         "publisher": { "@id": "https://andamanvoyages.in/#organization" },
         "potentialAction": {
             "@type": "SearchAction",
@@ -145,7 +223,7 @@
                 "name": "How much advance payment is required to book a package?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Only 5% advance is required to confirm your booking via Razorpay. The remaining 95% balance is paid directly to us on the last day of your trip via UPI, bank transfer or cash."
+                    "text": "A flat per-person booking advance is required at the time of booking, paid online via Razorpay: ₹6,000 per traveller for Budget and Standard packages, and ₹11,000 per traveller for Luxury, Premium and Honeymoon packages. The remaining balance is paid directly to us during or after your trip via UPI, bank transfer or cash."
                 }
             },
             {
@@ -153,7 +231,7 @@
                 "name": "What is your cancellation policy?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Cancellations more than 60 days before travel get a 95% refund (5% fee on advance). Cancellations 30 to 60 days before travel get a 90% refund. Cancellations within 30 days of travel get a 50% refund."
+                    "text": "Cancellations more than 7 days before travel: Budget/Standard packages retain ₹4,000 per head as cancellation fee (₹2,000 per head refunded); Luxury packages retain ₹7,000 per head (₹4,000 per head refunded). Cancellations within 7 days of travel or no-shows: no refund — the full advance and any partial balance paid is forfeited."
                 }
             },
             {
@@ -187,23 +265,58 @@
         ]
     }
     </script>
-    <link rel="stylesheet" href="css/style.css?v=30">
-    <link rel="stylesheet" href="css/mmt.css?v=28">
+    <link rel="stylesheet" href="css/style.css?v=56">
+    <link rel="stylesheet" href="css/conversion-kit.css?v=3">
+    <link rel="stylesheet" href="css/mmt.css?v=30">
     <link rel="stylesheet" href="css/flights.css?v=3">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Razorpay Payment Gateway -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- ── Razorpay — lazy-loaded on demand ──────────────────────────────
+         Razorpay's checkout.js eagerly fetches ~70 chunk files (Google Pay,
+         FPX, ACH, illustrations, locales, etc.) the moment it's parsed —
+         that's where the 86-request / 400 KB DevTools waterfall came from.
+         Most of those are irrelevant for an Indian travel site, AND every
+         visitor to the homepage paid for them whether or not they ever
+         clicked "Pay".
+
+         We now expose a lazy loader instead. The first time something calls
+         window.RazorpayReady() the SDK is injected; subsequent calls reuse
+         the same Promise. checkout.js / script.js await it right before
+         calling `new Razorpay(options)` — see js/checkout.js + js/script.js.
+
+         The checkout.html page still loads checkout.js synchronously
+         because that page IS the checkout funnel — Razorpay needs to be
+         instantly available the moment the user lands there. -->
+    <script>
+    window.RazorpayReady = (function () {
+        var p = null;
+        return function () {
+            if (window.Razorpay) return Promise.resolve();
+            if (p) return p;
+            p = new Promise(function (resolve, reject) {
+                var s = document.createElement('script');
+                s.src   = 'https://checkout.razorpay.com/v1/checkout.js';
+                s.async = true;
+                s.onload  = function () { resolve(); };
+                s.onerror = function () { p = null; reject(new Error('Razorpay failed to load')); };
+                document.head.appendChild(s);
+            });
+            return p;
+        };
+    })();
+    </script>
     <!-- Travelpayouts site tracker (flight-affiliate revenue) -->
     <script src="js/travelpayouts-init.js?v=1"></script>
+    <!-- ── Google AdSense loader (publisher pub-8154901590978667) ── -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8154901590978667" crossorigin="anonymous"></script>
 </head>
-<body>
+<body class="hero-page">
     <!-- ── Top Brand Bar with Inline Icon Nav ───────────────── -->
     <header class="topbar">
-        <div class="topbar-logo">
-            <img src="images/logo.png" alt="Bharat Tours and Travels logo">
-            <span>Bharat Tours &amp; Travels</span>
-        </div>
+        <a href="/" class="topbar-logo" style="text-decoration:none">
+            <img src="images/logo-white.png" alt="Bharat Transport and Tourism logo">
+            <span class="brand-text"><span class="brand-line1">Bharat Transport &amp; Tourism</span><span class="brand-line2">Andaman Specialists</span></span>
+        </a>
         <nav class="topnav" id="topnav">
         <a href="#home" class="topnav-item">
             <i class="fas fa-home"></i><span>Home</span>
@@ -211,17 +324,15 @@
         <a href="#packages" class="topnav-item active">
             <i class="fas fa-suitcase-rolling"></i><span>Packages</span>
         </a>
-        <a href="/flights.html" class="topnav-item">
+        <a href="/flights" class="topnav-item">
             <i class="fas fa-plane"></i><span>Flights</span>
         </a>
-        <a href="/gallery.html" class="topnav-item">
+        <a href="/customize" class="topnav-item"><i class="fas fa-sliders-h"></i><span>Customize</span></a>
+        <a href="/cabs" class="topnav-item">
+            <i class="fas fa-taxi"></i><span>Cabs</span>
+        </a>
+        <a href="/gallery" class="topnav-item">
             <i class="fas fa-images"></i><span>Gallery</span>
-        </a>
-        <a href="/bookings" class="topnav-item">
-            <i class="fas fa-calendar-check"></i><span>Bookings</span>
-        </a>
-        <a href="#customize" class="topnav-item">
-            <i class="fas fa-sliders-h"></i><span>Customize</span>
         </a>
         <a href="/dashboard" class="topnav-item">
             <i class="fas fa-th-large"></i><span>Dashboard</span>
@@ -288,12 +399,22 @@
         </div>
 
         <div class="hero-content">
-            <!-- Heading at the top of the hero -->
             <div class="hero-heading">
-                <h1>Best Andaman Holiday Packages <br><small>From ₹15,999 PP</small></h1>
+                <h1>Andaman, <em>Done Right</em>.</h1>
             </div>
 
-            <!-- Search bar in the MIDDLE of the hero image -->
+            <!-- Price callout: was/now/savings -->
+            <div class="hero-price">
+                <span class="hero-price-was">₹22,999</span>
+                <span class="hero-price-now">₹15,999</span>
+                <span class="hero-price-pp">per person, all-inclusive</span>
+                <span class="hero-price-save">Save ₹7,000</span>
+            </div>
+
+            <div class="hero-subtext">
+                <p>Pristine beaches, crystal waters, expert local guides — every package includes ferries, hand-picked stays &amp; activities.</p>
+            </div>
+
             <div class="mmt-searchbar mmt-searchbar-hero">
                 <div class="mmt-search-fields">
                     <div class="mmt-field">
@@ -301,45 +422,85 @@
                         <select class="mmt-field-value" id="mmtFrom" data-cities data-default="Bangalore (Bengaluru)"></select>
                     </div>
                     <div class="mmt-field">
-                        <span class="mmt-field-label">Going To</span>
-                        <input class="mmt-field-value" id="mmtTo" type="text" value="Andaman" readonly>
-                    </div>
-                    <div class="mmt-field">
                         <span class="mmt-field-label">Travel Date</span>
                         <input class="mmt-field-value" id="mmtDate" type="date">
                     </div>
-                    <div class="mmt-field">
-                        <span class="mmt-field-label">Adults</span>
-                        <select class="mmt-field-value" id="mmtAdults">
-                            <option value="1">1 Adult</option>
-                            <option value="2" selected>2 Adults</option>
-                            <option value="3">3 Adults</option>
-                            <option value="4">4 Adults</option>
-                            <option value="5">5 Adults</option>
-                            <option value="6">6 Adults</option>
-                        </select>
+                    <!-- Travellers — combined Adults (12y+) + Children (under 12) picker.
+                         Click opens a popup with two counters; the visible value
+                         reads e.g. "2 Adults, 1 Child". No infants. The hidden
+                         #mmtAdults / #mmtChildren inputs keep the rest of the
+                         search/booking flow working unchanged. -->
+                    <div class="mmt-field mmt-field-travellers" id="mmtTravellersField">
+                        <span class="mmt-field-label">Travellers</span>
+                        <button type="button" class="mmt-field-value mmt-travellers-trigger" id="mmtTravellersTrigger" aria-haspopup="dialog" aria-expanded="false">
+                            <span id="mmtTravellersText">2 Adults</span>
+                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <div class="mmt-travellers-pop" id="mmtTravellersPop" role="dialog" aria-label="Select travellers" hidden>
+                            <div class="mmt-trv-row">
+                                <div class="mmt-trv-text">
+                                    <strong>Adults</strong>
+                                    <small>12 yrs &amp; above</small>
+                                </div>
+                                <div class="mmt-trv-counter">
+                                    <button type="button" class="mmt-trv-btn" data-act="dec" data-target="adults" aria-label="Decrease adults">−</button>
+                                    <span class="mmt-trv-num" id="mmtTrvAdultsNum">2</span>
+                                    <button type="button" class="mmt-trv-btn" data-act="inc" data-target="adults" aria-label="Increase adults">+</button>
+                                </div>
+                            </div>
+                            <div class="mmt-trv-row">
+                                <div class="mmt-trv-text">
+                                    <strong>Children</strong>
+                                    <small>Under 12 yrs</small>
+                                </div>
+                                <div class="mmt-trv-counter">
+                                    <button type="button" class="mmt-trv-btn" data-act="dec" data-target="children" aria-label="Decrease children">−</button>
+                                    <span class="mmt-trv-num" id="mmtTrvChildrenNum">0</span>
+                                    <button type="button" class="mmt-trv-btn" data-act="inc" data-target="children" aria-label="Increase children">+</button>
+                                </div>
+                            </div>
+                            <div class="mmt-trv-foot">
+                                <button type="button" class="mmt-trv-done" id="mmtTrvDone">Done</button>
+                            </div>
+                        </div>
+                        <!-- Hidden numeric mirrors so the existing search /
+                             booking pipeline keeps reading adults+children. -->
+                        <input type="hidden" id="mmtAdults" value="2">
+                        <input type="hidden" id="mmtChildren" value="0">
                     </div>
+                    <!-- Phase 3: Category picker — mirrors the dashboard editor and the
+                         filter pills below the hero. SEARCH applies it via mmtState.cat
+                         and pushes it as ?category= so the filter survives reload/share. -->
                     <div class="mmt-field">
-                        <span class="mmt-field-label">Children (Under 5)</span>
-                        <select class="mmt-field-value" id="mmtChildren">
-                            <option value="0" selected>0 Children</option>
-                            <option value="1">1 Child</option>
-                            <option value="2">2 Children</option>
-                            <option value="3">3 Children</option>
-                            <option value="4">4 Children</option>
+                        <span class="mmt-field-label">Category</span>
+                        <select class="mmt-field-value" id="mmtCategory">
+                            <option value="all" selected>Any</option>
+                            <option value="budget">Budget</option>
+                            <option value="standard">Standard</option>
+                            <option value="deluxe">Deluxe</option>
+                            <option value="luxury">Luxury</option>
+                            <option value="royal">Royal</option>
+                            <option value="honeymoon">Honeymoon</option>
                         </select>
                     </div>
                 </div>
                 <button class="mmt-search-btn" id="mmtSearchBtn">SEARCH</button>
             </div>
 
-            <!-- Description and trust badges BELOW the search bar -->
-            <div class="hero-subtext">
-                <p>Discover pristine beaches, crystal waters &amp; adventure in Andaman Islands. Customizable packages with flights, hotels, ferries &amp; activities.</p>
-                <div class="trust-badges">
-                    <span><i class="fas fa-award"></i> 50K+ Happy Travelers</span>
-                    <span><i class="fas fa-shield-alt"></i> Secure Payments</span>
-                    <span><i class="fas fa-clock"></i> Instant Confirmation</span>
+            <!-- Secondary CTA: no-commit browsing -->
+            <a href="#packages" class="hero-cta-secondary">
+                Or browse all curated packages <i class="fas fa-arrow-right"></i>
+            </a>
+
+            <!-- Trust strip: badges + contact pills -->
+            <div class="hero-trust">
+                <span class="hero-trust__label">Trusted by 50,000+ travelers</span>
+                <div class="hero-trust__row">
+                    <span class="hero-trust__item"><i class="fas fa-shield-halved"></i> Secure SSL</span>
+                    <span class="hero-trust__item"><i class="fas fa-circle-check"></i> Instant Confirmation</span>
+                    <span class="hero-trust__item"><i class="fas fa-headset"></i> 24×7 Support</span>
+                    <a href="tel:+918880195191" class="hero-trust__contact"><i class="fas fa-phone"></i> +91 88801 95191</a>
+                    <a href="mailto:booking@andamanvoyages.in" class="hero-trust__contact"><i class="fas fa-envelope"></i> booking@andamanvoyages.in</a>
                 </div>
             </div>
         </div>
@@ -352,13 +513,20 @@
         <div class="mmt-listing-container">
             <!-- Tabs -->
             <div class="mmt-tabs-card">
+                <!-- Phase 1.4 — six category pills mirroring the dashboard editor's
+                     Category dropdown (Budget · Standard · Deluxe · Luxury · Royal ·
+                     Honeymoon). Counts auto-update from updateTabCounts() in
+                     js/script.js — the data-count slug must match a key produced
+                     by pkgCategory(). -->
                 <div class="mmt-tabs" id="mmtTabs">
                     <button class="mmt-tab-arrow" data-tab-scroll="left" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
-                    <button class="mmt-tab active" data-cat="all">ALL PACKAGES <span class="mmt-tab-count" data-count="all">(0)</span></button>
+                    <button class="mmt-tab active" data-cat="all">ALL <span class="mmt-tab-count" data-count="all">(0)</span></button>
                     <button class="mmt-tab" data-cat="budget">BUDGET <span class="mmt-tab-count" data-count="budget">(0)</span></button>
-                    <button class="mmt-tab" data-cat="honeymoon">HONEYMOON <span class="mmt-tab-count" data-count="honeymoon">(0)</span></button>
-                    <button class="mmt-tab" data-cat="premium">PREMIUM <span class="mmt-tab-count" data-count="premium">(0)</span></button>
                     <button class="mmt-tab" data-cat="standard">STANDARD <span class="mmt-tab-count" data-count="standard">(0)</span></button>
+                    <button class="mmt-tab" data-cat="deluxe">DELUXE <span class="mmt-tab-count" data-count="deluxe">(0)</span></button>
+                    <button class="mmt-tab" data-cat="luxury">LUXURY <span class="mmt-tab-count" data-count="luxury">(0)</span></button>
+                    <button class="mmt-tab" data-cat="royal">ROYAL <span class="mmt-tab-count" data-count="royal">(0)</span></button>
+                    <button class="mmt-tab" data-cat="honeymoon">HONEYMOON <span class="mmt-tab-count" data-count="honeymoon">(0)</span></button>
                     <button class="mmt-tab-arrow" data-tab-scroll="right" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
@@ -443,10 +611,236 @@
         </div>
     </section>
 
+    <!-- ═══ DESTINATIONS — visual island picker ═══════════════════════ -->
+    <section id="destinations" class="dest-section">
+        <header class="m-section-head">
+            <div>
+                <div class="m-eyebrow">Destinations</div>
+                <h2 class="m-title">Where do you want to <em>wake up</em>?</h2>
+                <p class="m-sub">Six islands, six personalities. Build your trip around the ones that match your mood.</p>
+            </div>
+        </header>
+        <div class="dest-grid">
+            <a href="#packages" class="dest-card dest-card--lg" data-dest="havelock"><div><h3 class="dest-card__title">Havelock Island</h3><div class="dest-card__meta"><span class="pill">Most Popular</span><span><i class="fas fa-water"></i> Radhanagar Beach (Asia's #7)</span></div></div></a>
+            <a href="#packages" class="dest-card dest-card--md" data-dest="neil"><div><h3 class="dest-card__title">Neil Island</h3><div class="dest-card__meta"><span class="pill">Quiet &amp; Slow</span><span><i class="fas fa-leaf"></i> Natural bridge &amp; coral</span></div></div></a>
+            <a href="#packages" class="dest-card dest-card--md" data-dest="portblair"><div><h3 class="dest-card__title">Port Blair</h3><div class="dest-card__meta"><span class="pill">History</span><span><i class="fas fa-monument"></i> Cellular Jail capital</span></div></div></a>
+            <a href="#packages" class="dest-card dest-card--sm" data-dest="baratang"><div><h3 class="dest-card__title">Baratang</h3><div class="dest-card__meta"><span class="pill">Day Trip</span></div></div></a>
+            <a href="#packages" class="dest-card dest-card--sm" data-dest="diglipur"><div><h3 class="dest-card__title">Diglipur</h3><div class="dest-card__meta"><span class="pill">Off-beat</span></div></div></a>
+            <a href="#packages" class="dest-card dest-card--sm" data-dest="rosssmith"><div><h3 class="dest-card__title">Ross &amp; Smith</h3><div class="dest-card__meta"><span class="pill">Twin Islands</span></div></div></a>
+        </div>
+    </section>
+
+    <!-- ═══ HOW IT WORKS — 4-step process ═════════════════════════════ -->
+    <section id="how-it-works" class="how-section">
+        <div class="how-inner">
+            <header class="m-section-head m-section-head--center">
+                <div>
+                    <div class="m-eyebrow">How it works</div>
+                    <h2 class="m-title">Book your trip in <em>4 simple steps</em></h2>
+                    <p class="m-sub">No phone tag, no email chains — start to finish in under 10 minutes.</p>
+                </div>
+            </header>
+            <div class="how-grid">
+                <div class="how-step"><div class="how-step__num"><i class="fas fa-magnifying-glass"></i></div><h3 class="how-step__title">1. Browse &amp; Pick</h3><p class="how-step__desc">Filter by budget, group size, or interest. Or build a custom itinerary from scratch.</p></div>
+                <div class="how-step"><div class="how-step__num"><i class="fas fa-pen-to-square"></i></div><h3 class="how-step__title">2. Customize</h3><p class="how-step__desc">Tweak nights, hotel category, activities, meals. We confirm changes within 2 hours.</p></div>
+                <div class="how-step"><div class="how-step__num"><i class="fas fa-credit-card"></i></div><h3 class="how-step__title">3. Pay Advance to Book</h3><p class="how-step__desc">Secure your seats with a flat ₹6,000/head (or ₹11,000/head for Luxury) advance via Razorpay. Balance during or after your trip.</p></div>
+                <div class="how-step"><div class="how-step__num"><i class="fas fa-plane-departure"></i></div><h3 class="how-step__title">4. Travel Worry-Free</h3><p class="how-step__desc">24×7 on-ground support in Port Blair. Vouchers &amp; WhatsApp group on day one.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ TESTIMONIALS + STATS ══════════════════════════════════════ -->
+    <section id="testimonials" class="tst-section">
+        <header class="m-section-head m-section-head--center">
+            <div>
+                <div class="m-eyebrow">Travelers love us</div>
+                <h2 class="m-title"><em>50,000+</em> happy travelers, and counting</h2>
+            </div>
+        </header>
+
+        <div class="tst-stat-row">
+            <div class="tst-stat"><div class="tst-stat__num">50K+</div><div class="tst-stat__label">Happy travelers</div></div>
+            <div class="tst-stat"><div class="tst-stat__num">4.8★</div><div class="tst-stat__label">Avg. Google rating</div></div>
+            <div class="tst-stat"><div class="tst-stat__num">98%</div><div class="tst-stat__label">Would recommend</div></div>
+            <div class="tst-stat"><div class="tst-stat__num">12+</div><div class="tst-stat__label">Years in Andaman</div></div>
+            <div class="tst-stat"><div class="tst-stat__num">24×7</div><div class="tst-stat__label">On-ground support</div></div>
+        </div>
+
+        <!-- ── Reviews showcase ─────────────────────────────────────
+             Three layers, in order of preference:
+               1. Tagembed widget (live Google Business Profile reviews,
+                  auto-syncs every 24h). Free tier = 1,000 page views
+                  per month; if we exceed, the widget either nags or
+                  hides, and our fallback below kicks in.
+               2. "Read on Google" pill — works even if the script is
+                  blocked entirely.
+               3. Curated <div class="tst-grid"> cards below — only
+                  shown when Tagembed has NOT injected anything (we
+                  detect with the :has() selector in CSS so older
+                  Safari shows both, never neither).
+             To swap providers, replace the data-widget-id and the
+             embed.min.js src on the same line; the rest of the
+             section needs no changes.
+        -->
+        <div class="tst-google-cta">
+            <a href="https://www.google.com/search?q=Bharat+Transport+and+Tourism+Andaman+reviews"
+               class="tst-google-link" target="_blank" rel="noopener">
+                <i class="fab fa-google"></i>
+                <span class="tst-google-stars">★★★★★</span>
+                <span class="tst-google-text">Read all 1,247+ reviews on Google</span>
+                <i class="fas fa-arrow-up-right-from-square"></i>
+            </a>
+        </div>
+
+        <!-- Tagembed live reviews widget (Google Business Profile sync).
+             Widget id 326943 is wired to "Bharat Transport and Tourism"
+             in https://app.tagembed.com → Sources → Google. Free tier:
+             1,000 page views/month. embed.min.js is loaded async-defer
+             so it never blocks first paint; if it fails to inject (rate
+             limit, ad-blocker, network error) the curated .tst-grid
+             below remains visible as a graceful fallback. -->
+        <div class="tst-tagembed-host">
+            <div class="tagembed-widget"
+                 style="width:100%;overflow:auto;"
+                 data-widget-id="326943"
+                 data-website="1"></div>
+            <script defer async src="https://widget.tagembed.com/embed.min.js"></script>
+        </div>
+
+        <div class="tst-grid tst-grid-fallback">
+            <div class="tst-card">
+                <div class="tst-card__head">
+                    <div class="tst-card__avatar">PS</div>
+                    <div><p class="tst-card__name">Priya Sharma</p><p class="tst-card__meta">Bangalore · Honeymoon · Mar 2026</p></div>
+                    <div class="tst-card__stars">★★★★★</div>
+                </div>
+                <p class="tst-card__quote">Honestly the smoothest trip planning we've ever done. Aditya from the team customized our itinerary three times without fuss, and the candlelight dinner on Radhanagar Beach was straight out of a movie.</p>
+                <span class="tst-card__pkg">Honeymoon Paradise</span>
+            </div>
+            <div class="tst-card">
+                <div class="tst-card__head">
+                    <div class="tst-card__avatar">RK</div>
+                    <div><p class="tst-card__name">Rahul &amp; Kavya</p><p class="tst-card__meta">Mumbai · Family · Feb 2026</p></div>
+                    <div class="tst-card__stars">★★★★★</div>
+                </div>
+                <p class="tst-card__quote">Travelled with two kids (5 and 8) — the family-friendly resorts were a lifesaver. Glass-bottom boat at Elephant Beach was the highlight; kids still talk about it. Thank you for the WhatsApp updates, very reassuring.</p>
+                <span class="tst-card__pkg">Family Andaman Special</span>
+            </div>
+            <div class="tst-card">
+                <div class="tst-card__head">
+                    <div class="tst-card__avatar">AM</div>
+                    <div><p class="tst-card__name">Arjun Menon</p><p class="tst-card__meta">Chennai · Adventure · Jan 2026</p></div>
+                    <div class="tst-card__stars">★★★★★</div>
+                </div>
+                <p class="tst-card__quote">Got my PADI scuba certification + parasailed over Havelock + sea-walked at North Bay — three new things ticked off in one trip. The dive instructors were ridiculously good. Worth every rupee.</p>
+                <span class="tst-card__pkg">Adventure Andaman</span>
+            </div>
+            <div class="tst-card">
+                <div class="tst-card__head">
+                    <div class="tst-card__avatar">SD</div>
+                    <div><p class="tst-card__name">Sneha Das</p><p class="tst-card__meta">Kolkata · Solo · Dec 2025</p></div>
+                    <div class="tst-card__stars">★★★★★</div>
+                </div>
+                <p class="tst-card__quote">As a solo female traveler, safety was my #1 concern. The hostel they picked at Havelock was clean, safe, and full of other solo travelers. Made friends for life. The on-ground team checked on me every single day.</p>
+                <span class="tst-card__pkg">Solo Backpacker</span>
+            </div>
+            <div class="tst-card">
+                <div class="tst-card__head">
+                    <div class="tst-card__avatar">VG</div>
+                    <div><p class="tst-card__name">Vikram &amp; Geeta</p><p class="tst-card__meta">Delhi · Senior · Nov 2025</p></div>
+                    <div class="tst-card__stars">★★★★★</div>
+                </div>
+                <p class="tst-card__quote">My parents (78 and 75) wanted to see Cellular Jail. Bharat Transport & Tourism arranged ground-floor rooms, wheelchair-friendly cars, and even a doctor for one minor scare. Extraordinary care. Will book again for our anniversary.</p>
+                <span class="tst-card__pkg">Senior-Friendly</span>
+            </div>
+            <div class="tst-card">
+                <div class="tst-card__head">
+                    <div class="tst-card__avatar">NA</div>
+                    <div><p class="tst-card__name">Nishant Agarwal</p><p class="tst-card__meta">Pune · Photographer · Oct 2025</p></div>
+                    <div class="tst-card__stars">★★★★★</div>
+                </div>
+                <p class="tst-card__quote">Drone permits sorted before I landed. Sunrise at Kalapathar, sunset at Radhanagar, dolphin tour at Havelock — the schedule was a photographer's dream. Got 200+ portfolio shots in 7 days. Not your typical tour operator.</p>
+                <span class="tst-card__pkg">Photographer's Expedition</span>
+            </div>
+        </div>
+
+        <div class="tst-source">
+            <i class="fab fa-google" style="color:#4285f4"></i>
+            Verified reviews from Google · TripAdvisor · MakeMyTrip
+        </div>
+
+        <!-- ── Reviews-section styles ──────────────────────────────
+             1. Google CTA pill — looks like a Google widget header
+             2. Tagembed host — reserves space (avoids CLS) and centers
+                the widget inside a 1200-px max-width container.
+             3. Fallback grid — hidden once Tagembed injects (detected
+                with :has() so we never end up with both showing).
+        -->
+        <style>
+            .tst-google-cta {
+                display: flex;
+                justify-content: center;
+                margin: 0 auto 1.25rem;
+                padding: 0 1rem;
+            }
+            .tst-google-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.65rem;
+                padding: 0.7rem 1.2rem;
+                background: #fff;
+                border: 1px solid #dadce0;
+                border-radius: 999px;
+                box-shadow: 0 1px 4px rgba(60,64,67,0.08);
+                color: #202124;
+                font-weight: 600;
+                font-size: 0.95rem;
+                text-decoration: none;
+                transition: box-shadow .15s, transform .1s;
+            }
+            .tst-google-link:hover {
+                box-shadow: 0 2px 8px rgba(60,64,67,0.16);
+                transform: translateY(-1px);
+            }
+            .tst-google-link .fa-google {
+                color: #4285f4;
+                font-size: 1.1rem;
+            }
+            .tst-google-stars {
+                color: #fbbc04;
+                letter-spacing: 1px;
+                font-size: 1rem;
+            }
+            .tst-google-text { color: #3c4043; }
+            .tst-google-link .fa-arrow-up-right-from-square {
+                color: #5f6368;
+                font-size: 0.85rem;
+            }
+            /* Tagembed widget host — reserve a sane min-height so the
+               page doesn't reflow as the widget loads, and constrain
+               the max width so the iframe doesn't stretch full-bleed
+               on huge desktops. */
+            .tst-tagembed-host {
+                max-width: 1200px;
+                margin: 0 auto 2rem;
+                padding: 0 1rem;
+                min-height: 200px;
+            }
+            /* Hide the curated fallback grid once Tagembed has injected
+               anything other than a <script>. Browsers without :has()
+               (older Safari) keep both visible — better than hiding the
+               wrong one. */
+            .tst-tagembed-host:has(*:not(script)) ~ .tst-grid-fallback {
+                display: none;
+            }
+        </style>
+    </section>
+
+
     <section id="customize" class="customization-section">
         <div class="container">
             <h2><i class="fas fa-magic"></i> Customize Your Package</h2>
-            <p>Tailor your Andaman holiday with add-ons like scuba diving, private dinners & more!</p>
+            <p>Tailor your Andaman holiday with add-ons like scuba diving, private dinners &amp; more!</p>
         </div>
     </section>
 
@@ -631,6 +1025,14 @@
         </div>
     </section>
 
+    <!-- ── Ezoic ad placement #101 (between testimonials and FAQ) ──
+         Bare div per Ezoic's docs — no inline style, no min-height.
+         js/ezoic-placements.js auto-discovers all such placeholders
+         and fires a single ezstandalone.showAds(...) call. Create the
+         matching placement in the Ezoic dashboard with ID 101 (or
+         change this number to whatever the dashboard generates). -->
+    <div id="ezoic-pub-ad-placeholder-101"></div>
+
     <!-- ── FAQ Section (visible content matches the FAQPage schema in <head>) ── -->
     <section id="faq" class="faq-section">
         <div class="container" style="max-width:880px;margin:0 auto;padding:3rem 1.25rem;">
@@ -661,12 +1063,23 @@
 
             <details class="faq-q">
                 <summary>How much advance payment is required to book a package?</summary>
-                <p>Only <strong>5% advance</strong> is required to confirm your booking via Razorpay. The remaining 95% balance is paid directly to us on the last day of your trip via UPI, bank transfer or cash.</p>
+                <p>A flat <strong>per-person booking advance</strong> is required at the time of booking, paid online via Razorpay:</p>
+                <ul style="margin:.5rem 0 .5rem 1.25rem;color:#5a6877;line-height:1.7;">
+                    <li><strong>Budget &amp; Standard packages:</strong> ₹6,000 per traveller</li>
+                    <li><strong>Luxury, Premium &amp; Honeymoon packages:</strong> ₹11,000 per traveller</li>
+                </ul>
+                <p>The remaining balance is paid directly to us during or after your trip via UPI, bank transfer or cash.</p>
             </details>
 
             <details class="faq-q">
                 <summary>What is your cancellation policy?</summary>
-                <p>Cancellations more than 60 days before travel get a 95% refund (5% fee on advance). Cancellations 30 to 60 days before travel get a 90% refund. Cancellations within 30 days of travel get a 50% refund. <a href="/terms" style="color:#0d7a8a;">Read the full policy →</a></p>
+                <p>The cancellation fee is a <strong>flat amount per traveller</strong>, deducted from the advance you've already paid:</p>
+                <ul style="margin:.5rem 0 .5rem 1.25rem;color:#5a6877;line-height:1.7;">
+                    <li><strong>Budget / Standard, more than 7 days before travel:</strong> ₹4,000/head retained, ₹2,000/head refunded.</li>
+                    <li><strong>Luxury / Premium / Honeymoon, more than 7 days before travel:</strong> ₹7,000/head retained, ₹4,000/head refunded.</li>
+                    <li><strong>Within 7 days of travel (or no-show):</strong> no refund — full advance forfeited.</li>
+                </ul>
+                <p><a href="/terms#cancellation" style="color:#0d7a8a;">Read the full policy →</a></p>
             </details>
 
             <details class="faq-q">
@@ -728,6 +1141,9 @@
         </style>
     </section>
 
+    <!-- ── Ezoic ad placement #102 (after FAQ, before contact CTA) ── -->
+    <div id="ezoic-pub-ad-placeholder-102"></div>
+
     <section id="contact" class="payment-section">
         <div class="container">
             <h2>Ready to Book?</h2>
@@ -735,32 +1151,83 @@
                 <a href="tel:+918880195191" style="color:#0d7a8a;font-weight:600;">+91 88801 95191</a> &nbsp;or&nbsp;
                 <a href="tel:+919434125698" style="color:#0d7a8a;font-weight:600;">+91 94341 25698</a>
             </p>
-            <p style="font-size:0.95rem;">📧 Email us:
+            <p style="font-size:0.95rem;margin-bottom:0.6rem;">📧 Email us:
                 <a href="mailto:info@andamanvoyages.in" style="color:#0d7a8a;">info@andamanvoyages.in</a> ·
                 <a href="mailto:booking@andamanvoyages.in" style="color:#0d7a8a;">booking@andamanvoyages.in</a> ·
                 <a href="mailto:cancellation@andamanvoyages.in" style="color:#0d7a8a;">cancellation@andamanvoyages.in</a>
             </p>
+            <p style="font-size:0.95rem;">📍 Visit us:
+                <strong>15, Air Road, Delanipur, Sri Vijaya Puram, Andaman &amp; Nicobar Islands 744102</strong>
+            </p>
         </div>
     </section>
 
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2026 Bharat Tours and Travels. All rights reserved. | Best Andaman Holiday Packages</p>
-            <p style="margin-top:0.5rem;font-size:0.88rem;">
-                <a href="/about" style="color:rgba(255,255,255,0.85);text-decoration:none;">About</a>
-                &nbsp;·&nbsp;
-                <a href="/privacy" style="color:rgba(255,255,255,0.85);text-decoration:none;">Privacy Policy</a>
-                &nbsp;·&nbsp;
-                <a href="/terms" style="color:rgba(255,255,255,0.85);text-decoration:none;">Terms &amp; Conditions</a>
-                &nbsp;·&nbsp;
-                <a href="/#contact" style="color:rgba(255,255,255,0.85);text-decoration:none;">Contact</a>
-            </p>
-            <div class="social-links">
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-whatsapp"></i></a>
+    <!-- ═══ FOOTER (rich, multi-column) ════════════════════════════════ -->
+    <footer class="ft">
+        <div class="ft-inner">
+            <div>
+                <div class="ft-brand">
+                    <span class="ft-mark"><i class="fas fa-umbrella-beach"></i></span>
+                    <span class="ft-brand-name">Bharat Transport &amp; Tourism</span>
+                </div>
+                <p class="ft-about">Andaman specialists since 2013. We're a small, on-ground team in Port Blair — every booking is handled by humans, not bots. We don't sell what we wouldn't book ourselves.</p>
+                <div class="ft-social">
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://wa.me/918880195191" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="TripAdvisor"><i class="fab fa-tripadvisor"></i></a>
+                </div>
             </div>
+
+            <div class="ft-col">
+                <h4>Explore</h4>
+                <ul>
+                    <li><a href="/#packages">All packages</a></li>
+                    <li><a href="/#packages">Honeymoon</a></li>
+                    <li><a href="/#packages">Family</a></li>
+                    <li><a href="/#packages">Adventure</a></li>
+                    <li><a href="/#packages">Luxury</a></li>
+                    <li><a href="/#customize">Custom itinerary</a></li>
+                </ul>
+            </div>
+
+            <div class="ft-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="/about">About us</a></li>
+                    <li><a href="/gallery">Gallery</a></li>
+                    <li><a href="/bookings">Bookings</a></li>
+                    <li><a href="/flights">Flights</a></li>
+                    <li><a href="/cabs">Cab hire</a></li>
+                    <li><a href="/privacy">Privacy policy</a></li>
+                    <li><a href="/terms">Terms &amp; conditions</a></li>
+                </ul>
+            </div>
+
+            <div class="ft-col">
+                <h4>Get in touch</h4>
+                <div class="ft-contact"><i class="fas fa-phone"></i><div><a href="tel:+918880195191">+91-88801-95191</a><br><span class="ft-muted">Daily 9 AM – 9 PM IST</span></div></div>
+                <div class="ft-contact"><i class="fas fa-envelope"></i><a href="mailto:booking@andamanvoyages.in">booking@andamanvoyages.in</a></div>
+                <div class="ft-contact"><i class="fas fa-location-dot"></i><span>15, Air Road, Delanipur,<br>Sri Vijaya Puram, A&amp;N Islands 744102</span></div>
+                <div class="ft-contact"><i class="fab fa-whatsapp"></i><a href="https://wa.me/918880195191">Chat on WhatsApp →</a></div>
+            </div>
+        </div>
+
+        <div class="ft-bottom">
+            <div>© 2026 Bharat Transport &amp; Tourism. All rights reserved.</div>
+            <div class="ft-bottom-links">
+                <a href="/terms">Terms &amp; Conditions</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms#cancellation">Cancellation Policy</a>
+                <a href="/#contact">Contact</a>
+            </div>
+        </div>
+        <div class="ft-license">
+            <span class="ft-license-badge"><i class="fas fa-shield-halved"></i> Secure SSL</span>
+            <span class="ft-license-badge"><i class="fas fa-certificate"></i> Govt. of India · Tour Operator</span>
+            <span class="ft-license-badge"><i class="fas fa-lock"></i> Razorpay Verified</span>
+            <span class="ft-license-tag">Andaman Voyages is a unit of Bharat Transport &amp; Tourism.</span>
         </div>
     </footer>
 
@@ -768,14 +1235,24 @@
 
     <!-- Firebase config + dataStore load first; auth/script depend on them -->
     <script>window.__toastAutoOverride = true;</script>
-    <script src="js/firebase-config.js?v=17"></script>
+    <script src="js/firebase-config.js?v=21"></script>
     <script src="js/analytics.js?v=1"></script>
-    <script src="js/dataStore.js?v=17"></script>
+    <script src="js/dataStore.js?v=25"></script>
     <script src="js/toast.js?v=1"></script>
-    <script src="js/auth.js?v=15"></script>
+    <script src="js/auth.js?v=16"></script>
     <script src="js/cities.js?v=18"></script>
-    <script src="js/script.js?v=29"></script>
-    <script src="js/chat.js?v=14"></script>
+    <script src="js/script.js?v=33"></script>
+    <script src="js/live-chat.js?v=8"></script>
     <script src="js/security.js?v=2"></script>
+    <script src="js/user-menu.js?v=14"></script>
+    <script src="js/conversion-kit.js?v=1"></script>
+    <script src="js/brevo.js?v=3" async></script>
+    <!-- Ezoic ad-placement helper — auto-discovers every
+         #ezoic-pub-ad-placeholder-NNN div on the page and fires a
+         single ezstandalone.showAds(...) call. Loaded last so all
+         placeholders above are already in the DOM. -->
+    <script src="js/ezoic-placements.js?v=2" defer></script>
+    <!-- Push-notification ad-network init (registers /sw.js) — see js/push-ads-init.js -->
+    <script src="js/push-ads-init.js?v=2" defer></script>
 </body>
 </html>

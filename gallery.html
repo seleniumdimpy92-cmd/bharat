@@ -1,23 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Hide .html and /index from the URL bar without re-loading the page -->
+    <script>(function(){try{var p=location.pathname;if(/\/index(\.html)?$/i.test(p)){history.replaceState(null,"",p.replace(/\/index(\.html)?$/i,"/")+location.search+location.hash);}else if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
+
+    <!-- ── EzoicAds: privacy + header (must load BEFORE any other ad/analytics) ──
+         Ezoic auto-rotates AdSense / Media.net / 9 other networks per visitor and
+         is our display-ad layer while AdSense approval is in progress. The privacy
+         scripts (Gatekeeper Consent) MUST come before the Ezoic header script so
+         GDPR/CCPA consent state is established first. data-cfasync="false" stops
+         Cloudflare's Rocket Loader from re-ordering them. -->
+    <script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js"></script>
+    <script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js"></script>
+    <script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
+    <script>
+        window.ezstandalone = window.ezstandalone || {};
+        ezstandalone.cmd = ezstandalone.cmd || [];
+    </script>
+    <script src="//ezoicanalytics.com/analytics.js"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Gallery — Andaman Tours | Bharat Tours &amp; Travels</title>
+    <title>Photo Gallery — Andaman Tours | Bharat Transport &amp; Tourism</title>
 
-    <meta name="description" content="Browse stunning photos of Andaman: Radhanagar Beach, Havelock Island, Neil Island, scuba diving, Ross Island, sunsets, and more. Bharat Tours and Travels.">
-    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="description" content="Browse stunning photos of Andaman: Radhanagar Beach, Havelock Island, Neil Island, scuba diving, Ross Island, sunsets, and more. Bharat Transport and Tourism.">
+    <meta name="keywords" content="Andaman photos, Andaman gallery, Radhanagar Beach photos, Havelock Island photos, Neil Island photos, Ross Island photos, Andaman scuba diving photos, Port Blair photos">
+    <meta name="author" content="Bharat Transport and Tourism">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large">
+    <meta name="bingbot" content="index, follow">
     <meta name="theme-color" content="#0d7a8a">
-    <link rel="canonical" href="https://andamanvoyages.in/gallery.html">
+    <meta name="geo.region" content="IN-AN">
+    <meta name="geo.placename" content="Port Blair, Andaman and Nicobar Islands">
+    <meta name="geo.position" content="11.6234;92.7265">
+    <meta name="ICBM" content="11.6234, 92.7265">
+    <link rel="canonical" href="https://andamanvoyages.in/gallery">
+    <link rel="alternate" hreflang="en-in" href="https://andamanvoyages.in/gallery">
+    <link rel="alternate" hreflang="x-default" href="https://andamanvoyages.in/gallery">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Photo Gallery — Andaman Tours | Bharat Tours &amp; Travels">
+    <meta property="og:site_name" content="Bharat Transport &amp; Tourism">
+    <meta property="og:title" content="Photo Gallery — Andaman Tours | Bharat Transport &amp; Tourism">
     <meta property="og:description" content="Stunning photos of Andaman beaches, islands, scuba diving, and tours.">
-    <meta property="og:url" content="https://andamanvoyages.in/gallery.html">
+    <meta property="og:url" content="https://andamanvoyages.in/gallery">
     <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Andaman beaches and islands photo gallery">
+    <meta property="og:locale" content="en_IN">
 
-    <link rel="icon" type="image/png" href="images/logo.png">
-    <link rel="apple-touch-icon" href="images/logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@andamanvoyages">
+    <meta name="twitter:title" content="Photo Gallery — Andaman Tours">
+    <meta name="twitter:description" content="Radhanagar Beach, Havelock, Neil, Ross Island, scuba diving — stunning Andaman photography.">
+    <meta name="twitter:image" content="https://andamanvoyages.in/images/beach1.jpg">
+
+    <link rel="icon" type="image/png" href="images/logo-white.png">
+    <link rel="apple-touch-icon" href="images/logo-white.png">
 
     <!-- Schema.org: ImageGallery + BreadcrumbList -->
     <script type="application/ld+json">
@@ -25,13 +68,13 @@
         "@context": "https://schema.org",
         "@type": "ImageGallery",
         "name": "Andaman Photo Gallery",
-        "description": "Travel photos from Andaman tours by Bharat Tours and Travels — Radhanagar Beach, Havelock Island, Neil Island, scuba diving, Ross Island, sunsets and more.",
-        "url": "https://andamanvoyages.in/gallery.html",
+        "description": "Travel photos from Andaman tours by Bharat Transport and Tourism — Radhanagar Beach, Havelock Island, Neil Island, scuba diving, Ross Island, sunsets and more.",
+        "url": "https://andamanvoyages.in/gallery",
         "publisher": {
             "@type": "TravelAgency",
-            "name": "Bharat Tours and Travels",
+            "name": "Bharat Transport and Tourism",
             "url": "https://andamanvoyages.in/",
-            "logo": "https://andamanvoyages.in/images/logo.png"
+            "logo": "https://andamanvoyages.in/images/logo-white.png"
         }
     }
     </script>
@@ -41,33 +84,37 @@
         "@type": "BreadcrumbList",
         "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://andamanvoyages.in/" },
-            { "@type": "ListItem", "position": 2, "name": "Photo Gallery", "item": "https://andamanvoyages.in/gallery.html" }
+            { "@type": "ListItem", "position": 2, "name": "Photo Gallery", "item": "https://andamanvoyages.in/gallery" }
         ]
     }
     </script>
 
-    <link rel="stylesheet" href="css/style.css?v=27">
-    <link rel="stylesheet" href="css/gallery.css?v=1">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=56">
+    <link rel="stylesheet" href="css/conversion-kit.css?v=3">
+    <link rel="stylesheet" href="css/gallery.css?v=3">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <script src="js/firebase-config.js?v=17"></script>
+    <script src="js/firebase-config.js?v=21"></script>
     <script src="js/analytics.js?v=1"></script>
     <script src="js/travelpayouts-init.js?v=1"></script>
+    <!-- ── Google AdSense loader (publisher pub-8154901590978667) ── -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8154901590978667" crossorigin="anonymous"></script>
 </head>
-<body>
+<body class="hero-page">
     <!-- ── Top Brand Bar ───────────────────────────────────── -->
     <header class="topbar">
         <a href="/" class="topbar-logo">
-            <img src="images/logo.png" alt="Bharat Tours and Travels logo">
-            <span>Bharat Tours &amp; Travels</span>
+            <img src="images/logo-white.png" alt="Bharat Transport and Tourism logo">
+            <span class="brand-text"><span class="brand-line1">Bharat Transport &amp; Tourism</span><span class="brand-line2">Andaman Specialists</span></span>
         </a>
         <nav class="topnav" id="topnav">
             <a href="/" class="topnav-item"><i class="fas fa-home"></i><span>Home</span></a>
             <a href="/#packages" class="topnav-item"><i class="fas fa-suitcase-rolling"></i><span>Packages</span></a>
-            <a href="/gallery.html" class="topnav-item active"><i class="fas fa-images"></i><span>Gallery</span></a>
+            <a href="/customize" class="topnav-item"><i class="fas fa-sliders-h"></i><span>Customize</span></a>
+            <a href="/cabs" class="topnav-item"><i class="fas fa-taxi"></i><span>Cabs</span></a>
+            <a href="/gallery" class="topnav-item active"><i class="fas fa-images"></i><span>Gallery</span></a>
             <a href="/about" class="topnav-item"><i class="fas fa-info-circle"></i><span>About</span></a>
-            <a href="/bookings" class="topnav-item"><i class="fas fa-calendar-check"></i><span>Bookings</span></a>
             <a href="/#contact" class="topnav-item"><i class="fas fa-phone-alt"></i><span>Contact</span></a>
         </nav>
         <div class="topbar-contact"><a href="tel:+918880195191" class="topbar-phone"><i class="fas fa-phone-alt"></i> <span>+91 88801 95191</span></a><a href="mailto:booking@andamanvoyages.in" class="topbar-email" title="Email us to book"><i class="fas fa-envelope"></i> <span>booking@andamanvoyages.in</span></a></div>
@@ -88,6 +135,32 @@
                 <button class="gallery-chip active" data-cat="all">All</button>
             </div>
 
+            <!-- Group + Sort controls -->
+            <div class="gallery-controls" id="galleryControls">
+                <div class="gallery-control">
+                    <label for="groupBy"><i class="fas fa-layer-group"></i> Group by</label>
+                    <select id="groupBy">
+                        <option value="none">None</option>
+                        <option value="year">Year</option>
+                        <option value="month">Month</option>
+                        <option value="place">Place</option>
+                        <option value="package">Package</option>
+                        <option value="category">Category</option>
+                    </select>
+                </div>
+                <div class="gallery-control">
+                    <label for="sortBy"><i class="fas fa-sort"></i> Sort by</label>
+                    <select id="sortBy">
+                        <option value="date_desc">Newest first (date)</option>
+                        <option value="date_asc">Oldest first (date)</option>
+                        <option value="title_asc">Title (A → Z)</option>
+                        <option value="title_desc">Title (Z → A)</option>
+                        <option value="place_asc">Place (A → Z)</option>
+                        <option value="order_asc">Custom order</option>
+                    </select>
+                </div>
+            </div>
+
             <div id="galleryStatus" class="gallery-empty" style="display:none;">
                 <i class="fas fa-spinner fa-spin"></i>
                 <p>Loading gallery…</p>
@@ -95,7 +168,10 @@
 
             <div id="galleryGrid" class="gallery-grid"></div>
         </section>
-    </main>
+    
+    <!-- ── Ezoic ad placement #107 — see js/ezoic-placements.js ── -->
+    <div id="ezoic-pub-ad-placeholder-107"></div>
+</main>
 
     <!-- Lightbox -->
     <div class="gallery-lightbox" id="galleryLightbox" role="dialog" aria-modal="true">
@@ -106,137 +182,17 @@
         <div class="lb-caption" id="lbCaption" style="display:none;"></div>
     </div>
 
-    <script src="js/dataStore.js?v=17"></script>
-    <script src="js/gallery.js?v=2"></script>
-    <script src="js/script.js?v=26"></script>
-    <script>
-        (function () {
-            const grid       = document.getElementById('galleryGrid');
-            const filtersEl  = document.getElementById('galleryFilters');
-            const statusEl   = document.getElementById('galleryStatus');
-            const lightbox   = document.getElementById('galleryLightbox');
-            const lbImage    = document.getElementById('lbImage');
-            const lbCaption  = document.getElementById('lbCaption');
-            const lbClose    = document.getElementById('lbClose');
-            const lbPrev     = document.getElementById('lbPrev');
-            const lbNext     = document.getElementById('lbNext');
-
-            let allItems = [];
-            let visibleItems = [];
-            let lbIndex = 0;
-
-            function renderFilters(cats) {
-                // Keep "All" + dynamic categories
-                filtersEl.innerHTML = '';
-                const allChip = document.createElement('button');
-                allChip.className = 'gallery-chip active';
-                allChip.dataset.cat = 'all';
-                allChip.textContent = 'All';
-                filtersEl.appendChild(allChip);
-                cats.forEach(cat => {
-                    const chip = document.createElement('button');
-                    chip.className = 'gallery-chip';
-                    chip.dataset.cat = cat;
-                    chip.textContent = cat;
-                    filtersEl.appendChild(chip);
-                });
-                filtersEl.addEventListener('click', (e) => {
-                    const chip = e.target.closest('.gallery-chip');
-                    if (!chip) return;
-                    filtersEl.querySelectorAll('.gallery-chip').forEach(c => c.classList.remove('active'));
-                    chip.classList.add('active');
-                    const cat = chip.dataset.cat;
-                    visibleItems = (cat === 'all')
-                        ? allItems.slice()
-                        : allItems.filter(it => (it.category || '').toLowerCase() === cat.toLowerCase());
-                    renderGrid();
-                }, { once: false });
-            }
-
-            function renderGrid() {
-                grid.innerHTML = '';
-                if (!visibleItems.length) {
-                    grid.innerHTML = `
-                        <div class="gallery-empty" style="grid-column:1/-1;">
-                            <i class="fas fa-image"></i>
-                            <h3>No photos yet</h3>
-                            <p>Check back soon — we’re adding new shots from recent tours.</p>
-                        </div>`;
-                    return;
-                }
-                visibleItems.forEach((item, idx) => {
-                    const tile = document.createElement('div');
-                    tile.className = 'gallery-tile';
-                    tile.innerHTML = `
-                        <img loading="lazy" src="${item.thumbUrl || item.url}" alt="${(item.title || 'Andaman photo').replace(/"/g, '&quot;')}">
-                        ${item.title ? `<div class="gallery-tile-caption">${escapeHtml(item.title)}</div>` : ''}
-                    `;
-                    tile.addEventListener('click', () => openLightbox(idx));
-                    grid.appendChild(tile);
-                });
-            }
-
-            function openLightbox(idx) {
-                lbIndex = idx;
-                showLightboxImage();
-                lightbox.classList.add('open');
-                document.body.style.overflow = 'hidden';
-            }
-            function closeLightbox() {
-                lightbox.classList.remove('open');
-                document.body.style.overflow = '';
-            }
-            function showLightboxImage() {
-                const item = visibleItems[lbIndex];
-                if (!item) return;
-                lbImage.src = item.url;
-                if (item.title || item.caption) {
-                    lbCaption.textContent = item.title ? (item.caption ? `${item.title} — ${item.caption}` : item.title) : item.caption;
-                    lbCaption.style.display = '';
-                } else {
-                    lbCaption.style.display = 'none';
-                }
-            }
-            function nextImg() { lbIndex = (lbIndex + 1) % visibleItems.length; showLightboxImage(); }
-            function prevImg() { lbIndex = (lbIndex - 1 + visibleItems.length) % visibleItems.length; showLightboxImage(); }
-
-            lbClose.addEventListener('click', closeLightbox);
-            lbNext.addEventListener('click', nextImg);
-            lbPrev.addEventListener('click', prevImg);
-            lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
-            document.addEventListener('keydown', (e) => {
-                if (!lightbox.classList.contains('open')) return;
-                if (e.key === 'Escape')      closeLightbox();
-                if (e.key === 'ArrowRight')  nextImg();
-                if (e.key === 'ArrowLeft')   prevImg();
-            });
-
-            function escapeHtml(s) {
-                return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            }
-
-            async function init() {
-                statusEl.style.display = '';
-                try {
-                    allItems = await window.GalleryStore.loadGalleryItems();
-                    visibleItems = allItems.slice();
-                    const cats = Array.from(new Set(allItems.map(i => (i.category || '').trim()).filter(Boolean))).sort();
-                    renderFilters(cats);
-                    renderGrid();
-                } catch (err) {
-                    console.error('Gallery load failed:', err);
-                    grid.innerHTML = `
-                        <div class="gallery-empty" style="grid-column:1/-1;">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>Couldn’t load gallery</h3>
-                            <p>${escapeHtml(err.message || 'Please try again later.')}</p>
-                        </div>`;
-                } finally {
-                    statusEl.style.display = 'none';
-                }
-            }
-            init();
-        })();
-    </script>
+    <script src="js/dataStore.js?v=25"></script>
+    <script src="js/gallery.js?v=3"></script>
+    <script src="js/script.js?v=30"></script>
+    <script src="js/gallery-page.js?v=1"></script>
+    <script src="js/user-menu.js?v=14"></script>
+    <script src="js/conversion-kit.js?v=1"></script>
+    <script src="js/brevo.js?v=3" async></script>
+    <script src="js/live-chat.js?v=8"></script>
+    <!-- Ezoic ad-placement helper (auto-discovers placeholders) -->
+    <script src="js/ezoic-placements.js?v=2" defer></script>
+    <!-- Push-notification ad-network init (registers /sw.js) — see js/push-ads-init.js -->
+    <script src="js/push-ads-init.js?v=2" defer></script>
 </body>
 </html>

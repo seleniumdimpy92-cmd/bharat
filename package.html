@@ -1,39 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Hide .html and /index from the URL bar without re-loading the page -->
+    <script>(function(){try{var p=location.pathname;if(/\/index(\.html)?$/i.test(p)){history.replaceState(null,"",p.replace(/\/index(\.html)?$/i,"/")+location.search+location.hash);}else if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
+
+    <!-- ── EzoicAds: privacy + header (must load BEFORE any other ad/analytics) ──
+         Ezoic auto-rotates AdSense / Media.net / 9 other networks per visitor and
+         is our display-ad layer while AdSense approval is in progress. The privacy
+         scripts (Gatekeeper Consent) MUST come before the Ezoic header script so
+         GDPR/CCPA consent state is established first. data-cfasync="false" stops
+         Cloudflare's Rocket Loader from re-ordering them. -->
+    <script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js"></script>
+    <script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js"></script>
+    <script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
+    <script>
+        window.ezstandalone = window.ezstandalone || {};
+        ezstandalone.cmd = ezstandalone.cmd || [];
+    </script>
+    <script src="//ezoicanalytics.com/analytics.js"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Andaman Tour Package Details | Bharat Tours &amp; Travels</title>
+    <title>Andaman Tour Package Details | Bharat Transport &amp; Tourism</title>
 
     <!-- ── SEO ─────────────────────────────────────────────────── -->
     <meta name="description" content="Detailed Andaman tour package itinerary — day-by-day plan, inclusions, exclusions, photo gallery and instant Razorpay booking. Customizable Port Blair, Havelock & Neil Island packages from ₹15,999.">
     <meta name="keywords" content="Andaman tour package, Andaman itinerary, Port Blair package, Havelock Island tour, Neil Island package, Andaman honeymoon package, scuba diving Andaman, book Andaman trip">
-    <meta name="author" content="Bharat Tours and Travels">
-    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="author" content="Bharat Transport and Tourism">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large">
+    <meta name="bingbot" content="index, follow">
     <meta name="theme-color" content="#0d7a8a">
     <meta name="google-adsense-account" content="ca-pub-8154901590978667">
-    <link rel="canonical" href="https://andamanvoyages.in/package.html">
+    <meta name="geo.region" content="IN-AN">
+    <meta name="geo.placename" content="Port Blair, Andaman and Nicobar Islands">
+    <meta name="geo.position" content="11.6234;92.7265">
+    <meta name="ICBM" content="11.6234, 92.7265">
+    <link rel="canonical" href="https://andamanvoyages.in/package" id="seoCanonical">
+    <link rel="alternate" hreflang="en-in" href="https://andamanvoyages.in/package" id="seoHreflang">
+    <link rel="alternate" hreflang="x-default" href="https://andamanvoyages.in/package" id="seoHreflangDefault">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://checkout.razorpay.com" crossorigin>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="product">
-    <meta property="og:site_name" content="Bharat Tours &amp; Travels">
-    <meta property="og:url" content="https://andamanvoyages.in/package.html">
-    <meta property="og:title" content="Andaman Tour Package Details | Bharat Tours &amp; Travels">
-    <meta property="og:description" content="Day-by-day Andaman itinerary with hotels, ferries, scuba diving and instant Razorpay booking.">
-    <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg">
+    <meta property="og:site_name" content="Bharat Transport &amp; Tourism">
+    <meta property="og:url" content="https://andamanvoyages.in/package" id="seoOgUrl">
+    <meta property="og:title" content="Andaman Tour Package Details | Bharat Transport &amp; Tourism" id="seoOgTitle">
+    <meta property="og:description" content="Day-by-day Andaman itinerary with hotels, ferries, scuba diving and instant Razorpay booking." id="seoOgDesc">
+    <meta property="og:image" content="https://andamanvoyages.in/images/beach1.jpg" id="seoOgImg">
+    <meta property="og:image:secure_url" content="https://andamanvoyages.in/images/beach1.jpg" id="seoOgImgSecure">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Andaman tour package — Bharat Transport and Tourism" id="seoOgImgAlt">
     <meta property="og:locale" content="en_IN">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Andaman Tour Package Details | Bharat Tours &amp; Travels">
-    <meta name="twitter:description" content="Day-by-day Andaman itinerary with hotels, ferries, scuba diving and instant Razorpay booking.">
-    <meta name="twitter:image" content="https://andamanvoyages.in/images/beach1.jpg">
+    <meta name="twitter:site" content="@andamanvoyages">
+    <meta name="twitter:title" content="Andaman Tour Package Details | Bharat Transport &amp; Tourism" id="seoTwTitle">
+    <meta name="twitter:description" content="Day-by-day Andaman itinerary with hotels, ferries, scuba diving and instant Razorpay booking." id="seoTwDesc">
+    <meta name="twitter:image" content="https://andamanvoyages.in/images/beach1.jpg" id="seoTwImg">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="images/logo.png">
-    <link rel="apple-touch-icon" href="images/logo.png">
+    <link rel="icon" type="image/png" href="images/logo-white.png">
+    <link rel="apple-touch-icon" href="images/logo-white.png">
 
     <!-- Schema.org: BreadcrumbList -->
     <script type="application/ld+json">
@@ -57,34 +91,56 @@
                 "@type": "ListItem",
                 "position": 3,
                 "name": "Package Details",
-                "item": "https://andamanvoyages.in/package.html"
+                "item": "https://andamanvoyages.in/package"
             }
         ]
     }
     </script>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/package.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/conversion-kit.css?v=3">
+    <link rel="stylesheet" href="css/package.css?v=4">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- ── Razorpay — lazy-loaded on demand (see comments in index.html) ── -->
+    <script>
+    window.RazorpayReady = window.RazorpayReady || (function () {
+        var p = null;
+        return function () {
+            if (window.Razorpay) return Promise.resolve();
+            if (p) return p;
+            p = new Promise(function (resolve, reject) {
+                var s = document.createElement('script');
+                s.src   = 'https://checkout.razorpay.com/v1/checkout.js';
+                s.async = true;
+                s.onload  = function () { resolve(); };
+                s.onerror = function () { p = null; reject(new Error('Razorpay failed to load')); };
+                document.head.appendChild(s);
+            });
+            return p;
+        };
+    })();
+    </script>
     <script>window.__toastAutoOverride = true;</script>
-    <script src="js/firebase-config.js?v=17"></script>
+    <script src="js/firebase-config.js?v=21"></script>
     <script src="js/analytics.js?v=1"></script>
-    <script src="js/dataStore.js?v=17"></script>
+    <script src="js/dataStore.js?v=25"></script>
+    <script src="js/itinerary-blocks.js?v=1"></script>
     <script src="js/toast.js?v=1"></script>
     <script src="js/travelpayouts-init.js?v=1"></script>
+    <!-- ── Google AdSense loader (publisher pub-8154901590978667) ── -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8154901590978667" crossorigin="anonymous"></script>
 </head>
 <body>
 
     <!-- Minimal Navbar -->
     <header style="position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(20,20,20,0.96);backdrop-filter:blur(10px);">
         <nav style="display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;max-width:1400px;margin:0 auto;">
-            <a href="index.html" style="text-decoration:none;display:flex;align-items:center;">
-                <img src="images/logo.png" alt="Bharat Tours & Travels" style="height:58px;width:auto;object-fit:contain;">
+            <a href="/" style="text-decoration:none;display:flex;align-items:center;">
+                <img src="images/logo-white.png" alt="Bharat Transport & Tourism" style="height:58px;width:auto;object-fit:contain;">
             </a>
             <div style="display:flex;gap:1rem;align-items:center;">
-                <a href="index.html#packages" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;"><i class="fas fa-suitcase"></i> All Packages</a>
-                <a href="index.html" id="navAuthLink" style="color:#fff;background:#0d7a8a;padding:0.4rem 1rem;border-radius:6px;text-decoration:none;font-size:0.88rem;font-weight:600;">Login</a>
+                <a href="/#packages" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;"><i class="fas fa-suitcase"></i> All Packages</a>
+                <a href="/" id="navAuthLink" style="color:#fff;background:#0d7a8a;padding:0.4rem 1rem;border-radius:6px;text-decoration:none;font-size:0.88rem;font-weight:600;">Login</a>
             </div>
         </nav>
     </header>
@@ -272,7 +328,7 @@ async function loadPackage() {
         document.getElementById('pageContent').innerHTML = `
             <div class="pkg-loading" style="padding-top:6rem;">
                 <i class="fas fa-exclamation-circle" style="color:#e74c3c;"></i>
-                <p>Package not found. <a href="index.html#packages">Browse all packages</a></p>
+                <p>Package not found. <a href="/#packages">Browse all packages</a></p>
             </div>`;
         return;
     }
@@ -291,7 +347,7 @@ async function loadPackage() {
         ...currentPkg
     };
 
-    document.title = pkg.name + ' – Bharat Tours & Travels';
+    document.title = pkg.name + ' – Bharat Transport & Tourism';
     injectDynamicSEO(pkg);
     renderPage(pkg);
 
@@ -315,7 +371,7 @@ async function loadPackage() {
 
 // ── Inject per-package dynamic SEO + TouristTrip structured data ─
 function injectDynamicSEO(pkg) {
-    const url = 'https://andamanvoyages.in/package.html?id=' + encodeURIComponent(pkg.id);
+    const url = 'https://andamanvoyages.in/package?id=' + encodeURIComponent(pkg.id);
     const img = pkg.image ? ('https://andamanvoyages.in/' + pkg.image.replace(/^\/+/, '')) : 'https://andamanvoyages.in/images/beach1.jpg';
     const desc = (pkg.desc || ('Andaman tour package: ' + pkg.name + '. Hotels, ferries and activities included. Book now from ₹' + Number(pkg.price).toLocaleString() + '.')).slice(0, 300);
     const setMeta = (selector, attr, val) => {
@@ -328,11 +384,11 @@ function injectDynamicSEO(pkg) {
     setMeta('link[rel="canonical"]', 'href', url);
 
     setMeta('meta[property="og:url"]', 'content', url);
-    setMeta('meta[property="og:title"]', 'content', pkg.name + ' | Bharat Tours & Travels');
+    setMeta('meta[property="og:title"]', 'content', pkg.name + ' | Bharat Transport & Tourism');
     setMeta('meta[property="og:description"]', 'content', desc);
     setMeta('meta[property="og:image"]', 'content', img);
 
-    setMeta('meta[name="twitter:title"]', 'content', pkg.name + ' | Bharat Tours & Travels');
+    setMeta('meta[name="twitter:title"]', 'content', pkg.name + ' | Bharat Transport & Tourism');
     setMeta('meta[name="twitter:description"]', 'content', desc);
     setMeta('meta[name="twitter:image"]', 'content', img);
 
@@ -366,7 +422,7 @@ function injectDynamicSEO(pkg) {
         },
         "provider": {
             "@type": "TravelAgency",
-            "name": "Bharat Tours and Travels",
+            "name": "Bharat Transport and Tourism",
             "url": "https://andamanvoyages.in/"
         }
     };
@@ -389,7 +445,7 @@ function renderPage(pkg) {
         <!-- Hero -->
         <div class="pkg-hero" style="background-image:url('${heroImg}');">
             <div class="pkg-hero-content">
-                <a href="index.html#packages" class="back-btn"><i class="fas fa-arrow-left"></i> All Packages</a>
+                <a href="/#packages" class="back-btn"><i class="fas fa-arrow-left"></i> All Packages</a>
                 <h1>${pkg.name}</h1>
                 <div class="pkg-hero-meta">
                     <span class="price-badge">₹${Number(pkg.price).toLocaleString()} ${isTest ? '/test' : '/person'}</span>
@@ -405,6 +461,55 @@ function renderPage(pkg) {
             ${(pkg.highlights || []).map(h => `<div class="pkg-highlight-item"><i class="fas fa-check-circle"></i> ${h}</div>`).join('')}
         </div>
 
+        <!-- Phase 3 Option B — "Tweak this trip" widget.
+             Compact mirror of the homepage hero search bar. Pre-fills from
+             sessionStorage.searchContext (set by the homepage SEARCH btn) so
+             whatever the visitor entered there carries over. Clicking
+             "Update search" pushes a fresh ?from=…&date=…&adults=…&children=…
+             &category=… back to /#packages, which Phase 3 already wires to
+             auto-apply on the homepage. -->
+        <div class="pkg-tweak-trip" id="pkgTweakTrip">
+            <div class="pkg-tweak-head">
+                <i class="fas fa-pen-to-square"></i>
+                <strong>Tweak this trip</strong>
+                <span class="pkg-tweak-sub">change dates / heads / package style</span>
+            </div>
+            <div class="pkg-tweak-fields">
+                <label class="pkg-tweak-field">
+                    <span>Travelling from</span>
+                    <select id="ttFrom" data-cities data-default="Bangalore (Bengaluru)"></select>
+                </label>
+                <label class="pkg-tweak-field">
+                    <span>Travel date</span>
+                    <input type="date" id="ttDate">
+                </label>
+                <label class="pkg-tweak-field">
+                    <span>Adults</span>
+                    <select id="ttAdults">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </label>
+                <label class="pkg-tweak-field">
+                    <span>Kids</span>
+                    <select id="ttChildren">
+                        <option value="0" selected>0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </label>
+                <button type="button" class="pkg-tweak-btn" id="ttSearchBtn">
+                    <i class="fas fa-rotate"></i> Update price
+                </button>
+            </div>
+        </div>
+
         <!-- Main Content -->
         <div class="pkg-main">
             <!-- Left Column -->
@@ -418,19 +523,98 @@ function renderPage(pkg) {
                 <!-- Itinerary -->
                 <div class="pkg-section">
                     <h2><i class="fas fa-map-marked-alt"></i> Day-by-Day Itinerary</h2>
+                    ${(function () {
+                        // Phase 2 — MMT-style typed timeline.
+                        // Show the counts strip + per-day typed-block rendering when ANY day
+                        // has a blocks[] array. When empty, the legacy `activities[]` plain
+                        // list renders below — back-compat for every existing package.
+                        var IB = window.IteBlocks;
+                        var hasBlocks = !!(IB && IB.hasAnyBlocks && IB.hasAnyBlocks(pkg.days));
+                        if (!hasBlocks) return '';
+                        var c = IB.countBlocks(pkg.days);
+                        function pill(n, label, icon) {
+                            if (!n) return '';
+                            return '<span class="ite-count-pill"><i class="fas ' + icon + '"></i> ' +
+                                   n + ' ' + label + '</span>';
+                        }
+                        return '<div class="ite-counts-row">' +
+                            pill(c.transfers,   'TRANSFERS',   'fa-bus') +
+                            pill(c.hotels,      'HOTELS',      'fa-hotel') +
+                            pill(c.activities,  'ACTIVITIES',  'fa-person-walking') +
+                            pill(c.sightseeing, 'SIGHTSEEING', 'fa-camera') +
+                            pill(c.meals,       'MEALS',       'fa-utensils') +
+                            pill(c.flights,     'FLIGHTS',     'fa-plane-departure') +
+                        '</div>';
+                    })()}
                     <div class="timeline">
-                        ${(pkg.days || []).map(d => `
-                        <div class="timeline-day">
-                            <div class="timeline-dot">${d.day}</div>
-                            <div class="timeline-day-header">
-                                <span class="day-badge">Day ${d.day}</span>
-                                <span class="timeline-day-title">${d.title}</span>
-                            </div>
-                            ${d.desc ? `<p class="timeline-day-desc">${d.desc}</p>` : ''}
-                            <ul class="timeline-activities">
-                                ${(d.activities || []).map(a => `<li><i class="fas fa-chevron-right"></i> ${a}</li>`).join('')}
-                            </ul>
-                        </div>`).join('')}
+                        ${(pkg.days || []).map(d => {
+                            var IB2 = window.IteBlocks;
+                            var blocks = Array.isArray(d.blocks) ? d.blocks : [];
+                            var esc = (IB2 && IB2.escHtml) ? IB2.escHtml : (s => String(s == null ? '' : s)
+                                .replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+                            var blockMeta = (IB2 && IB2.blockMeta) ? IB2.blockMeta : (function (t) {
+                                var m = { activity:'fa-person-walking', transfer:'fa-bus', hotel:'fa-hotel',
+                                          sightseeing:'fa-camera', meal:'fa-utensils', flight:'fa-plane-departure',
+                                          'hotel-checkout':'fa-right-from-bracket' };
+                                return { type: t, icon: m[t] || 'fa-circle', label: t || '' };
+                            });
+                            // Render one typed block as an MMT-style row
+                            function renderBlock(b) {
+                                var meta = blockMeta(b.type);
+                                var titleParts = [];
+                                if (b.title) titleParts.push(esc(b.title));
+                                else if (b.type === 'meal' && b.label) titleParts.push(esc(b.label));
+                                else if (b.type === 'hotel-checkout') titleParts.push('Hotel Check-out');
+                                var title = titleParts.join(' ');
+                                var metaBits = [];
+                                if (b.duration)   metaBits.push('<i class="far fa-clock"></i> ' + esc(b.duration));
+                                if (b.timeOfDay)  metaBits.push(esc(b.timeOfDay));
+                                if (b.place)      metaBits.push('<i class="fas fa-location-dot"></i> ' + esc(b.place));
+                                if (b.vehicle)    metaBits.push(esc(b.vehicle));
+                                if (b.starRating) metaBits.push('★ ' + esc(b.starRating));
+                                if (b.checkIn)    metaBits.push('Check-in: ' + esc(b.checkIn));
+                                if (b.checkOut)   metaBits.push('Check-out: ' + esc(b.checkOut));
+                                if (b.nights)     metaBits.push(esc(b.nights) + ' night' + (Number(b.nights) === 1 ? '' : 's'));
+                                if (b.roomType)   metaBits.push(esc(b.roomType));
+                                if (b.address)    metaBits.push(esc(b.address));
+                                if (b.departTime) metaBits.push('Departs ' + esc(b.departTime));
+                                if (b.arriveTime) metaBits.push('Arrives ' + esc(b.arriveTime));
+                                if (b.mealsIncluded && b.mealsIncluded.length) {
+                                    metaBits.push('Meals: ' + esc((Array.isArray(b.mealsIncluded) ? b.mealsIncluded.join(', ') : b.mealsIncluded)));
+                                }
+                                return '<div class="ite-pub-block ite-pub-' + esc(b.type) + '">' +
+                                    (b.imageUrl
+                                        ? '<div class="ite-pub-thumb"><img src="' + esc(b.imageUrl) + '" alt="" loading="lazy" decoding="async"></div>'
+                                        : '<div class="ite-pub-icon"><i class="fas ' + esc(meta.icon) + '"></i></div>'
+                                    ) +
+                                    '<div class="ite-pub-body">' +
+                                        '<div class="ite-pub-type">' +
+                                            '<i class="fas ' + esc(meta.icon) + '"></i> ' + esc(meta.label) +
+                                        '</div>' +
+                                        (title ? '<div class="ite-pub-title">' + title + '</div>' : '') +
+                                        (metaBits.length ? '<div class="ite-pub-meta">' + metaBits.join(' &middot; ') + '</div>' : '') +
+                                        (b.description ? '<p class="ite-pub-desc">' + esc(b.description) + '</p>' : '') +
+                                    '</div>' +
+                                '</div>';
+                            }
+                            return `
+                            <div class="timeline-day">
+                                <div class="timeline-dot">${d.day}</div>
+                                <div class="timeline-day-header">
+                                    <span class="day-badge">Day ${d.day}</span>
+                                    <span class="timeline-day-title">${d.title || ''}</span>
+                                </div>
+                                ${d.desc ? `<p class="timeline-day-desc">${d.desc}</p>` : ''}
+                                ${blocks.length
+                                    ? '<div class="ite-pub-blocks">' + blocks.map(renderBlock).join('') + '</div>'
+                                    : `<ul class="timeline-activities">
+                                        ${(d.activities || []).map(a => `<li><i class="fas fa-chevron-right"></i> ${a}</li>`).join('')}
+                                      </ul>`
+                                }
+                                <!-- Per-day photo strip — populated by hydrateDayGalleries() after render -->
+                                <div class="day-photo-strip" data-day-photos="${(d.imageIds || []).join(',')}"></div>
+                            </div>`;
+                        }).join('')}
                     </div>
                 </div>
 
@@ -468,14 +652,16 @@ function renderPage(pkg) {
                 <div class="pkg-section">
                     <h2><i class="fas fa-file-contract"></i> Terms & Policies</h2>
                     <ul style="color:#666;font-size:0.9rem;line-height:2;padding-left:1.2rem;margin:0;">
-                        <li>Check-in: 12:00 PM | Check-out: 11:00 AM</li>
-                        <li>Cancellation: 100% refund if cancelled 15+ days before travel date</li>
-                        <li>Cancellation: 50% refund if cancelled 7–14 days before travel date</li>
-                        <li>No refund for cancellations within 7 days of travel date</li>
-                        <li>ID proof mandatory at check-in (passport / Aadhar Card)</li>
-                        <li>Carry sufficient cash – ATMs may be limited on islands</li>
-                        <li>Sea conditions may affect ferry schedules (beyond our control)</li>
-                        <li>GST (5%) applicable on all package amounts</li>
+                        <li>Hotel check-in: 1:00 PM &middot; check-out: 11:00 AM</li>
+                        <li>Booking advance: ₹6,000/head for Budget &amp; Standard packages, ₹11,000/head for Luxury / Premium / Honeymoon packages. <strong>Balance</strong> is paid on Day 1 after check-in (UPI / cash / bank transfer).</li>
+                        <li><strong>Cancellation 30+ days before travel:</strong> Budget/Standard — ₹2,000/head refunded; Luxury/Premium/Honeymoon — ₹4,000/head refunded.</li>
+                        <li><strong>Cancellation 8–29 days before travel:</strong> 50% of advance retained — Budget/Standard ₹3,000/head refunded; Luxury/Premium/Honeymoon ₹5,500/head refunded.</li>
+                        <li><strong>Cancellation 0–7 days before travel (or no-show):</strong> <strong>no refund</strong> — full advance forfeited.</li>
+                        <li>See <a href="/terms#cancellation">full cancellation policy →</a></li>
+                        <li>ID proof mandatory at check-in (Passport / Aadhaar / Voter ID / Driving Licence).</li>
+                        <li>Sea conditions may affect ferry schedules (beyond our control).</li>
+                        <li>All applicable taxes are <strong>included</strong> in the price shown — no surprise extras at the end.</li>
+                        <li>Carry sufficient cash — ATMs may be limited on smaller islands.</li>
                     </ul>
                 </div>
             </div>
@@ -525,10 +711,13 @@ function renderPage(pkg) {
 
         <!-- Footer -->
         <footer style="background:#1a1a1a;color:rgba(255,255,255,0.6);text-align:center;padding:1.5rem;margin-top:2rem;font-size:0.88rem;">
-            © 2026 Bharat Tours and Travels · <a href="index.html" style="color:#0d7a8a;">Home</a> · 
-            <a href="index.html#packages" style="color:#0d7a8a;">All Packages</a> · 
-            <a href="index.html#contact" style="color:#0d7a8a;">Contact</a>
-        </footer>
+            © 2026 Bharat Transport and Tourism · <a href="/" style="color:#0d7a8a;">Home</a> · 
+            <a href="/#packages" style="color:#0d7a8a;">All Packages</a> · 
+            <a href="/#contact" style="color:#0d7a8a;">Contact</a>
+        
+    <!-- ── Ezoic ad placement #105 — see js/ezoic-placements.js ── -->
+    <div id="ezoic-pub-ad-placeholder-105"></div>
+</footer>
 
         <!-- Lightbox -->
         <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;">
@@ -555,6 +744,118 @@ function renderPage(pkg) {
     // Lightbox click to close
     const lightbox = document.getElementById('lightbox');
     if (lightbox) lightbox.addEventListener('click', () => { lightbox.style.display = 'none'; });
+
+    // ── Phase 3 Option B — wire the "Tweak this trip" widget ───
+    // Logic now lives in js/package-tweak-trip.js (loaded just above).
+    if (window.PkgTweakTrip && typeof window.PkgTweakTrip.wire === 'function') {
+        window.PkgTweakTrip.wire(pkg);
+    }
+}
+
+// Phase 3 Option B — hydrate the inline trip-tweaker with whatever the
+// visitor entered on the homepage (sessionStorage.searchContext) and
+// pre-select Category from the package they're currently viewing.
+// Clicking the SEARCH button bounces them back to /#packages with the
+// updated query string — js/script.js' `initMmtSearchDefaults` IIFE
+// then auto-applies all five fields to the homepage hero search bar
+// AND to mmtState.cat for the first render.
+function wireTweakTrip(pkg) {
+    const tt = document.getElementById('pkgTweakTrip');
+    if (!tt) return;
+
+    const fromEl     = document.getElementById('ttFrom');
+    const dateEl     = document.getElementById('ttDate');
+    const adultsEl   = document.getElementById('ttAdults');
+    const childrenEl = document.getElementById('ttChildren');
+    const categoryEl = document.getElementById('ttCategory');
+    const btn        = document.getElementById('ttSearchBtn');
+
+    // Min date = today; default = today + 30 days when empty.
+    if (dateEl) {
+        dateEl.min = new Date().toISOString().slice(0, 10);
+        if (!dateEl.value) {
+            const d = new Date(); d.setDate(d.getDate() + 30);
+            dateEl.value = d.toISOString().slice(0, 10);
+        }
+    }
+
+    // Pre-fill from sessionStorage.searchContext (set by the homepage
+    // hero SEARCH button). Falls through silently when nothing's there.
+    let sc = null;
+    try { sc = JSON.parse(sessionStorage.getItem('searchContext') || 'null'); } catch (e) {}
+    if (sc) {
+        if (fromEl     && sc.from)              fromEl.value     = sc.from;
+        if (dateEl     && sc.date)              dateEl.value     = sc.date;
+        if (adultsEl   && sc.adults != null)    adultsEl.value   = String(sc.adults);
+        if (childrenEl && sc.children != null)  childrenEl.value = String(sc.children);
+    }
+
+    // Category default = the slug for THIS package (so the widget feels
+    // pre-set to "show me more like this"). Falls back to "all".
+    if (categoryEl) {
+        const slug = (function () {
+            const explicit = String(pkg.category || '').trim().toLowerCase();
+            if (explicit) return explicit;
+            const name = String(pkg.name || '').toLowerCase();
+            const id   = String(pkg.id || '').toLowerCase();
+            if (/honeymoon/.test(name) || id === 'honeymoon')      return 'honeymoon';
+            if (/royal/.test(name))                                return 'royal';
+            if (/luxury|premium|5[\s-]?star/.test(name) || id === 'luxury') return 'luxury';
+            if (/deluxe/.test(name))                               return 'deluxe';
+            if (/budget|backpack|saver|economy/.test(name) || id === 'budget') return 'budget';
+            return 'all';
+        })();
+        const has = Array.prototype.some.call(categoryEl.options, o => o.value === slug);
+        categoryEl.value = has ? slug : 'all';
+        // sessionStorage value (if any) wins — the visitor explicitly set it
+        if (sc && sc.category) {
+            const has2 = Array.prototype.some.call(categoryEl.options, o => o.value === sc.category);
+            if (has2) categoryEl.value = sc.category;
+        }
+    }
+
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const from     = (fromEl && fromEl.value || '').trim();
+            const date     = dateEl ? dateEl.value : '';
+            const adults   = adultsEl ? parseInt(adultsEl.value, 10) || 2 : 2;
+            const children = childrenEl ? parseInt(childrenEl.value, 10) || 0 : 0;
+            const category = categoryEl ? (categoryEl.value || 'all').toLowerCase() : 'all';
+
+            if (!from) {
+                alert('Please enter your travelling-from city.');
+                if (fromEl) fromEl.focus();
+                return;
+            }
+            if (!date) {
+                alert('Please pick a travel date.');
+                if (dateEl) dateEl.focus();
+                return;
+            }
+
+            // Persist for downstream booking flow (mirrors index.html)
+            const ctx = { from, to: 'Andaman', date, adults, children, category, totalPersons: adults + children };
+            try { sessionStorage.setItem('searchContext', JSON.stringify(ctx)); } catch (e) {}
+
+            // GA4 — search event
+            try {
+                window.Analytics && window.Analytics.search(
+                    `${from} → Andaman | ${date} | ${adults}A${children}C | ${category} (from package page)`
+                );
+            } catch (e) {}
+
+            // Bounce to homepage with full search params; #packages anchor
+            // scrolls the grid into view, mmt-search hydrator on index.html
+            // re-applies the form & filter on first paint.
+            const next = new URLSearchParams();
+            next.set('from', from);
+            next.set('date', date);
+            next.set('adults', String(adults));
+            next.set('children', String(children));
+            if (category && category !== 'all') next.set('category', category);
+            window.location.href = '/?' + next.toString() + '#packages';
+        });
+    }
 }
 
 function openImgLightbox(src) {
@@ -616,7 +917,7 @@ function requireLoginForBooking() {
     } catch (e) {}
     // Silently redirect to home page where the login modal will auto-open.
     // No browser alert — the login modal is the prompt.
-    window.location.href = 'index.html#login';
+    window.location.href = '/#login';
     return false;
 }
 
@@ -647,7 +948,7 @@ function bookNow() {
         }
     } catch (e) {}
     try { sessionStorage.setItem('checkoutCart', JSON.stringify(cart)); } catch (e) {}
-    window.location.href = 'checkout.html';
+    window.location.href = '/checkout';
 }
 
 function customizeNow() {
@@ -706,7 +1007,7 @@ window.confirmBooking = async function() {
         key: 'rzp_live_SLfG8nnKN3tXPC',
         amount: price * 100,
         currency: 'INR',
-        name: 'Bharat Tours & Travels',
+        name: 'Bharat Transport & Tourism',
         description: currentPkg.name,
         handler: function(response) {
             // Save booking to localStorage
@@ -725,7 +1026,7 @@ window.confirmBooking = async function() {
             });
             localStorage.setItem('bookings', JSON.stringify(bookings));
             document.getElementById('paymentModal').style.display = 'none';
-            alert('🎉 Booking Confirmed!\nPayment ID: ' + response.razorpay_payment_id + '\n\nThank you for choosing Bharat Tours & Travels!');
+            alert('🎉 Booking Confirmed!\nPayment ID: ' + response.razorpay_payment_id + '\n\nThank you for choosing Bharat Transport & Tourism!');
         },
         prefill: {
             name: currentUser ? JSON.parse(currentUser).username : 'Guest',
@@ -747,7 +1048,7 @@ function updateNavAuth() {
     if (user && localStorage.getItem('token')) {
         const u = JSON.parse(user);
         link.textContent = u.username;
-        link.href = 'index.html';
+        link.href = '/';
     }
 }
 updateNavAuth();
@@ -785,10 +1086,119 @@ updateNavAuth();
     });
 })();
 
-// Load on page ready
-loadPackage();
+// ── Per-day photo strips ──────────────────────────────────
+// After renderPage() inserts the timeline, each day card has a
+// <div class="day-photo-strip" data-day-photos="id1,id2,..."></div>.
+// We fetch the gallery once and hydrate every strip with thumbnails
+// that open the existing #lightbox on click.
+async function hydrateDayGalleries() {
+    const strips = document.querySelectorAll('.day-photo-strip[data-day-photos]');
+    if (!strips.length) return;
+
+    // Find which strips actually have photos referenced
+    const wantedIds = new Set();
+    strips.forEach(s => {
+        (s.dataset.dayPhotos || '').split(',').filter(Boolean).forEach(id => wantedIds.add(id));
+    });
+
+    // If no strip references any gallery doc, hide them all and return early
+    if (!wantedIds.size) {
+        strips.forEach(s => s.style.display = 'none');
+        return;
+    }
+
+    if (!window.GalleryStore || typeof window.GalleryStore.loadGalleryItems !== 'function') {
+        strips.forEach(s => s.style.display = 'none');
+        return;
+    }
+
+    let items;
+    try {
+        items = await window.GalleryStore.loadGalleryItems();
+    } catch (err) {
+        console.warn('hydrateDayGalleries: failed to load gallery', err);
+        strips.forEach(s => s.style.display = 'none');
+        return;
+    }
+    const byId = {};
+    items.forEach(it => { byId[it.id] = it; });
+
+    strips.forEach(strip => {
+        const ids = (strip.dataset.dayPhotos || '').split(',').filter(Boolean);
+        const photos = ids.map(id => byId[id]).filter(Boolean);
+        if (!photos.length) {
+            strip.style.display = 'none';
+            return;
+        }
+        strip.innerHTML = photos.map((p, i) => `
+            <button type="button" class="day-photo-thumb" data-full="${p.url}" aria-label="View photo ${i + 1}">
+                <img src="${p.thumbUrl || p.url}" alt="${(p.title || '').replace(/"/g, '&quot;')}" loading="lazy">
+            </button>
+        `).join('');
+        strip.querySelectorAll('.day-photo-thumb').forEach(btn => {
+            btn.addEventListener('click', () => openImgLightbox(btn.dataset.full));
+        });
+    });
+}
+
+// Hydrate after the package is rendered. renderPage() runs synchronously
+// inside loadPackage(); so we just wait for that promise to settle and the
+// timeline DOM to exist.
+loadPackage().then(() => {
+    // Defer one tick so the DOM is fully attached before we query.
+    setTimeout(hydrateDayGalleries, 0);
+}).catch(() => {});
 </script>
-<script src="js/chat.js"></script>
+
+<!-- ── Per-day photo strip styles ───────────────────────── -->
+<style>
+.day-photo-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed #e0e6ea;
+}
+.day-photo-thumb {
+    width: 76px;
+    height: 76px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    background: #f0f2f5;
+    cursor: pointer;
+    padding: 0;
+    transition: border-color .15s, transform .15s;
+}
+.day-photo-thumb:hover {
+    border-color: #0d7a8a;
+    transform: scale(1.05);
+}
+.day-photo-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+@media (max-width: 600px) {
+    .day-photo-thumb { width: 64px; height: 64px; }
+}
+</style>
+
+<!-- gallery.js exposes window.GalleryStore for the hydration above -->
+<!-- Phase 3 Option B — cities list + tweak-trip widget logic -->
+<script src="js/cities.js?v=18"></script>
+<script src="js/package-tweak-trip.js?v=1"></script>
+<script src="js/gallery.js?v=3"></script>
+<script src="js/live-chat.js?v=8"></script>
 <script src="js/security.js?v=2"></script>
+    <script src="js/user-menu.js?v=14"></script>
+    <script src="js/conversion-kit.js?v=1"></script>
+    <script src="js/brevo.js?v=3" async></script>
+    <!-- Ezoic ad-placement helper (auto-discovers placeholders) -->
+    <script src="js/ezoic-placements.js?v=2" defer></script>
+    <!-- Push-notification ad-network init (registers /sw.js) — see js/push-ads-init.js -->
+    <script src="js/push-ads-init.js?v=2" defer></script>
 </body>
 </html>

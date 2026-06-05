@@ -6,6 +6,7 @@
     "price": 15999,
     "rating": 4.2,
     "image": "images/beach1.jpg",
+    "category": "Budget",
     "inclusions": ["Hotels", "Ferries", "Breakfast"],
     "visible": true
   },
@@ -16,6 +17,7 @@
     "price": 21999,
     "rating": 4.6,
     "image": "images/beach2.jpg",
+    "category": "Standard",
     "inclusions": ["Deluxe Hotels", "Premium Ferries", "Snorkeling"],
     "visible": true
   },
@@ -26,6 +28,7 @@
     "price": 28999,
     "rating": 4.8,
     "image": "images/beach3.jpg",
+    "category": "Luxury",
     "inclusions": ["5* Resorts", "VIP Ferries", "Scuba Dive"],
     "visible": true
   },
@@ -36,7 +39,54 @@
     "price": 24999,
     "rating": 4.9,
     "image": "images/beach4.jpg",
+    "category": "Honeymoon",
     "inclusions": ["Romantic Setup", "Photoshoot", "Dinner"],
+    "visible": true
+  },
+  {
+    "id": "honeymoon-4a-2026",
+    "name": "Honeymoon Package (4A) — 2026",
+    "desc": "4N/5D | Port Blair + Havelock | Beach Resort + Candlelight Dinner + Photoshoot + AC Premium Cruise",
+    "price": 29500,
+    "rating": 4.8,
+    "image": "images/beach4.jpg",
+    "category": "Honeymoon",
+    "inclusions": [
+      "Star Category Accommodation",
+      "Beach Resort at Havelock",
+      "Welcome Drinks & Bouquet",
+      "Breakfast",
+      "Flower Bed Decor + Honeymoon Cake",
+      "1 Night Candlelight Dinner",
+      "AC Personal Car",
+      "Elephant Beach by Speed Boat (with Snorkelling)",
+      "Photoshoot at Radhanagar Beach (15 min)",
+      "All Entry Fees",
+      "Toll Tax & Parking",
+      "Airport Pickup & Drop",
+      "AC Premium Cruise (Havelock)"
+    ],
+    "visible": true
+  },
+  {
+    "id": "royal-4b-2026",
+    "name": "Royal Package (4B) — 2026",
+    "desc": "4N/5D | Port Blair + Havelock + Neil | Star Hotels + AC Premium Cruise + AC Personal Car",
+    "price": 29500,
+    "rating": 4.7,
+    "image": "images/beach3.jpg",
+    "category": "Royal",
+    "inclusions": [
+      "Star Category Accommodation",
+      "Resort at Havelock & Neil",
+      "Welcome Drinks",
+      "Breakfast & Dinner",
+      "AC Personal Car",
+      "All Entry Fees",
+      "Toll Tax & Parking",
+      "Airport Pickup & Drop",
+      "AC Premium Cruise (Havelock & Neil)"
+    ],
     "visible": true
   },
   {

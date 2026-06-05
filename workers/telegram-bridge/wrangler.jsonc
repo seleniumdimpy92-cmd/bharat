@@ -1,0 +1,40 @@
+{
+  // ── telegram-bridge Worker ─────────────────────────────────
+  // Bridges the website's custom live-chat with the admin's Telegram
+  // via the Telegram Bot API (https://core.telegram.org/bots/api).
+  //
+  //   POST /notify       — called by js/chat.js when a customer sends
+  //                         a new chat message. We look up the chat
+  //                         session, format a digest, send it to the
+  //                         admin's Telegram chat via sendMessage.
+  //   GET/POST /webhook  — called by Telegram when the admin replies
+  //                         in their bot chat. We optionally check the
+  //                         secret-token header (set when we register
+  //                         the webhook), find the related chat
+  //                         session (by /reply <sessionId> or the
+  //                         most-recent active session), and append
+  //                         the admin's text into
+  //                         /chats/{sessionId}/messages.
+  //
+  // Setup walkthrough: telegram_setup.md
+  // Secrets needed (set via `npx wrangler secret put NAME`):
+  //   TELEGRAM_BOT_TOKEN             — from @BotFather, e.g. 1234:ABC...
+  //   TELEGRAM_WEBHOOK_SECRET        — random string we set when
+  //                                     registering the webhook; Telegram
+  //                                     echoes it in X-Telegram-Bot-Api-Secret-Token
+  //   FIREBASE_SERVICE_ACCOUNT_KEY   — full JSON of the service account
+  //
+  // Plain env vars (in this file):
+  //   FIREBASE_PROJECT_ID
+  //   ALLOWED_ORIGIN          — comma-separated list, for /notify CORS
+  "$schema":         "node_modules/wrangler/config-schema.json",
+  "name":            "telegram-bridge",
+  "main":            "worker.js",
+  "compatibility_date": "2024-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "vars": {
+    "FIREBASE_PROJECT_ID": "andaman-b886d",
+    "ALLOWED_ORIGIN":      "https://andamanvoyages.in,https://www.andamanvoyages.in"
+  }
+}

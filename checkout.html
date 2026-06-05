@@ -1,36 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Hide .html and /index from the URL bar without re-loading the page -->
+    <script>(function(){try{var p=location.pathname;if(/\/index(\.html)?$/i.test(p)){history.replaceState(null,"",p.replace(/\/index(\.html)?$/i,"/")+location.search+location.hash);}else if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout — Bharat Tours &amp; Travels</title>
+    <title>Checkout — Bharat Transport &amp; Tourism</title>
     <meta name="description" content="Review your Andaman tour booking, fill traveler details, apply coupons and pay securely with Razorpay.">
     <meta name="robots" content="noindex,nofollow">
     <meta name="theme-color" content="#0d7a8a">
 
-    <link rel="icon" type="image/png" href="images/logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/logo-white.png">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/checkout.css?v=3">
+    <link rel="stylesheet" href="css/checkout.css?v=8">
+    <link rel="stylesheet" href="css/conversion-kit.css?v=3">
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="js/firebase-config.js?v=17"></script>
+    <script src="js/firebase-config.js?v=21"></script>
     <script src="js/analytics.js?v=1"></script>
-    <script src="js/dataStore.js?v=17"></script>
+    <script src="js/dataStore.js?v=25"></script>
     <script src="js/toast.js?v=1"></script>
     <script src="js/travelpayouts-init.js?v=1"></script>
+    <!-- ── Google AdSense loader (publisher pub-8154901590978667) ── -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8154901590978667" crossorigin="anonymous"></script>
 </head>
 <body>
 
     <!-- Header -->
     <header class="co-header">
-        <a href="index.html" style="display:flex;align-items:center;gap:.75rem;">
-            <img src="images/logo.png" alt="Bharat Tours">
-            <span style="font-weight:700;font-size:1rem;">Bharat Tours &amp; Travels</span>
+        <a href="/" style="display:flex;align-items:center;gap:.75rem;">
+            <img src="images/logo-white.png" alt="Bharat Transport & Tourism">
+            <span style="font-weight:700;font-size:1rem;">Bharat Transport &amp; Tourism</span>
         </a>
         <div style="display:flex;gap:1rem;align-items:center;">
-            <a href="index.html#packages" class="home-link"><i class="fas fa-suitcase"></i> All Packages</a>
-            <a href="index.html" id="navAuthLink" class="auth-link">Login</a>
+            <a href="/#packages" class="home-link"><i class="fas fa-suitcase"></i> All Packages</a>
+            <a href="/" id="navAuthLink" class="auth-link">Login</a>
         </div>
     </header>
 
@@ -53,15 +58,25 @@
     </main>
 
     <footer class="co-footer">
-        © 2026 Bharat Tours and Travels &middot;
-        <a href="index.html">Home</a> &middot;
-        <a href="index.html#packages">Packages</a> &middot;
-        <a href="index.html#contact">Contact</a> &middot;
-        <a href="privacy.html">Privacy</a> &middot;
-        <a href="terms.html">Terms</a>
+        © 2026 Bharat Transport and Tourism &middot;
+        <a href="/">Home</a> &middot;
+        <a href="/#packages">Packages</a> &middot;
+        <a href="/#contact">Contact</a> &middot;
+        <a href="/privacy">Privacy</a> &middot;
+        <a href="/terms">Terms</a>
     </footer>
 
-    <script src="js/checkout.js?v=5"></script>
+    <!-- Inbox-mail Worker URL — used by booking-emails.js to send the
+         booking confirmation through Brevo when an admin/staff is
+         logged in. Customers fall through to the Firestore mail/{ref}
+         queue (Trigger Email extension). Same URL as dashboard.html. -->
+    <script>window.INBOX_WORKER_URL = 'https://inbox-mail.pittu-das2.workers.dev';</script>
+    <script src="js/booking-emails.js?v=1"></script>
+    <script src="js/checkout.js?v=8"></script>
     <script src="js/security.js?v=2"></script>
+    <script src="js/user-menu.js?v=14"></script>
+    <script src="js/conversion-kit.js?v=1"></script>
+    <script src="js/brevo.js?v=3" async></script>
+    <script src="js/live-chat.js?v=8"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-# robots.txt — Bharat Tours and Travels (andamanvoyages.in)
+# robots.txt — Bharat Transport and Tourism (andamanvoyages.in)
 User-agent: *
 Allow: /
 
@@ -51,3 +51,4 @@ Disallow: /bookings.html
 
 # Sitemap
 Sitemap: https://andamanvoyages.in/sitemap.xml
+

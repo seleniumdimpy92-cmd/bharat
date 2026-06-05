@@ -45,6 +45,10 @@
                 caption: data.caption || '',
                 category: data.category || '',
                 order: typeof data.order === 'number' ? data.order : 9999,
+                // ── New metadata for grouping/sorting on the public gallery
+                date:    data.date    || '',          // ISO yyyy-mm-dd (date the photo was taken)
+                place:   data.place   || '',          // free-text e.g. "Radhanagar Beach"
+                packageRef: data.packageRef || '',    // package id or name e.g. "honeymoon"
                 publicId: data.publicId || '',          // Cloudinary public_id
                 storagePath: data.storagePath || '',    // legacy (Firebase Storage)
                 createdAt: data.createdAt || null
@@ -138,6 +142,10 @@
             caption:  (meta && meta.caption)  || '',
             category: (meta && meta.category) || '',
             order:    (meta && typeof meta.order === 'number') ? meta.order : 9999,
+            // Tagging fields used for grouping/sorting on the public gallery
+            date:       (meta && meta.date)       || '',  // ISO yyyy-mm-dd
+            place:      (meta && meta.place)      || '',  // free-text place
+            packageRef: (meta && meta.packageRef) || '',  // package id/name
             width:    cloudinaryRes.width  || null,
             height:   cloudinaryRes.height || null,
             format:   cloudinaryRes.format || '',
@@ -150,12 +158,12 @@
         return { id: docRef.id, ...docData };
     }
 
-    // ── Admin: update metadata only (title/caption/category/order)
+    // ── Admin: update metadata only (title/caption/category/order/date/place/packageRef)
     async function updateGalleryItem(id, patch) {
         const { db, firestore } = await window.__firebaseReady;
         const ref = firestore.doc(db, 'gallery', id);
         const allowed = {};
-        ['title', 'caption', 'category', 'order'].forEach(k => {
+        ['title', 'caption', 'category', 'order', 'date', 'place', 'packageRef'].forEach(k => {
             if (patch && Object.prototype.hasOwnProperty.call(patch, k)) {
                 allowed[k] = patch[k];
             }

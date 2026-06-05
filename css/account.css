@@ -1,0 +1,454 @@
+/* ── Profile + Settings shared styles ───────────────────────────
+   Used by /profile and /settings.
+   ──────────────────────────────────────────────────────────────── */
+
+:root{
+    --teal:#0d7a8a;
+    --teal-dark:#0a5a68;
+    --green:#27ae60;
+    --red:#c0392b;
+    --amber:#f39c12;
+    --line:#e3e8ef;
+    --bg:#f6f8fb;
+    --text:#1c2b48;
+    --muted:#6b7a99;
+}
+
+/* Dark theme — applied via .theme-dark on <html> */
+html.theme-dark{
+    --bg:#0e1422;
+    --text:#e6ebf2;
+    --muted:#9aa9bf;
+    --line:#1f2a44;
+}
+html.theme-dark body{background:var(--bg);color:var(--text)}
+html.theme-dark .topbar{background:#111a2e;border-color:#1f2a44}
+html.theme-dark .topbar-logo span{color:#e6ebf2}
+html.theme-dark .account-card{background:#16223b;border-color:#1f2a44;color:#e6ebf2}
+html.theme-dark .account-card .account-card-sub,
+html.theme-dark .account-card small,
+html.theme-dark .account-meta{color:#9aa9bf}
+html.theme-dark .account-form input:not([disabled]),
+html.theme-dark .account-form select,
+html.theme-dark .account-form textarea{
+    background:#0e1422;color:#e6ebf2;border-color:#2a3656;
+}
+html.theme-dark .account-form input[disabled]{background:#1a2540;color:#7f8ba6}
+html.theme-dark .theme-card{background:#16223b;border-color:#1f2a44;color:#e6ebf2}
+html.theme-dark .theme-card.active{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,122,138,.3)}
+
+.account-section{background:var(--bg);min-height:calc(100vh - var(--tb-h));padding:2.5rem 0 4rem}
+.account-container{max-width:920px}
+.account-title{
+    font-size:1.7rem;font-weight:800;color:var(--text);
+    display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;
+}
+.account-title i{color:var(--teal)}
+.account-lead{color:var(--muted);font-size:.95rem;line-height:1.55;max-width:760px;margin-bottom:1.5rem}
+
+.account-card{
+    background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:1.4rem 1.6rem;margin-bottom:1.1rem;
+    box-shadow:0 2px 12px rgba(10,31,68,.05);
+}
+.account-card-title{
+    font-size:1.05rem;font-weight:700;color:var(--teal);
+    display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;
+}
+.account-card-sub{
+    color:var(--muted);font-size:.88rem;line-height:1.55;margin-bottom:1rem;
+}
+.account-empty{text-align:center;padding:2.5rem 1.5rem}
+.account-empty i{font-size:2.4rem;color:var(--muted);margin-bottom:.6rem;display:block}
+.account-empty h3{margin-bottom:.4rem;font-size:1.1rem;color:var(--text)}
+.account-empty p{color:var(--muted);font-size:.92rem;margin-bottom:1rem}
+
+/* Header summary */
+.account-summary{
+    display:flex;align-items:center;gap:1.1rem;
+}
+.account-avatar{
+    width:64px;height:64px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,#0d7a8a 0%,#16a085 100%);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:1.4rem;font-weight:800;
+    box-shadow:0 4px 14px rgba(13,122,138,.3);
+}
+.account-name{font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:.2rem}
+.account-meta{display:flex;flex-wrap:wrap;gap:.85rem;font-size:.85rem;color:var(--muted)}
+.account-meta i{margin-right:.2rem}
+.account-role-badge{
+    background:#fef9e7;color:#9c6500;
+    padding:.15rem .55rem;border-radius:999px;
+    font-size:.7rem;font-weight:700;letter-spacing:.4px;
+}
+
+/* ── Profile picture uploader ────────────────────────────────
+   Wraps the .account-avatar so we can layer a hover overlay +
+   loading spinner on top of the same circular box used for the
+   initials/photo fallback. The existing .account-avatar rules
+   above still apply; we just turn the element into a button so
+   it's clickable, and swap the text-content for an <img> when
+   the user has uploaded a picture. */
+.account-summary{align-items:flex-start} /* let the text column grow tall */
+.account-summary-text{flex:1;min-width:0}
+.account-avatar-wrap{
+    position:relative;flex-shrink:0;
+    width:96px;height:96px; /* a touch bigger now that it's the focal point */
+}
+.account-avatar.account-avatar-btn{
+    width:96px;height:96px;font-size:2rem;
+    border:0;cursor:pointer;padding:0;overflow:hidden;
+    transition:transform .15s,box-shadow .15s,filter .15s;
+}
+.account-avatar.account-avatar-btn:hover{
+    transform:scale(1.04);
+    box-shadow:0 6px 20px rgba(13,122,138,.4);
+    filter:brightness(1.05);
+}
+.account-avatar.account-avatar-btn:focus-visible{
+    outline:3px solid #0d7a8a;outline-offset:3px;
+}
+.account-avatar.has-photo{
+    background:#eef3f5; /* fallback while <img> loads */
+}
+.account-avatar img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    border-radius:50%;
+}
+/* Camera-icon overlay on hover (only when there's a photo, since the
+   initials avatar already screams "click me" via its hover scale). */
+.account-avatar.account-avatar-btn::after{
+    content:"\f030"; /* fa-camera (free solid uses 6.x weight 900) */
+    font-family:"Font Awesome 6 Free";
+    font-weight:900;
+    position:absolute;inset:0;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;background:rgba(13,44,58,.55);
+    font-size:1.4rem;
+    opacity:0;transition:opacity .15s;
+    pointer-events:none;
+}
+.account-avatar.account-avatar-btn:hover::after,
+.account-avatar.account-avatar-btn:focus-visible::after{
+    opacity:1;
+}
+/* Spinner overlay during uploads */
+.account-avatar-spinner{
+    position:absolute;inset:0;border-radius:50%;
+    display:none;align-items:center;justify-content:center;
+    background:rgba(15,32,39,.65);color:#fff;font-size:1.5rem;
+    pointer-events:none;
+}
+.account-avatar-wrap.is-uploading .account-avatar-spinner{display:flex}
+.account-avatar-wrap.is-uploading .account-avatar-btn{filter:blur(.5px) brightness(.7)}
+
+.account-avatar-actions{
+    margin-top:.65rem;
+    display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .85rem;
+}
+.btn-link.btn-link-danger{color:#c0392b}
+.btn-link.btn-link-danger:hover{color:#922b21}
+
+@media (max-width:600px){
+    .account-summary{flex-direction:column;align-items:center;text-align:center;gap:.65rem}
+    .account-summary-text{width:100%}
+    .account-meta{justify-content:center}
+    .account-avatar-actions{justify-content:center}
+}
+
+/* NOTE: .um-has-photo styles for the topbar avatar pill live in
+   css/style.css (loaded on every page including the admin dashboard),
+   not here — css/account.css is only loaded on /profile and /settings,
+   which would leave the picture overflowing on every other page.
+   See the .um-has-photo block in style.css next to .user-menu-btn. */
+
+/* Forms */
+.account-form{display:flex;flex-direction:column;gap:.85rem}
+.account-row{
+    display:grid;grid-template-columns:1fr 1fr;gap:.85rem;
+}
+.account-form label{
+    display:flex;flex-direction:column;gap:.3rem;
+    font-size:.82rem;font-weight:600;color:var(--muted);
+}
+.account-form input,
+.account-form select,
+.account-form textarea{
+    padding:.6rem .8rem;border:1px solid var(--line);border-radius:8px;
+    font-family:inherit;font-size:.95rem;color:var(--text);
+    background:#fff;transition:border-color .15s,box-shadow .15s;
+    width:100%;
+}
+.account-form input:focus,
+.account-form select:focus,
+.account-form textarea:focus{
+    outline:none;border-color:var(--teal);
+    box-shadow:0 0 0 3px rgba(13,122,138,.18);
+}
+.account-form input[disabled]{
+    background:#f4f6f9;color:#8c98ad;cursor:not-allowed;
+}
+.account-form small{font-size:.74rem;color:var(--muted);font-weight:500}
+
+.account-actions{
+    display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-top:.4rem;
+}
+.btn-save{
+    background:linear-gradient(135deg,var(--teal) 0%,#16a085 100%);
+    color:#fff;border:0;font-family:inherit;font-weight:700;font-size:.92rem;
+    padding:.6rem 1.2rem;border-radius:8px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:.4rem;
+    box-shadow:0 3px 10px rgba(13,122,138,.25);
+    transition:filter .15s,transform .1s;
+}
+.btn-save:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.btn-save:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-link{
+    background:none;border:0;color:var(--teal);
+    font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;
+    text-decoration:underline;padding:.2rem .4rem;
+}
+.btn-link:hover{color:var(--teal-dark)}
+
+.btn-danger,
+.btn-danger-outline{
+    font-family:inherit;font-weight:700;font-size:.92rem;
+    padding:.6rem 1.2rem;border-radius:8px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:.4rem;
+    transition:filter .15s,transform .1s;
+}
+.btn-danger{background:var(--red);color:#fff;border:0;box-shadow:0 3px 10px rgba(192,57,43,.25)}
+.btn-danger:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.btn-danger-outline{
+    background:#fff;color:var(--red);border:1px solid var(--red);
+}
+.btn-danger-outline:hover{background:#fdedec}
+
+.account-status{
+    font-size:.85rem;color:var(--muted);font-weight:500;
+    display:inline-flex;align-items:center;gap:.3rem;
+}
+.account-status.ok{color:var(--green)}
+.account-status.err{color:var(--red)}
+
+/* Settings-specific bits */
+.theme-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:.7rem;
+}
+.theme-card{
+    background:#fff;border:2px solid var(--line);border-radius:12px;
+    padding:.75rem;cursor:pointer;text-align:center;
+    font-family:inherit;font-size:.88rem;font-weight:600;color:var(--text);
+    display:flex;flex-direction:column;gap:.5rem;align-items:center;
+    transition:border-color .15s,transform .1s,box-shadow .15s;
+}
+.theme-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(10,31,68,.08)}
+.theme-card.active{
+    border-color:var(--teal);
+    box-shadow:0 0 0 3px rgba(13,122,138,.18);
+}
+.theme-card i{margin-right:.3rem;color:var(--teal)}
+.theme-preview{width:100%;height:64px;border-radius:8px;border:1px solid var(--line)}
+.theme-preview-light{background:linear-gradient(135deg,#fff 0%,#f6f8fb 100%)}
+.theme-preview-dark{background:linear-gradient(135deg,#0e1422 0%,#1a2540 100%)}
+.theme-preview-auto{background:linear-gradient(135deg,#fff 0%,#fff 49%,#0e1422 51%,#0e1422 100%)}
+
+.setting-row{
+    display:flex;flex-wrap:wrap;align-items:center;gap:.8rem;margin-top:.4rem;
+}
+.setting-row label{display:flex;flex-direction:column;gap:.3rem;font-size:.82rem;font-weight:600;color:var(--muted);min-width:240px}
+.setting-row select{padding:.55rem .8rem;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:.92rem;background:#fff;color:var(--text);cursor:pointer}
+
+.setting-toggle-row{
+    display:flex;justify-content:space-between;align-items:center;
+    gap:1rem;padding:.85rem 0;border-top:1px solid var(--line);
+}
+.setting-toggle-row:first-of-type{border-top:0;padding-top:0}
+.setting-toggle-row > div{flex:1;min-width:0}
+.setting-toggle-row strong{display:block;font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.15rem}
+.setting-toggle-row p{font-size:.83rem;color:var(--muted);line-height:1.45;margin:0}
+
+.toggle-switch{position:relative;display:inline-block;width:46px;height:26px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{
+    position:absolute;cursor:pointer;inset:0;
+    background:#cfd9df;border-radius:999px;transition:background .2s;
+}
+.toggle-slider:before{
+    content:'';position:absolute;height:20px;width:20px;
+    left:3px;bottom:3px;background:#fff;border-radius:50%;
+    transition:transform .2s;box-shadow:0 2px 4px rgba(0,0,0,.2);
+}
+.toggle-switch input:checked + .toggle-slider{background:var(--teal)}
+.toggle-switch input:checked + .toggle-slider:before{transform:translateX(20px)}
+
+.account-danger{
+    border-color:#f5b7b1;background:linear-gradient(180deg,#fef5f4 0%,#fff 100%);
+}
+.account-danger .account-card-title{color:var(--red)}
+
+@media (max-width:720px){
+    .account-    .account-row{grid-template-columns:1fr}
+    .account-card{padding:1.1rem}
+    .account-summary{flex-direction:column;text-align:center}
+    .account-meta{justify-content:center}
+    .setting-toggle-row{flex-direction:column;align-items:flex-start}
+}
+
+/* ── Preset avatar gallery ────────────────────────────────────────
+   Renders inside the account-summary card (right column on desktop,
+   beneath the "Change/Remove photo" links + caption). Each tile is
+   a circular thumbnail of a static avatar shipped under
+   /images/avatars/. The currently-selected avatar is highlighted
+   with a teal ring + a checkmark badge; the first tile (anonymous
+   silhouette) gets a tiny "Default" badge so customers know which
+   one is the fallback the rest of the site uses when their photoURL
+   is empty.
+   ─────────────────────────────────────────────────────────────── */
+
+.account-avatar-presets-wrap {
+    margin-top: .9rem;
+    padding-top: .85rem;
+    border-top: 1px dashed #d6dee5;
+}
+.account-avatar-presets-head {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: #5a6877;
+    margin-bottom: .55rem;
+}
+.account-avatar-presets-head i {
+    color: #0d7a8a;
+    font-size: .9rem;
+}
+
+/* Grid of circular avatar thumbnails. Wraps onto multiple rows when
+   the column is narrow (e.g. mobile); on desktop ~7 fit per row. */
+.account-avatar-presets {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+    gap: .55rem;
+    align-items: start;
+}
+
+/* Each tile is a button so it's keyboard-accessible. The img inside
+   fills the circle; we use object-fit:cover to crop edge cases like
+   non-square assets gracefully. */
+.profile-preset-tile {
+    position: relative;
+    appearance: none;
+    border: 2px solid transparent;
+    background: #f4f7fa;
+    border-radius: 50%;
+    width: 58px;
+    height: 58px;
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.profile-preset-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+}
+.profile-preset-tile:hover {
+    transform: translateY(-2px) scale(1.04);
+    border-color: #b6dde2;
+    box-shadow: 0 4px 14px rgba(13, 122, 138, .18);
+}
+.profile-preset-tile:focus-visible {
+    outline: none;
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13, 122, 138, .25);
+}
+.profile-preset-tile:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Active = currently chosen avatar. Distinct teal ring + check icon
+   so the customer sees at a glance which one is "their" avatar. */
+.profile-preset-tile.is-active {
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13, 122, 138, .18);
+}
+.profile-preset-check {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #0d7a8a;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .65rem;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+/* Default-avatar tile gets a small "Default" pill badge so customers
+   always know which one is the site fallback. */
+.profile-preset-tile.is-default .profile-preset-badge {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2c3e50;
+    color: #fff;
+    font-size: .58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    line-height: 1.5;
+    white-space: nowrap;
+    pointer-events: none;
+}
+/* When the default tile is also the active one, lift the badge so it
+   doesn't collide with the check icon. */
+.profile-preset-tile.is-default.is-active .profile-preset-badge {
+    bottom: -10px;
+}
+
+@media (max-width: 600px) {
+    .account-avatar-presets {
+        grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+        gap: .45rem;
+    }
+    .profile-preset-tile { width: 52px; height: 52px; }
+    .profile-preset-check { width: 18px; height: 18px; font-size: .58rem; }
+}
+
+/* ── Recent uploads — variant of preset tile ─────────────────────
+   Uses the same .profile-preset-tile geometry as the preset gallery
+   but tinted differently so customers immediately see "this is one
+   of MY past photos, not one of the site's stock avatars". The
+   "Recent" badge is amber instead of dark navy, and the tile gets
+   a soft amber ring on hover. */
+.profile-preset-tile-recent {
+    border-color: #f4c98a;
+    background: #fffbf0;
+}
+.profile-preset-tile-recent:hover {
+    border-color: #d68910;
+    box-shadow: 0 4px 14px rgba(214, 137, 16, .22);
+}
+.profile-preset-badge-recent {
+    background: #d68910 !important;
+    color: #fff !important;
+}

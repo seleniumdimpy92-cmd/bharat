@@ -93,7 +93,7 @@
         ft.className = 'fr-footer';
         ft.innerHTML =
             '<i class="fas fa-shield-alt" style="color:#16a085;"></i> ' +
-            esc(data.disclaimer || 'Bharat Tours redirects to trusted partners. We may earn a small affiliate commission at no extra cost to you.');
+            esc(data.disclaimer || 'Bharat Transport & Tourism redirects to trusted partners. We may earn a small affiliate commission at no extra cost to you.');
         containerEl.appendChild(ft);
     }
 
@@ -120,7 +120,7 @@
             flights: [],
             source:  'estimate',
             params:  params || {},
-            disclaimer: 'Bharat Tours redirects to trusted partners. We may earn a small affiliate commission at no extra cost to you.'
+            disclaimer: 'Bharat Transport & Tourism redirects to trusted partners. We may earn a small affiliate commission at no extra cost to you.'
         });
     }
 

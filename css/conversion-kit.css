@@ -1,0 +1,223 @@
+/* ── Conversion Kit styles ────────────────────────────────────
+   Loaded by every public page. Drives the urgency bar, WhatsApp
+   floating button, and exit-intent coupon popup injected by
+   js/conversion-kit.js.
+   ─────────────────────────────────────────────────────────── */
+
+/* 1. Sticky urgency bar (package.html only)
+   ------------------------------------------------------------
+   DISABLED: the red countdown bar was removed per request — it
+   felt too "scammy" and pushed the topbar down. We hide it via
+   CSS (belt + braces with the JS DEFAULT being `false` now) so
+   even a stale SettingsStore cache cannot bring it back. To
+   re-enable, simply remove this `display:none !important` rule.
+   ------------------------------------------------------------ */
+#ck-urgency-bar { display: none !important; }
+#ck-urgency-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999998;
+    background: linear-gradient(90deg, #c0392b 0%, #e74c3c 60%, #ff6b5b 100%);
+    color: #fff;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .85rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+}
+#ck-urgency-bar .ck-urgency-text { flex-shrink: 1; }
+#ck-urgency-bar .ck-urgency-timer {
+    background: rgba(0,0,0,.2);
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: .85rem;
+    letter-spacing: .04em;
+    flex-shrink: 0;
+}
+@media (max-width: 600px) {
+    #ck-urgency-bar { font-size: .75rem; padding: 6px 10px; gap: .5rem; }
+    #ck-urgency-bar .ck-urgency-timer { font-size: .78rem; padding: 2px 7px; }
+}
+
+/* 2. WhatsApp floating button — now sits BELOW the chat widget
+   (chat on top, WhatsApp on bottom — per design request).
+   The chat-bubble lives at bottom:106px (see js/chat.js), so
+   anchoring WhatsApp at bottom:28px puts it as the very lowest
+   floating action on the right rail. */
+#ck-wa-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 999997;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #25d366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(37,211,102,.45), 0 2px 8px rgba(0,0,0,.15);
+    transition: transform .15s ease, box-shadow .15s ease;
+    text-decoration: none;
+    cursor: pointer;
+}
+#ck-wa-fab:hover {
+    transform: scale(1.08);
+    box-shadow: 0 10px 28px rgba(37,211,102,.55), 0 4px 14px rgba(0,0,0,.2);
+}
+#ck-wa-fab .ck-wa-pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(37,211,102,.6);
+    animation: ck-wa-pulse 2s infinite;
+    pointer-events: none;
+}
+@keyframes ck-wa-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(37,211,102,.55); }
+    70%  { box-shadow: 0 0 0 18px rgba(37,211,102,0); }
+    100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); }
+}
+/* On phones, mirror the same swap: WhatsApp goes to the bottom slot
+   (matching the chat-widget's old position) and the chat widget moves
+   above it. The chat-widget's mobile bottom is bumped to 100px in
+   js/chat.js to keep them from overlapping. */
+@media (max-width: 600px) {
+    #ck-wa-fab { width: 50px; height: 50px; bottom: 20px; right: 16px; }
+}
+
+/* 3. Exit-intent coupon popup */
+#ck-exit-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: rgba(0,0,0,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: ck-fade-in .25s ease both;
+}
+#ck-exit-modal.ck-open { display: flex; }
+@keyframes ck-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.ck-exit-card {
+    background: #fff;
+    border-radius: 18px;
+    width: min(440px, 95vw);
+    padding: 2rem 1.75rem 1.5rem;
+    box-shadow: 0 18px 48px rgba(0,0,0,.35);
+    text-align: center;
+    position: relative;
+    font-family: 'Poppins', system-ui, sans-serif;
+    color: #1c2b48;
+    animation: ck-pop-in .3s cubic-bezier(.18,.89,.32,1.28) both;
+}
+@keyframes ck-pop-in {
+    from { transform: scale(.85); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+}
+.ck-exit-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+    transition: background .15s, color .15s;
+}
+.ck-exit-close:hover { background: #f0f0f0; color: #333; }
+.ck-exit-emoji { font-size: 2.5rem; line-height: 1; margin-bottom: .35rem; }
+.ck-exit-card h3 {
+    margin: 0 0 .35rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #0d2c3a;
+}
+.ck-exit-card p {
+    margin: 0 0 1.1rem;
+    color: #5a6877;
+    font-size: .98rem;
+    line-height: 1.55;
+}
+.ck-exit-card p strong { color: #c0392b; }
+.ck-exit-code {
+    background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+    border: 2px dashed #f1c27d;
+    border-radius: 12px;
+    padding: .85rem 1rem;
+    margin: 0 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+    align-items: center;
+}
+.ck-exit-label {
+    font-size: .7rem;
+    text-transform: uppercase;
+    color: #a04000;
+    letter-spacing: .12em;
+    font-weight: 700;
+}
+.ck-exit-coupon {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #c0392b;
+    letter-spacing: .15em;
+    background: #fff;
+    padding: .4rem .85rem;
+    border-radius: 8px;
+    border: 1px solid #f1c27d;
+}
+.ck-exit-copy {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: .35rem .9rem;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+.ck-exit-copy:hover { background: #a52a1c; }
+.ck-exit-cta {
+    display: inline-block;
+    background: linear-gradient(135deg, #0d7a8a 0%, #16a085 100%);
+    color: #fff;
+    padding: .75rem 1.6rem;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    margin-bottom: .65rem;
+    transition: transform .15s, filter .15s;
+}
+.ck-exit-cta:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.ck-exit-fine {
+    color: #999 !important;
+    font-size: .72rem !important;
+    margin: 0 !important;
+}
+@media (max-width: 480px) {
+    .ck-exit-card { padding: 1.5rem 1.25rem 1.25rem; }
+    .ck-exit-card h3 { font-size: 1.2rem; }
+    .ck-exit-coupon { font-size: 1.15rem; }
+}

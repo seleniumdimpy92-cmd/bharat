@@ -3,3 +3,4 @@ node_modules/
 travel.db
 *.log
 .DS_Store
+workers/*/node_modules

@@ -1,0 +1,17 @@
+{
+    "name": "customize-email",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev":    "wrangler dev",
+        "deploy": "wrangler deploy",
+        "tail":   "wrangler tail"
+    },
+    "dependencies": {
+        "mimetext": "^3.0.27"
+    },
+    "devDependencies": {
+        "wrangler": "^3.78.0"
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "name": "inbox-mail",
+    "version": "1.0.0",
+    "description": "Cloudflare Worker for outbound email replies from the admin dashboard via Brevo's transactional API.",
+    "private": true,
+    "scripts": {
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy",
+        "tail": "wrangler tail"
+    },
+    "devDependencies": {
+        "wrangler": "^3.78.0"
+    }
+}

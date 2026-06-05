@@ -466,3 +466,228 @@ body {
     .pkg-hero-meta { gap: 0.75rem; }
     .pkg-hero-meta .price-badge { font-size: 1rem; }
 }
+/* ── Phase 2 — MMT-style typed itinerary timeline (public renderer) ──
+ * Rendered by package.html when pkg.days[].blocks is non-empty.
+ * Falls back to .timeline-activities (the legacy plain list) when
+ * blocks are missing — both styles coexist within the same .timeline. */
+
+.ite-counts-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    margin: 0 0 1rem;
+    padding: .65rem .85rem;
+    background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%);
+    border: 1px solid #fbe1b6;
+    border-radius: 10px;
+}
+.ite-count-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    background: #fff;
+    color: #a04000;
+    padding: .35rem .75rem;
+    border-radius: 999px;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    border: 1px solid #f3dfb6;
+}
+.ite-count-pill i { color: #d97706; }
+
+.ite-pub-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
+    margin: .6rem 0 .35rem;
+}
+.ite-pub-block {
+    display: flex;
+    gap: .85rem;
+    background: #fff;
+    border: 1px solid #e3e8ef;
+    border-radius: 10px;
+    padding: .75rem .85rem;
+    transition: border-color .15s, box-shadow .15s;
+}
+.ite-pub-block:hover {
+    border-color: #cfd9df;
+    box-shadow: 0 4px 12px rgba(10, 31, 68, 0.06);
+}
+.ite-pub-thumb {
+    flex-shrink: 0;
+    width: 96px;
+    height: 96px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f0f3f5;
+}
+.ite-pub-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.ite-pub-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #eef6f8;
+    color: #0d7a8a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+}
+.ite-pub-body { flex: 1; min-width: 0; }
+.ite-pub-type {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #0d7a8a;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: .15rem;
+}
+.ite-pub-title {
+    font-size: .98rem;
+    font-weight: 700;
+    color: #1c2b48;
+    line-height: 1.35;
+    margin-bottom: .2rem;
+    word-break: break-word;
+}
+.ite-pub-meta {
+    font-size: .82rem;
+    color: #5a6877;
+    line-height: 1.5;
+    margin-bottom: .25rem;
+}
+.ite-pub-meta i { margin-right: .15rem; opacity: .8; }
+.ite-pub-desc {
+    margin: .25rem 0 0;
+    font-size: .88rem;
+    color: #444;
+    line-height: 1.55;
+}
+
+/* Per-type accent bars (left edge) — match the editor styling */
+.ite-pub-block.ite-pub-activity     { border-left: 3px solid #0d7a8a; }
+.ite-pub-block.ite-pub-transfer     { border-left: 3px solid #3498db; }
+.ite-pub-block.ite-pub-hotel        { border-left: 3px solid #9b59b6; }
+.ite-pub-block.ite-pub-sightseeing  { border-left: 3px solid #16a085; }
+.ite-pub-block.ite-pub-meal         { border-left: 3px solid #e67e22; }
+.ite-pub-block.ite-pub-flight       { border-left: 3px solid #e74c3c; }
+.ite-pub-block.ite-pub-hotel-checkout { border-left: 3px solid #95a5a6; }
+
+@media (max-width: 600px) {
+    .ite-pub-block { padding: .6rem; gap: .6rem; }
+    .ite-pub-thumb { width: 72px; height: 72px; }
+    .ite-pub-title { font-size: .92rem; }
+    .ite-counts-row { padding: .5rem; }
+    .ite-count-pill { font-size: .72rem; padding: .28rem .6rem; }
+}
+
+/* ── Phase 3 Option B — "Tweak this trip" widget ──
+ * Compact mirror of the homepage hero search bar, rendered just under
+ * the .pkg-highlights-bar. Wraps to two rows on desktop, stacks on
+ * mobile. SEARCH bounces the visitor back to /#packages with the
+ * full query string. */
+
+.pkg-tweak-trip {
+    max-width: 1200px;
+    margin: .85rem auto 0;
+    padding: .85rem 1.1rem 1rem;
+    background: #fff;
+    border: 1px solid #e3e8ef;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(10, 31, 68, 0.06);
+}
+.pkg-tweak-head {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin-bottom: .65rem;
+    color: #1c2b48;
+    font-size: .98rem;
+}
+.pkg-tweak-head i { color: #0d7a8a; font-size: 1rem; }
+.pkg-tweak-head strong { font-weight: 700; }
+.pkg-tweak-sub {
+    color: #6b7a99;
+    font-size: .82rem;
+    font-weight: 400;
+    margin-left: .35rem;
+}
+.pkg-tweak-fields {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr .8fr .8fr 1fr auto;
+    gap: .6rem;
+    align-items: end;
+}
+.pkg-tweak-field {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    min-width: 0;
+}
+.pkg-tweak-field span {
+    font-size: .72rem;
+    font-weight: 700;
+    color: #5a6877;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+.pkg-tweak-field input,
+.pkg-tweak-field select {
+    width: 100%;
+    padding: .55rem .7rem;
+    border: 1px solid #cfd9df;
+    border-radius: 8px;
+    font: inherit;
+    font-size: .92rem;
+    color: #1c2b48;
+    background: #fff;
+    transition: border-color .12s, box-shadow .12s;
+}
+.pkg-tweak-field input:focus,
+.pkg-tweak-field select:focus {
+    outline: none;
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13, 122, 138, .15);
+}
+.pkg-tweak-btn {
+    padding: .65rem 1.1rem;
+    background: linear-gradient(135deg, #0d7a8a, #16a085);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font: inherit;
+    font-size: .9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    box-shadow: 0 2px 8px rgba(13, 122, 138, .25);
+    transition: transform .1s, filter .15s;
+}
+.pkg-tweak-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.pkg-tweak-btn:active { transform: none; }
+
+@media (max-width: 900px) {
+    .pkg-tweak-fields {
+        grid-template-columns: 1fr 1fr;
+    }
+    .pkg-tweak-btn { grid-column: 1 / -1; padding: .7rem; justify-content: center; }
+}
+@media (max-width: 600px) {
+    .pkg-tweak-trip { margin: .6rem .75rem 0; padding: .7rem .85rem; border-radius: 10px; }
+    .pkg-tweak-head { font-size: .9rem; flex-wrap: wrap; }
+    .pkg-tweak-sub { width: 100%; margin-left: 0; }
+    .pkg-tweak-fields { grid-template-columns: 1fr; }
+}

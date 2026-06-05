@@ -1,0 +1,89 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "ai-assistant",
+    "main": "worker.js",
+    "compatibility_date": "2025-05-01",
+    "compatibility_flags": ["nodejs_compat"],
+    "observability": {
+        "enabled": true
+    },
+
+    // ── Cloudflare Workers AI binding ─────────────────────────
+    // Gives the worker access to env.AI.run('@cf/...', { ... })
+    // — Cloudflare's edge-hosted LLM inference. Free quota:
+    // 10,000 neurons/day on the Workers free plan (≈ 30K calls
+    // for a small model like Llama 3.1 8B). No separate API key,
+    // no billing setup, never expires.
+    // Model catalog: https://developers.cloudflare.com/workers-ai/models/
+    "ai": {
+        "binding": "AI"
+    },
+
+    // ── Scheduled trigger: daily executive report ─────────────
+    // Runs once a day at 02:30 UTC = 08:00 IST.  The cron string
+    // uses standard 5-field syntax: minute hour day-of-month month
+    // day-of-week. Adjust if you'd rather receive the report at
+    // a different local time.
+    //
+    // Cloudflare Workers Free plan: 1,000 cron invocations / day.
+    // We use 1.
+    "triggers": {
+        "crons": ["30 2 * * *"]
+    },
+
+    // ── Plain-text variables ──────────────────────────────────
+    // ALLOWED_ORIGIN     CORS allow-list for /summarize and /draft-reply
+    //                    (both are called from the admin dashboard in a
+    //                    browser, so origin enforcement is required).
+    // ADMIN_EMAILS       comma-separated list of emails allowed to call
+    //                    the auth-required endpoints. We verify the
+    //                    Firebase ID token sent in `Authorization:
+    //                    Bearer …` and reject anything else.
+    // FIREBASE_PROJECT_ID  must match the project hosting Firestore;
+    //                    used both for Firestore REST writes (via
+    //                    service account) and for verifying Firebase
+    //                    ID tokens (audience claim).
+    // REPORT_TO_EMAIL    where the daily executive summary is sent.
+    // REPORT_FROM_EMAIL  visible "From:" on the daily report. MUST be a
+    //                    verified Brevo sender (same dashboard as the
+    //                    inbox-mail Worker uses).
+    // REPORT_FROM_NAME   display name on the daily report.
+    // AI_MODEL           which Cloudflare Workers AI model to use.
+    //                    Llama 3.1 8B Instruct is the sweet spot for
+    //                    short summarisation + reply drafting:
+    //                    fast, cheap (low neuron cost), good quality.
+    //                    Other free options:
+    //                      @cf/meta/llama-3.1-8b-instruct        ← we use this
+    //                      @cf/meta/llama-3.3-70b-instruct-fp8-fast (smarter, more neurons)
+    //                      @cf/google/gemma-7b-it-lora            (Google open model)
+    //                    Catalog: https://developers.cloudflare.com/workers-ai/models/
+    "vars": {
+        "ALLOWED_ORIGIN":      "https://andamanvoyages.in,http://localhost:8000",
+        "ADMIN_EMAILS":        "deb@andamanvoyages.in,admin@admin.com,booking@andamanvoyages.in,cancellation@andamanvoyages.in,info@andamanvoyages.in,enquiries@andamanvoyages.in",
+        "FIREBASE_PROJECT_ID": "andaman-b886d",
+        "REPORT_TO_EMAIL":     "deb@andamanvoyages.in",
+        "REPORT_FROM_EMAIL":   "info@andamanvoyages.in",
+        "REPORT_FROM_NAME":    "Andaman Voyages — Daily AI Report",
+        "AI_MODEL":            "@cf/meta/llama-3.1-8b-instruct"
+    }
+
+    // ── Secrets (set after first deploy) ──────────────────────
+    // No AI key required — Cloudflare Workers AI uses the
+    // env.AI binding declared above and is billed against the
+    // account's free neuron quota directly.
+    //
+    // BREVO_API_KEY      Reuse the same Brevo v3 key already used by
+    //                    workers/inbox-mail. Set with:
+    //                        npx wrangler secret put BREVO_API_KEY
+    //
+    // FIREBASE_SERVICE_ACCOUNT_KEY
+    //                    Same JSON used by workers/email-router. Set with:
+    //                        printf %s '<paste full JSON>' | \
+    //                            npx wrangler secret put FIREBASE_SERVICE_ACCOUNT_KEY
+    //                    Required for the daily report (reads bookings +
+    //                    receivedEmails collections via Firestore REST).
+    //
+    // After deploy, the URL will look like
+    //     https://ai-assistant.<sub>.workers.dev
+    // Paste it into dashboard.html → window.AI_ASSISTANT_WORKER_URL.
+}

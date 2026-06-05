@@ -1,0 +1,68 @@
+{
+    "name": "Bharat Transport and Tourism — Andaman Voyages",
+    "short_name": "Andaman Voyages",
+    "description": "Customizable Andaman holiday packages from ₹15,999 — Port Blair, Havelock and Neil Island tours with hotels, ferries and instant Razorpay booking.",
+    "start_url": "/?utm_source=pwa",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#ffffff",
+    "theme_color": "#0d7a8a",
+    "lang": "en-IN",
+    "dir": "ltr",
+    "categories": ["travel", "lifestyle", "tourism", "business"],
+    "icons": [
+        {
+            "src": "/images/logo-white.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/images/logo-white.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/images/logo.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/images/logo.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Browse Packages",
+            "short_name": "Packages",
+            "description": "Browse all Andaman holiday packages",
+            "url": "/#packages",
+            "icons": [{ "src": "/images/logo-white.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Customize Trip",
+            "short_name": "Customize",
+            "description": "Build a custom Andaman itinerary",
+            "url": "/customize",
+            "icons": [{ "src": "/images/logo-white.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Book Cabs",
+            "short_name": "Cabs",
+            "description": "Hire cabs across Andaman",
+            "url": "/cabs",
+            "icons": [{ "src": "/images/logo-white.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Photo Gallery",
+            "short_name": "Gallery",
+            "description": "Andaman travel photo gallery",
+            "url": "/gallery",
+            "icons": [{ "src": "/images/logo-white.png", "sizes": "192x192" }]
+        }
+    ]
+}

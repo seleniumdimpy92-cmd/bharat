@@ -1,0 +1,27 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "refund-test",
+    "main": "worker.js",
+    "compatibility_date": "2025-05-01",
+    "compatibility_flags": ["nodejs_compat"],
+    "observability": {
+        "enabled": true
+    },
+    "vars": {
+        "ALLOWED_ORIGIN":      "https://andamanvoyages.in,http://localhost:8000",
+        "ADMIN_EMAILS":        "deb@andamanvoyages.in,admin@admin.com",
+        "FIREBASE_PROJECT_ID": "andaman-b886d",
+        "MAX_REFUND_INR":      "1000000"
+    }
+    // Secrets — set with TEST Razorpay credentials:
+    //   cd workers/refund-test
+    //   npm install
+    //   npx wrangler secret put RAZORPAY_KEY_ID      # rzp_test_…
+    //   npx wrangler secret put RAZORPAY_KEY_SECRET  # matching test secret
+    //   npx wrangler deploy
+    //
+    // After deploy the URL will be:
+    //   https://refund-test.<subdomain>.workers.dev
+    // Add to dashboard.html:
+    //   window.REFUND_TEST_WORKER_URL = 'https://refund-test.<subdomain>.workers.dev';
+}

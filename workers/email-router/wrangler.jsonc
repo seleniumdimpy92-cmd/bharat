@@ -1,0 +1,83 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "email-router",
+    "main": "worker.js",
+    "compatibility_date": "2025-05-01",
+    "compatibility_flags": ["nodejs_compat"],
+    "observability": {
+        "enabled": true
+    },
+
+    // ── send_email bindings ────────────────────────────────────
+    // Each binding lets the Worker call message.forward('<NAME>')
+    // (or env.<NAME>.send(...)). The destination_address MUST be a
+    // verified destination in Cloudflare → Email Routing → Destination
+    // Addresses. Add more entries here if you want different mailboxes
+    // forwarded to different inboxes; for now everything funnels to
+    // debjyoti.office@gmail.com (the verified destination on this domain).
+    "send_email": [
+        {
+            "name": "GMAIL_FORWARD",
+            "destination_address": "debjyoti.office@gmail.com"
+        }
+    ],
+
+    // ── Plain-text variables ───────────────────────────────────
+    // FIREBASE_PROJECT_ID — must match the Firestore project (used for
+    //   the service-account JWT audience claim).
+    // ALLOWED_INBOXES   — comma-separated list of recipient addresses
+    //   the Worker is willing to accept. Cloudflare's routing rule
+    //   already enforces this at the SMTP layer, but a JS-level check
+    //   guards against config drift if someone adds a wildcard rule.
+    // FORWARD_ALL_TO    — fallback Gmail address used by the
+    //   message.forward() call. Must already be a verified Cloudflare
+    //   destination address.
+    // MAX_RAW_BYTES     — hard cap on the email size we'll process; any
+    //   message larger gets logged + forwarded but skipped from
+    //   Firestore (keeps the doc small).
+    "vars": {
+        "FIREBASE_PROJECT_ID": "andaman-b886d",
+        "ALLOWED_INBOXES":     "booking@andamanvoyages.in,info@andamanvoyages.in,cancellation@andamanvoyages.in,enquiries@andamanvoyages.in,noreply@andamanvoyages.in",
+        "FORWARD_ALL_TO":      "debjyoti.office@gmail.com",
+        "MAX_RAW_BYTES":       "5000000",
+
+        // ── Automatic acknowledgement reply on every inbound email ──
+        // When AUTO_REPLY_ENABLED = "1", the worker fires off a
+        // friendly templated "we got your message" email back to the
+        // sender right after persisting + forwarding. This makes the
+        // customer feel heard immediately, without you having to be
+        // online. Templates are picked by the destination mailbox
+        // (booking@ / info@ / cancellation@ / enquiries@). Set "0"
+        // to disable. The Brevo API key is the secret BREVO_API_KEY
+        // (same key inbox-mail uses).
+        //
+        // We send auto-replies FROM noreply@andamanvoyages.in so customers
+        // immediately understand the auto-ack isn't a manned mailbox —
+        // their actual reply (Reply-To header) routes back to the original
+        // recipient (booking@ / info@ / etc.) which IS a real mailbox.
+        "AUTO_REPLY_ENABLED":     "1",
+        "AUTO_REPLY_FROM_EMAIL":  "noreply@andamanvoyages.in",
+        "AUTO_REPLY_FROM_NAME":   "Bharat Transport & Tourism",
+        // Comma-separated list of headers / subject patterns we should
+        // NEVER auto-reply to. Stops mailer-loops when another
+        // auto-responder pings us back. Keep this list defensive.
+        "AUTO_REPLY_SKIP_PATTERNS": "auto-reply,auto reply,autoreply,out of office,delivery status notification,mailer-daemon,postmaster,no-reply,noreply,bounce",
+        // URL of the inbox-mail Worker. Auto-reply now POSTs to its
+        // /internal/send endpoint instead of calling Brevo directly,
+        // so the Brevo API key only has to live on inbox-mail (not on
+        // BOTH workers). Auth uses the shared INTERNAL_SEND_TOKEN
+        // secret which must be set with the SAME value on both
+        // Workers via `wrangler secret put INTERNAL_SEND_TOKEN`.
+        "INBOX_MAIL_URL":          "https://inbox-mail.pittu-das2.workers.dev"
+    }
+
+    // ── Secrets (set after first deploy) ───────────────────────
+    // The Firebase service-account JSON. Generate one at:
+    //   Firebase Console → Project settings → Service accounts → Generate new private key
+    // Then upload the *full* JSON contents (a single string) with:
+    //   printf %s '<paste full JSON>' | npx wrangler secret put FIREBASE_SERVICE_ACCOUNT_KEY
+    //
+    // After deploy, return to Cloudflare → Email → Email Routing → Routes
+    // and add "Send to a Worker → email-router" as an action on each
+    // address rule (booking@, info@, cancellation@).
+}

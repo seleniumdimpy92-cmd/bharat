@@ -1,31 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Hide .html and /index from the URL bar without re-loading the page -->
+    <script>(function(){try{var p=location.pathname;if(/\/index(\.html)?$/i.test(p)){history.replaceState(null,"",p.replace(/\/index(\.html)?$/i,"/")+location.search+location.hash);}else if(/\.html$/i.test(p)){history.replaceState(null,"",p.replace(/\.html$/i,"")+location.search+location.hash);}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bookings | Bharat Tours &amp; Travels</title>
+    <title>My Bookings | Bharat Transport &amp; Tourism</title>
 
-    <meta name="description" content="View, track and manage your Andaman holiday bookings with Bharat Tours and Travels.">
+    <meta name="description" content="View, track and manage your Andaman holiday bookings with Bharat Transport and Tourism.">
     <meta name="robots" content="noindex, nofollow"><!-- private user area -->
     <meta name="theme-color" content="#0d7a8a">
     <meta name="google-adsense-account" content="ca-pub-8154901590978667">
     <link rel="canonical" href="https://andamanvoyages.in/bookings">
 
-    <link rel="icon" type="image/png" href="images/logo.png">
-    <link rel="apple-touch-icon" href="images/logo.png">
+    <link rel="icon" type="image/png" href="images/logo-white.png">
+    <link rel="apple-touch-icon" href="images/logo-white.png">
 
-    <link rel="stylesheet" href="css/style.css?v=27">
-    <link rel="stylesheet" href="css/mmt.css?v=24">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=56">
+    <link rel="stylesheet" href="css/conversion-kit.css?v=3">
+    <link rel="stylesheet" href="css/mmt.css?v=25">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="js/travelpayouts-init.js?v=1"></script>
+    <!-- ── Google AdSense loader (publisher pub-8154901590978667) ── -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8154901590978667" crossorigin="anonymous"></script>
 </head>
 <body>
     <!-- ── Top Brand Bar with Inline Icon Nav ───────────────── -->
     <header class="topbar">
         <a href="/" class="topbar-logo" style="text-decoration:none;">
-            <img src="images/logo.png" alt="Bharat Tours and Travels logo">
-            <span>Bharat Tours &amp; Travels</span>
+            <img src="images/logo-white.png" alt="Bharat Transport and Tourism logo">
+            <span class="brand-text"><span class="brand-line1">Bharat Transport &amp; Tourism</span><span class="brand-line2">Andaman Specialists</span></span>
         </a>
         <nav class="topnav" id="topnav">
             <a href="/" class="topnav-item">
@@ -89,6 +94,7 @@
                         <button class="bk-tab" data-bk-filter="upcoming">Upcoming</button>
                         <button class="bk-tab" data-bk-filter="completed">Completed</button>
                         <button class="bk-tab" data-bk-filter="cancelled">Cancelled</button>
+                        <button class="bk-tab" data-bk-filter="locks"><i class="fas fa-lock"></i> Locks</button>
                     </div>
                     <div id="bookingsContainer" class="bookings-grid">
                         <div class="bookings-empty-inline">
@@ -172,22 +178,97 @@
         </div>
     </div>
 
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2026 Bharat Tours and Travels. All rights reserved.</p>
-            <div class="social-links">
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-whatsapp"></i></a>
+    <!-- ═══ FOOTER (rich, multi-column) ════════════════════════════════ -->
+    <footer class="ft">
+        <div class="ft-inner">
+            <div>
+                <div class="ft-brand">
+                    <span class="ft-mark"><i class="fas fa-umbrella-beach"></i></span>
+                    <span class="ft-brand-name">Bharat Transport &amp; Tourism</span>
+                </div>
+                <p class="ft-about">Andaman specialists since 2013. We're a small, on-ground team in Port Blair — every booking is handled by humans, not bots.</p>
+                <div class="ft-social">
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://wa.me/918880195191" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="TripAdvisor"><i class="fab fa-tripadvisor"></i></a>
+                </div>
             </div>
+            <div class="ft-col">
+                <h4>Explore</h4>
+                <ul>
+                    <li><a href="/#packages">All packages</a></li>
+                    <li><a href="/#packages">Honeymoon</a></li>
+                    <li><a href="/#packages">Family</a></li>
+                    <li><a href="/#packages">Adventure</a></li>
+                    <li><a href="/#packages">Luxury</a></li>
+                    <li><a href="/#customize">Custom itinerary</a></li>
+                </ul>
+            </div>
+            <div class="ft-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="/about">About us</a></li>
+                    <li><a href="/gallery">Gallery</a></li>
+                    <li><a href="/bookings">Bookings</a></li>
+                    <li><a href="/flights">Flights</a></li>
+                    <li><a href="/privacy">Privacy policy</a></li>
+                    <li><a href="/terms">Terms &amp; conditions</a></li>
+                </ul>
+            </div>
+            <div class="ft-col">
+                <h4>Get in touch</h4>
+                <div class="ft-contact"><i class="fas fa-phone"></i><div><a href="tel:+918880195191">+91-88801-95191</a><br><span class="ft-muted">Daily 9 AM – 9 PM IST</span></div></div>
+                <div class="ft-contact"><i class="fas fa-envelope"></i><a href="mailto:booking@andamanvoyages.in">booking@andamanvoyages.in</a></div>
+                <div class="ft-contact"><i class="fas fa-location-dot"></i><span>15, Air Road, Delanipur,<br>Sri Vijaya Puram, A&amp;N Islands 744102</span></div>
+                <div class="ft-contact"><i class="fab fa-whatsapp"></i><a href="https://wa.me/918880195191">Chat on WhatsApp →</a></div>
+            </div>
+        </div>
+        <div class="ft-bottom">
+            <div>© 2026 Bharat Transport &amp; Tourism. All rights reserved.</div>
+            <div class="ft-bottom-links">
+                <a href="/terms">Terms &amp; Conditions</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms#cancellation">Cancellation Policy</a>
+                <a href="/#contact">Contact</a>
+            </div>
+        </div>
+        <div class="ft-license">
+            <span class="ft-license-badge"><i class="fas fa-shield-halved"></i> Secure SSL</span>
+            <span class="ft-license-badge"><i class="fas fa-certificate"></i> Govt. of India · Tour Operator</span>
+            <span class="ft-license-badge"><i class="fas fa-lock"></i> Razorpay Verified</span>
+            <span class="ft-license-tag">Andaman Voyages is a unit of Bharat Transport &amp; Tourism.</span>
         </div>
     </footer>
 
-    <script src="js/firebase-config.js?v=17"></script>
+    <!-- Outbound mail Worker (Brevo-backed). Used by booking-emails.js
+         when the caller has an admin Firebase ID token — i.e. when an
+         admin/staff user cancels a booking from this page. Customer
+         users fall through to the Firebase "Trigger Email" extension
+         (Firestore mail/{ref} doc) which is admin-token-free. -->
+    <script>window.INBOX_WORKER_URL = 'https://inbox-mail.pittu-das2.workers.dev';</script>
+
+    <!-- Razorpay refund Worker. Admin-only by design (the Worker
+         enforces ADMIN_EMAILS); customers cancelling here will see
+         the cancellation succeed and the refund deferred to admin
+         approval. After deploying workers/refund/, paste the URL
+         here, e.g. 'https://refund.<sub>.workers.dev'. -->
+    <script>window.REFUND_WORKER_URL = 'https://refund.pittu-das2.workers.dev';</script>
+
+    <script src="js/firebase-config.js?v=21"></script>
     <script src="js/analytics.js?v=1"></script>
-    <script src="js/dataStore.js?v=17"></script>
-    <script src="js/auth.js?v=15"></script>
-    <script src="js/script.js?v=25"></script>
+    <script src="js/dataStore.js?v=25"></script>
+    <script src="js/auth.js?v=17"></script>
+    <script src="js/toast.js?v=1"></script>
+    <script src="js/booking-emails.js?v=1"></script>
+    <script src="js/refund.js?v=2"></script>
+    <script src="js/locks-ui.js?v=2"></script>
+    <script src="js/bookings-page.js?v=4"></script>
+    <script src="js/script.js?v=30"></script>
+    <script src="js/user-menu.js?v=14"></script>
+    <script src="js/conversion-kit.js?v=1"></script>
+    <script src="js/brevo.js?v=3" async></script>
+    <script src="js/live-chat.js?v=8"></script>
 </body>
 </html>

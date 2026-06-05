@@ -1,0 +1,15 @@
+{
+    "name": "email-router",
+    "version": "1.0.0",
+    "description": "Cloudflare Email-Routing Worker — receives inbound mail at the andamanvoyages.in mailboxes, parses RFC-822, writes a record to Firestore /receivedEmails, and forwards the message to a Gmail destination so phones / desktop clients keep working.",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy",
+        "tail": "wrangler tail"
+    },
+    "devDependencies": {
+        "wrangler": "^3.78.0"
+    }
+}

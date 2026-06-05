@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reset password · Andaman Voyages</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg,#0d7a8a 0%,#16a085 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #1c2b48;
+}
+.card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.18);
+    padding: 32px;
+    max-width: 440px;
+    width: 100%;
+}
+.logo {
+    font-size: 12px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #0d7a8a;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    color: #0d2b3a;
+}
+p.lede {
+    color: #607480;
+    margin: 0 0 20px;
+    font-size: 14px;
+}
+.field {
+    margin-bottom: 14px;
+}
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 6px;
+}
+input[type="password"], input[type="email"] {
+    width: 100%;
+    padding: 11px 13px;
+    font-size: 15px;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    transition: border-color .15s;
+}
+input[type="password"]:focus, input[type="email"]:focus {
+    outline: none;
+    border-color: #0d7a8a;
+    box-shadow: 0 0 0 3px rgba(13,122,138,.12);
+}
+button {
+    width: 100%;
+    padding: 12px;
+    background: #0d7a8a;
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+button:hover:not(:disabled) { background: #0a6371; }
+button:disabled { background: #95a5a6; cursor: not-allowed; }
+.msg {
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+.msg.error   { background: #fdedec; color: #922b21; border-left: 3px solid #e74c3c; }
+.msg.success { background: #e8f8f5; color: #0d6e3a; border-left: 3px solid #16a085; }
+.msg.info    { background: #eaf2f8; color: #1a5276; border-left: 3px solid #3498db; }
+.account {
+    background: #f8fafb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #607480;
+    margin-bottom: 16px;
+}
+.account strong { color: #0d2b3a; }
+.center {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 14px;
+}
+.center a {
+    color: #0d7a8a;
+    text-decoration: none;
+    font-weight: 600;
+}
+.center a:hover { text-decoration: underline; }
+.spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="card">
+    <div class="logo">Andaman Voyages</div>
+    <h1 id="title">Loading…</h1>
+    <p class="lede" id="subtitle">Please wait while we verify your link.</p>
+
+    <div id="message" class="msg info hidden"></div>
+
+    <!-- Reset password form -->
+    <form id="resetForm" class="hidden" autocomplete="off">
+        <div class="account" id="resetAccount"></div>
+        <div class="field">
+            <label for="newPwd">New password</label>
+            <input type="password" id="newPwd" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters">
+        </div>
+        <div class="field">
+            <label for="confirmPwd">Confirm new password</label>
+            <input type="password" id="confirmPwd" required minlength="6" autocomplete="new-password" placeholder="Re-type the password">
+        </div>
+        <button type="submit" id="resetBtn">Save new password</button>
+    </form>
+
+    <!-- Generic "done" view -->
+    <div id="doneView" class="hidden">
+        <div class="center">
+            <a href="/">← Back to Andaman Voyages</a>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase project config (same as the rest of the site) -->
+<script src="js/firebase-config.js"></script>
+
+<script type="module">
+import { initializeApp }
+    from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+import {
+    getAuth,
+    verifyPasswordResetCode,
+    confirmPasswordReset,
+    applyActionCode,
+    checkActionCode
+} from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+
+// ── DOM helpers ────────────────────────────────────────────────
+const $title    = document.getElementById('title');
+const $subtitle = document.getElementById('subtitle');
+const $msg      = document.getElementById('message');
+const $form     = document.getElementById('resetForm');
+const $account  = document.getElementById('resetAccount');
+const $newPwd   = document.getElementById('newPwd');
+const $confirm  = document.getElementById('confirmPwd');
+const $btn      = document.getElementById('resetBtn');
+const $done     = document.getElementById('doneView');
+
+function showMsg(kind, html) {
+    $msg.className = 'msg ' + kind;
+    $msg.innerHTML = html;
+    $msg.classList.remove('hidden');
+}
+function hideMsg() {
+    $msg.classList.add('hidden');
+}
+function setHeader(t, s) {
+    $title.textContent    = t;
+    $subtitle.textContent = s || '';
+}
+function showDone() {
+    $form.classList.add('hidden');
+    $done.classList.remove('hidden');
+}
+
+// ── Parse query parameters ─────────────────────────────────────
+const params  = new URLSearchParams(location.search);
+const mode    = params.get('mode')    || '';
+const oobCode = params.get('oobCode') || '';
+
+if (!mode || !oobCode) {
+    setHeader('Invalid link', '');
+    showMsg('error', 'This link is missing required parameters. Please request a new password reset from the website.');
+    showDone();
+} else {
+    // Initialise Firebase. window.FIREBASE_CONFIG is set by
+    // js/firebase-config.js (loaded above as a regular script).
+    const app  = initializeApp(window.FIREBASE_CONFIG);
+    const auth = getAuth(app);
+
+    if (mode === 'resetPassword') {
+        await handleResetPassword(auth, oobCode);
+    } else if (mode === 'verifyEmail') {
+        await handleVerifyEmail(auth, oobCode);
+    } else if (mode === 'recoverEmail') {
+        await handleRecoverEmail(auth, oobCode);
+    } else {
+        setHeader('Unsupported action', '');
+        showMsg('error', 'This link uses an action mode we do not handle: <code>' + mode + '</code>.');
+        showDone();
+    }
+}
+
+// ── Reset-password flow ────────────────────────────────────────
+async function handleResetPassword(auth, oobCode) {
+    setHeader('Reset your password', 'Verifying link…');
+    let email;
+    try {
+        email = await verifyPasswordResetCode(auth, oobCode);
+    } catch (err) {
+        setHeader('Link expired or invalid', '');
+        showMsg('error', friendlyError(err) +
+            '<br><br>Please request a new password reset from the login page.');
+        showDone();
+        return;
+    }
+
+    setHeader('Reset your password', 'Choose a new password to finish.');
+    $account.innerHTML = 'Resetting password for <strong>' + escHtml(email) + '</strong>';
+    $form.classList.remove('hidden');
+
+    $form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideMsg();
+        const pwd     = $newPwd.value;
+        const confirm = $confirm.value;
+        if (pwd.length < 6) {
+            showMsg('error', 'Password must be at least 6 characters.');
+            return;
+        }
+        if (pwd !== confirm) {
+            showMsg('error', 'The two passwords do not match.');
+            return;
+        }
+        $btn.disabled = true;
+        $btn.innerHTML = '<span class="spinner"></span>Saving…';
+        try {
+            await confirmPasswordReset(auth, oobCode, pwd);
+            setHeader('Password updated ✅', '');
+            showMsg('success',
+                'Your password has been reset successfully. ' +
+                'You can now log in with the new password.');
+            $form.classList.add('hidden');
+            $done.classList.remove('hidden');
+            // Auto-redirect to home after 3 s so the user can log in.
+            setTimeout(() => { location.href = '/'; }, 3000);
+        } catch (err) {
+            $btn.disabled = false;
+            $btn.innerHTML = 'Save new password';
+            showMsg('error', friendlyError(err));
+        }
+    });
+}
+
+// ── Email-verification flow (free bonus — fixes /verify links too) ─
+async function handleVerifyEmail(auth, oobCode) {
+    setHeader('Verifying your email…', '');
+    try {
+        await applyActionCode(auth, oobCode);
+        setHeader('Email verified ✅', '');
+        showMsg('success',
+            'Your email is verified. You can now log in and start booking.');
+    } catch (err) {
+        setHeader('Verification failed', '');
+        showMsg('error', friendlyError(err));
+    }
+    showDone();
+}
+
+// ── Email-recovery flow (used if a user was emailed a "revert email change") ─
+async function handleRecoverEmail(auth, oobCode) {
+    setHeader('Recover your email…', '');
+    try {
+        const info = await checkActionCode(auth, oobCode);
+        await applyActionCode(auth, oobCode);
+        setHeader('Email recovered ✅', '');
+        showMsg('success',
+            'Your account email has been restored to ' +
+            (info && info.data && info.data.email ? '<strong>' + escHtml(info.data.email) + '</strong>' : 'the previous address') +
+            '. We recommend resetting your password as a precaution.');
+    } catch (err) {
+        setHeader('Recovery failed', '');
+        showMsg('error', friendlyError(err));
+    }
+    showDone();
+}
+
+// ── Helpers ────────────────────────────────────────────────────
+function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+}
+
+function friendlyError(err) {
+    const code = (err && err.code) || '';
+    if (code === 'auth/expired-action-code')
+        return 'This link has expired. Password-reset links are valid for 1 hour.';
+    if (code === 'auth/invalid-action-code')
+        return 'This link is invalid or has already been used. Please request a new one.';
+    if (code === 'auth/user-disabled')
+        return 'This account has been disabled. Please contact support.';
+    if (code === 'auth/user-not-found')
+        return 'No account was found for this link.';
+    if (code === 'auth/weak-password')
+        return 'Please choose a stronger password (at least 6 characters).';
+    return (err && err.message) || 'Something went wrong. Please try again.';
+}
+</script>
+
+</body>
+</html>

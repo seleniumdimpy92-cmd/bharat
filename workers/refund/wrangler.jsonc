@@ -1,0 +1,39 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "refund",
+    "main": "worker.js",
+    "compatibility_date": "2025-05-01",
+    "compatibility_flags": ["nodejs_compat"],
+    "observability": {
+        "enabled": true
+    },
+
+    // ── Plain-text variables ───────────────────────────────────
+    // ALLOWED_ORIGIN — comma-separated CORS allow-list. Add
+    //   http://localhost:8000 (or your dev port) for local testing.
+    // ADMIN_EMAILS — only Firebase ID tokens issued to one of these
+    //   accounts can initiate a refund. Refunds are admin-only by
+    //   design; customers cannot trigger this Worker.
+    // FIREBASE_PROJECT_ID — must match the project hosting Firestore
+    //   (the JWT's `aud` claim is verified against this).
+    // MAX_REFUND_INR — sanity cap (default ₹10 lakh). Reject any
+    //   single refund larger than this.
+    "vars": {
+        "ALLOWED_ORIGIN":      "https://andamanvoyages.in,http://localhost:8000",
+        "ADMIN_EMAILS":        "deb@andamanvoyages.in,admin@admin.com",
+        "FIREBASE_PROJECT_ID": "andaman-b886d",
+        "MAX_REFUND_INR":      "1000000"
+    }
+
+    // ── Secrets (set after first deploy) ───────────────────────
+    // Razorpay API credentials. Get them from Razorpay Dashboard
+    // → Settings → API Keys (use Live keys for production, Test keys
+    // for staging). Set with:
+    //     npx wrangler secret put RAZORPAY_KEY_ID
+    //     npx wrangler secret put RAZORPAY_KEY_SECRET
+    //
+    // After deployment, the Worker URL will be something like
+    //   https://refund.<your-subdomain>.workers.dev
+    // Paste it into bookings.html / dashboard.html as
+    //   window.REFUND_WORKER_URL = '…';
+}
